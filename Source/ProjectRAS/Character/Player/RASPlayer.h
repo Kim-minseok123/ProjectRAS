@@ -19,7 +19,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void Tick(float DeltaSeconds) override;
+    
 // Input Section
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -40,6 +41,7 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Roll(const FInputActionValue& Value);
+	bool bIsRolling = false;
 	void LockOn();
 
 // Camera Section

@@ -77,6 +77,11 @@ void ARASPlayer::BeginPlay()
 	}
 }
 
+void ARASPlayer::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
 void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -115,12 +120,49 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 {
 	if (RollMontage == nullptr) return;
 
-	if (rollTime % 2 == 1)
+	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
+	if (MyAnimInstance == nullptr) return;
+
+	if (bIsRolling) return;
+	bIsRolling = true;
+
+	if (bUseControllerRotationYaw)
 	{
-		UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
-		if (MyAnimInstance == nullptr) return;
+		LockOn();
+		FVector MoveInput = GetLastMovementInputVector(); 
+
+		if (!MoveInput.IsNearlyZero())
+		{
+			MoveInput.Normalize();
+
+			FRotator DesiredRotation = MoveInput.Rotation();
+
+			SetActorRotation(DesiredRotation);
+		}
+
 		MyAnimInstance->Montage_Play(RollMontage);
 		MyAnimInstance->Montage_JumpToSection(TEXT("Roll"));
+		
+
+		FOnMontageEnded MontageEndedDelegate;
+		MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
+			{
+				bIsRolling = false;
+				LockOn();
+			});
+		MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, RollMontage);
+
+	}
+	else
+	{
+		MyAnimInstance->Montage_Play(RollMontage);
+		MyAnimInstance->Montage_JumpToSection(TEXT("Roll"));
+		FOnMontageEnded MontageEndedDelegate;
+		MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
+			{
+				bIsRolling = false;
+			});
+		MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, RollMontage);
 	}
 }
 
