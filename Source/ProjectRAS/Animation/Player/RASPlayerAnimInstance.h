@@ -16,6 +16,8 @@ class PROJECTRAS_API URASPlayerAnimInstance : public UAnimInstance
 public:
 	URASPlayerAnimInstance();
 
+	void SetLockOn(bool InLockOn);
+
 protected:
 	virtual void NativeInitializeAnimation() override;
 
@@ -27,43 +29,45 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
 	TObjectPtr<class UCharacterMovementComponent> Movement;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	FVector Velocity;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float Speed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 IsInAir : 1;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float Pitch;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float Roll;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float Yaw;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	FRotator RotationLastTick;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float YawDelta;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 IsAccelerating : 1;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 IsAttacking : 1;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	int32 CurrentAttacking;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 FullBody : 1;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float MoveDirectionX;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	float MoveDirectionY;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	uint8 bLockOn : 1;
 };

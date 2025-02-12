@@ -10,6 +10,11 @@ URASPlayerAnimInstance::URASPlayerAnimInstance()
 
 }
 
+void URASPlayerAnimInstance::SetLockOn(bool InLockOn)
+{
+	bLockOn = InLockOn;
+}
+
 void URASPlayerAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -65,6 +70,8 @@ void URASPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		// Set LocalMovementDirection X Y
 		MoveDirectionY = LocalMovementDirection.Y;
 		MoveDirectionX = LocalMovementDirection.X;
+
+		//UE_LOG(LogTemp, Log, TEXT("Local Movement Direction: %s"), *LocalMovementDirection.ToString());
 	}
 }
 

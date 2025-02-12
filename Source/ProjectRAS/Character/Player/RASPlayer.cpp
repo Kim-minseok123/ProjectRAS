@@ -9,10 +9,11 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
+#include "Animation//Player/RASPlayerAnimInstance.h"
 
 ARASPlayer::ARASPlayer()
 {
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonAurora/Characters/Heroes/Aurora/Skins/GlacialEmpress/Meshes/Aurora_GlacialEmpress.Aurora_GlacialEmpress'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/ParagonAurora/Characters/Heroes/Aurora/Meshes/Aurora.Aurora'"));
 	if (CharacterMeshRef.Object)
 	{
 		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
@@ -54,6 +55,11 @@ ARASPlayer::ARASPlayer()
 	{
 		RollAction = RollActionRef.Object;
 	}
+	static ConstructorHelpers::FObjectFinder<UInputAction> LockOnActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_LockOn.IA_LockOn'"));
+	if (LockOnActionRef.Object)
+	{
+		LockOnAction = LockOnActionRef.Object;
+	}
 }
 
 void ARASPlayer::BeginPlay()
@@ -80,6 +86,7 @@ void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	EnhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &ARASPlayer::Roll);
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARASPlayer::Move);
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARASPlayer::Look);
+	EnhancedInput->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ARASPlayer::LockOn);
 }
 
 void ARASPlayer::Move(const FInputActionValue& Value)
@@ -106,5 +113,24 @@ void ARASPlayer::Look(const FInputActionValue& Value)
 
 void ARASPlayer::Roll(const FInputActionValue& Value)
 {
+	if (RollMontage == nullptr) return;
 
+	if (rollTime % 2 == 1)
+	{
+		UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
+		if (MyAnimInstance == nullptr) return;
+		MyAnimInstance->Montage_Play(RollMontage);
+		MyAnimInstance->Montage_JumpToSection(TEXT("Roll"));
+	}
 }
+
+void ARASPlayer::LockOn()
+{
+	URASPlayerAnimInstance* MyAnimInstance = Cast<URASPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (MyAnimInstance == nullptr)
+		return;
+
+	bUseControllerRotationYaw = !bUseControllerRotationYaw;
+	MyAnimInstance->SetLockOn(bUseControllerRotationYaw);
+}
+
