@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "Animation//Player/RASPlayerAnimInstance.h"
+#include "Component/Player/ComboAttackComponent.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -34,32 +35,52 @@ ARASPlayer::ARASPlayer()
 	FollowCamera->SetupAttachment(CameraBoom);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> MappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/1_ProjectRAS/Input/IMC_NonBattle.IMC_NonBattle'"));
-	if (MappingContextRef.Object)
+	// Input Action
 	{
-		MappingContext = MappingContextRef.Object;
+		static ConstructorHelpers::FObjectFinder<UInputMappingContext> MappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/1_ProjectRAS/Input/IMC_NonBattle.IMC_NonBattle'"));
+		if (MappingContextRef.Object)
+		{
+			MappingContext = MappingContextRef.Object;
+		}
+
+		static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_Move.IA_Move'"));
+		if (MoveActionRef.Object)
+		{
+			MoveAction = MoveActionRef.Object;
+		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> LookActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_Look.IA_Look'"));
+		if (LookActionRef.Object)
+		{
+			LookAction = LookActionRef.Object;
+		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> RollActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_Roll.IA_Roll'"));
+		if (RollActionRef.Object)
+		{
+			RollAction = RollActionRef.Object;
+		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> LockOnActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_LockOn.IA_LockOn'"));
+		if (LockOnActionRef.Object)
+		{
+			LockOnAction = LockOnActionRef.Object;
+		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> LeftAttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_LeftAttack.IA_LeftAttack'"));
+		if (LeftAttackActionRef.Object)
+		{
+			LeftAttackAction = LeftAttackActionRef.Object;
+		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> ShiftAttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_LeftAndShift.IA_LeftAndShift'"));
+		if (ShiftAttackActionRef.Object)
+		{
+			ShiftAttackAction = ShiftAttackActionRef.Object;
+		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> FAttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_LeftAndF.IA_LeftAndF'"));
+		if (FAttackActionRef.Object)
+		{
+			FAttackAction = FAttackActionRef.Object;
+		}
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_Move.IA_Move'"));
-	if (MoveActionRef.Object)
-	{
-		MoveAction = MoveActionRef.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_Look.IA_Look'"));
-	if (LookActionRef.Object)
-	{
-		LookAction = LookActionRef.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> RollActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_Roll.IA_Roll'"));
-	if (RollActionRef.Object)
-	{
-		RollAction = RollActionRef.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UInputAction> LockOnActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_LockOn.IA_LockOn'"));
-	if (LockOnActionRef.Object)
-	{
-		LockOnAction = LockOnActionRef.Object;
-	}
+	ComboAttack = CreateDefaultSubobject<UComboAttackComponent>(TEXT("Combo"));
 }
 
 void ARASPlayer::BeginPlay()
@@ -80,6 +101,29 @@ void ARASPlayer::BeginPlay()
 void ARASPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bIsRotation && Controller)
+	{
+		FRotator ControlRot = Controller->GetControlRotation();
+		FRotator CurrentRot = GetActorRotation();
+
+		float CurrentRotYaw = CurrentRot.Yaw;
+		float TargetRotYaw = ControlRot.Yaw;
+		float InterpSpeed = 20.0f;
+
+		float DeltaYaw = FMath::FindDeltaAngleDegrees(CurrentRotYaw, TargetRotYaw);
+
+		float NewYaw = CurrentRotYaw + DeltaYaw * DeltaTime * InterpSpeed;
+
+		SetActorRotation(FRotator(CurrentRot.Pitch, NewYaw, CurrentRot.Roll));
+
+		if (FMath::Abs(DeltaYaw) <= 3.0f)
+		{
+			LockOn();
+			bIsRolling = false;
+			bIsRotation = false;
+		}
+	}
 }
 
 void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -92,10 +136,15 @@ void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARASPlayer::Move);
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARASPlayer::Look);
 	EnhancedInput->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ARASPlayer::LockOn);
+	EnhancedInput->BindAction(LeftAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressComboAction);
+	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressComboActionWithShift);
+	EnhancedInput->BindAction(FAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressComboActionWithF);
 }
 
 void ARASPlayer::Move(const FInputActionValue& Value)
 {
+	if (bIsRolling || bIsAttacking) return;
+
 	FVector2D CurrentMovementInput = Value.Get<FVector2D>();
 
 	const FRotator Rotation = GetController()->GetControlRotation();
@@ -126,6 +175,8 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 	if (bIsRolling) return;
 	bIsRolling = true;
 
+	MyAnimInstance->Montage_Stop(0.1f);
+
 	if (bUseControllerRotationYaw)
 	{
 		LockOn();
@@ -147,8 +198,7 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 		FOnMontageEnded MontageEndedDelegate;
 		MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
 			{
-				bIsRolling = false;
-				LockOn();
+				bIsRotation = true;
 			});
 		MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, RollMontage);
 
@@ -174,5 +224,32 @@ void ARASPlayer::LockOn()
 
 	bUseControllerRotationYaw = !bUseControllerRotationYaw;
 	MyAnimInstance->SetLockOn(bUseControllerRotationYaw);
+}
+
+void ARASPlayer::PressComboAction()
+{
+	if (ComboAttack)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Left"));
+		ComboAttack->PressComboAction(EAttackType::LeftClick);
+	}
+}
+
+void ARASPlayer::PressComboActionWithShift()
+{
+	if (ComboAttack)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Shift"));
+		ComboAttack->PressComboAction(EAttackType::Shift);
+	}
+}
+
+void ARASPlayer::PressComboActionWithF()
+{
+	if (ComboAttack)
+	{
+		UE_LOG(LogTemp, Log, TEXT("F"));
+		ComboAttack->PressComboAction(EAttackType::F);
+	}
 }
 
