@@ -69,12 +69,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	uint8 bIsAttacking : 1;
 
+	bool bIsPressShift = false;
+	bool bIsPressF = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UComboAttackComponent> ComboAttack;
 
 	void PressComboAction();
-	void PressComboActionWithShift();
-	void PressComboActionWithF();
+	void PressShift();
+	void PressShiftEnd();
+	void PressF();
+	void PressFEnd();
 // AnimMontage Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))

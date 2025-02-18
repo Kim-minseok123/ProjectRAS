@@ -1,6 +1,7 @@
 ﻿#include "Component/Player/ComboAttackComponent.h"
 #include "Character/Player/RASPlayer.h"
 #include "Animation/AnimInstance.h"
+#include "Data/ComboAttackData.h"
 #include "TimerManager.h"
 
 UComboAttackComponent::UComboAttackComponent()
@@ -9,89 +10,54 @@ UComboAttackComponent::UComboAttackComponent()
 
 	CurrentState = NAME_None;
 	bHasPendingInput = false;
+
+	bCanAcceptInput = true;
 }
 
 void UComboAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 콤보 상태 데이터 초기화
-	InitializeComboStates();
-}
-
-void UComboAttackComponent::InitializeComboStates()
-{
-	ComboStateMap.Empty();
-
-	// 상태 A: 콤보 시작 상태 – 입력(좌클릭) 시 B로 전이
-	FComboState StateA;
-	StateA.StateName = FName("A");
-	StateA.EffectiveTime = 0.45f;
-	StateA.Transitions.Add(EAttackType::LeftClick, FName("B"));
-	StateA.bIsLast = false;
-	ComboStateMap.Add(StateA.StateName, StateA);
-
-	// 상태 B: 입력(좌클릭) 시 C, Shift 입력 시 F, F 입력 시 G로 전이
-	FComboState StateB;
-	StateB.StateName = FName("B");
-	StateB.EffectiveTime = 0.55f;
-	StateB.Transitions.Add(EAttackType::LeftClick, FName("C"));
-	StateB.Transitions.Add(EAttackType::Shift, FName("F"));
-	StateB.Transitions.Add(EAttackType::F, FName("G"));
-	StateB.bIsLast = false;
-	ComboStateMap.Add(StateB.StateName, StateB);
-
-	// 상태 C: 입력(좌클릭) 시 D, Shift 입력 시 E, F 입력 시 H로 전이
-	FComboState StateC;
-	StateC.StateName = FName("C");
-	StateC.EffectiveTime = 0.55f;
-	StateC.Transitions.Add(EAttackType::LeftClick, FName("D"));
-	StateC.Transitions.Add(EAttackType::Shift, FName("E"));
-	StateC.Transitions.Add(EAttackType::F, FName("H"));
-	StateC.bIsLast = false;
-	ComboStateMap.Add(StateC.StateName, StateC);
-
-	// 터미널 상태: D, E, F, G, H – 더 이상의 입력 없이 콤보 종료
-	FComboState StateD;
-	StateD.StateName = FName("D");
-	StateD.EffectiveTime = 0.3f;
-	StateD.bIsLast = false;
-	ComboStateMap.Add(StateD.StateName, StateD);
-
-	FComboState StateE;
-	StateE.StateName = FName("E");
-	StateE.EffectiveTime = 1.2f;
-	StateE.bIsLast = false;
-	ComboStateMap.Add(StateE.StateName, StateE);
-
-	FComboState StateF;
-	StateF.StateName = FName("F");
-	StateF.EffectiveTime = .5f;
-	StateF.bIsLast = false;
-	ComboStateMap.Add(StateF.StateName, StateF);
-
-	FComboState StateG;
-	StateG.StateName = FName("G");
-	StateG.EffectiveTime = 0.25f;
-	StateG.bIsLast = false;
-	ComboStateMap.Add(StateG.StateName, StateG);
-
-	FComboState StateH;
-	StateH.StateName = FName("H");
-	StateH.EffectiveTime = 0.25f;
-	StateH.bIsLast = false;
-	ComboStateMap.Add(StateH.StateName, StateH);
+	// Data Asset이 할당되어 있다면, 에디터에서 구성한 콤보 상태를 ComboStateMap에 복사
+	if (ComboDataAsset)
+	{
+		ComboStateMap.Empty();
+		for (const FComboState& State : ComboDataAsset->ComboStates)
+		{
+			ComboStateMap.Add(State.StateName, State);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ComboDataAsset이 할당되지 않았습니다!"));
+	}
 }
 
 void UComboAttackComponent::PressComboAction(EAttackType InAttackType)
 {
-	// 만약 콤보 진행 중이 아니라면 시작
-	if (CurrentState == NAME_None && InAttackType == EAttackType::LeftClick)
+	// 입력 제한이 활성화 중이면 입력 무시
+	if (!bCanAcceptInput)
 	{
-		StartCombo();
 		return;
 	}
 
+	// 만약 콤보 진행 중이 아니라면 시작
+	if (CurrentState == NAME_None)
+	{
+		if (InAttackType == EAttackType::LeftClick)
+		{
+			CurrentState = FName("A");
+			StartCombo();
+
+		}
+		else if (InAttackType == EAttackType::Shift)
+		{
+			CurrentState = FName("F");
+			StartCombo();
+		}
+		return;
+	}
+	
 	// 터미널 상태(마지막 공격)가 진행 중이면 새로운 입력은 무시
 	if (ComboStateMap.Contains(CurrentState) && ComboStateMap[CurrentState].bIsLast)
 	{
@@ -109,9 +75,6 @@ void UComboAttackComponent::PressComboAction(EAttackType InAttackType)
 
 void UComboAttackComponent::StartCombo()
 {
-	// 콤보 시작 시 상태 "A"로 초기화
-	CurrentState = FName("A");
-
 	// 플레이어 공격 상태 활성화
 	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
 	if (Player)
@@ -136,6 +99,7 @@ void UComboAttackComponent::SetComboTimer()
 	{
 		ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
 		if (Player) if (Player->bIsRolling == true) return;
+
 		float EffectiveTime = ComboStateMap[CurrentState].EffectiveTime;
 		if (ComboStateMap[CurrentState].bIsLast == false)
 		{
@@ -200,10 +164,14 @@ bool UComboAttackComponent::GetNextState(EAttackType InAttackType, FName& OutNex
 	if (ComboStateMap.Contains(CurrentState))
 	{
 		const FComboState& ComboState = ComboStateMap[CurrentState];
-		if (ComboState.Transitions.Contains(InAttackType))
+		// 배열을 순회하여 해당 공격 타입과 일치하는 전이를 찾음
+		for (const FComboTransition& Transition : ComboState.Transitions)
 		{
-			OutNextState = ComboState.Transitions[InAttackType];
-			return true;
+			if (Transition.AttackType == InAttackType)
+			{
+				OutNextState = Transition.NextState;
+				return true;
+			}
 		}
 	}
 	return false;
@@ -222,6 +190,17 @@ void UComboAttackComponent::EndCombo()
 	{
 		Player->SetIsAttacking(false);
 	}
+
+	bCanAcceptInput = false;
+	GetWorld()->GetTimerManager().SetTimer(
+		ComboResetHandle,
+		FTimerDelegate::CreateLambda([this]()
+			{
+				bCanAcceptInput = true;
+			}),
+		1.0f, 
+		false
+	);
 }
 
 

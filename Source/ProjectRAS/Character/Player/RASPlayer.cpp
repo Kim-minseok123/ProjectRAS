@@ -68,12 +68,12 @@ ARASPlayer::ARASPlayer()
 		{
 			LeftAttackAction = LeftAttackActionRef.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UInputAction> ShiftAttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_LeftAndShift.IA_LeftAndShift'"));
+		static ConstructorHelpers::FObjectFinder<UInputAction> ShiftAttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_Shift.IA_Shift'"));
 		if (ShiftAttackActionRef.Object)
 		{
 			ShiftAttackAction = ShiftAttackActionRef.Object;
 		}
-		static ConstructorHelpers::FObjectFinder<UInputAction> FAttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_LeftAndF.IA_LeftAndF'"));
+		static ConstructorHelpers::FObjectFinder<UInputAction> FAttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_F.IA_F'"));
 		if (FAttackActionRef.Object)
 		{
 			FAttackAction = FAttackActionRef.Object;
@@ -121,7 +121,9 @@ void ARASPlayer::Tick(float DeltaTime)
 		{
 			LockOn();
 			bIsRolling = false;
+			bIsAttacking = false;
 			bIsRotation = false;
+			ComboAttack->EndCombo();
 		}
 	}
 }
@@ -137,8 +139,10 @@ void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARASPlayer::Look);
 	EnhancedInput->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ARASPlayer::LockOn);
 	EnhancedInput->BindAction(LeftAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressComboAction);
-	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressComboActionWithShift);
-	EnhancedInput->BindAction(FAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressComboActionWithF);
+	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Started, this, &ARASPlayer::PressShift);
+	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Completed, this, &ARASPlayer::PressShiftEnd);
+	EnhancedInput->BindAction(FAttackAction, ETriggerEvent::Started, this, &ARASPlayer::PressF);
+	EnhancedInput->BindAction(FAttackAction, ETriggerEvent::Completed, this, &ARASPlayer::PressFEnd);
 }
 
 void ARASPlayer::Move(const FInputActionValue& Value)
@@ -205,12 +209,25 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 	}
 	else
 	{
+		FVector MoveInput = GetLastMovementInputVector();
+
+		if (!MoveInput.IsNearlyZero())
+		{
+			MoveInput.Normalize();
+
+			FRotator DesiredRotation = MoveInput.Rotation();
+
+			SetActorRotation(DesiredRotation);
+		}
+
 		MyAnimInstance->Montage_Play(RollMontage);
 		MyAnimInstance->Montage_JumpToSection(TEXT("Roll"));
 		FOnMontageEnded MontageEndedDelegate;
 		MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
 			{
 				bIsRolling = false;
+				bIsAttacking = false;
+				ComboAttack->EndCombo();
 			});
 		MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, RollMontage);
 	}
@@ -230,26 +247,34 @@ void ARASPlayer::PressComboAction()
 {
 	if (ComboAttack)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Left"));
-		ComboAttack->PressComboAction(EAttackType::LeftClick);
+		if(bIsPressShift)
+			ComboAttack->PressComboAction(EAttackType::Shift);
+		else if(bIsPressF)
+			ComboAttack->PressComboAction(EAttackType::F);
+		else
+			ComboAttack->PressComboAction(EAttackType::LeftClick);
 	}
 }
 
-void ARASPlayer::PressComboActionWithShift()
+void ARASPlayer::PressShift()
 {
-	if (ComboAttack)
-	{
-		UE_LOG(LogTemp, Log, TEXT("Shift"));
-		ComboAttack->PressComboAction(EAttackType::Shift);
-	}
+	bIsPressShift = true;
 }
 
-void ARASPlayer::PressComboActionWithF()
+void ARASPlayer::PressShiftEnd()
 {
-	if (ComboAttack)
-	{
-		UE_LOG(LogTemp, Log, TEXT("F"));
-		ComboAttack->PressComboAction(EAttackType::F);
-	}
+	bIsPressShift = false;
 }
+
+void ARASPlayer::PressF()
+{
+	bIsPressF = true;
+}
+
+void ARASPlayer::PressFEnd()
+{
+	bIsPressF = false;
+}
+
+
 
