@@ -198,7 +198,7 @@ void UComboAttackComponent::EndCombo()
 			{
 				bCanAcceptInput = true;
 			}),
-		1.0f, 
+		.7f, 
 		false
 	);
 }

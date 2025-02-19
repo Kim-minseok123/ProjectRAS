@@ -20,7 +20,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
-	bool bIsRotation = false;
 // Input Section
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -40,6 +39,10 @@ protected:
 	TObjectPtr<class UInputAction> ShiftAttackAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> FAttackAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> QAttackAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> EAttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> MappingContext;
@@ -47,6 +50,8 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Roll(const FInputActionValue& Value);
+
+	FVector2D LastMoveInput;
 public:
 	bool bIsRolling = false;
 	void LockOn();
@@ -74,12 +79,16 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UComboAttackComponent> ComboAttack;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> SkillMontage;
 
 	void PressComboAction();
 	void PressShift();
 	void PressShiftEnd();
 	void PressF();
 	void PressFEnd();
+	void PressQ();
+	void PressE();
 // AnimMontage Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))
