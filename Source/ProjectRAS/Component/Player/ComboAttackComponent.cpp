@@ -86,6 +86,7 @@ void UComboAttackComponent::StartCombo()
 		if (AnimInstance && ComboAttackMontage)
 		{
 			AnimInstance->Montage_Play(ComboAttackMontage);
+			AnimInstance->Montage_JumpToSection(CurrentState, ComboAttackMontage);
 		}
 	}
 
@@ -108,7 +109,9 @@ void UComboAttackComponent::SetComboTimer()
 		}
 		else
 		{
-			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &UComboAttackComponent::EndCombo, EffectiveTime, false);
+			FTimerDelegate TimerDel;
+			TimerDel.BindUObject(this, &UComboAttackComponent::EndCombo, true);
+			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, TimerDel, EffectiveTime, false);
 		}
 	}
 	else
@@ -177,7 +180,7 @@ bool UComboAttackComponent::GetNextState(EAttackType InAttackType, FName& OutNex
 	return false;
 }
 
-void UComboAttackComponent::EndCombo()
+void UComboAttackComponent::EndCombo(bool InbSetTiemr /*= true*/)
 {
 	// 타이머 초기화 및 콤보 상태 리셋
 	GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);
@@ -192,15 +195,23 @@ void UComboAttackComponent::EndCombo()
 	}
 
 	bCanAcceptInput = false;
-	GetWorld()->GetTimerManager().SetTimer(
-		ComboResetHandle,
-		FTimerDelegate::CreateLambda([this]()
-			{
-				bCanAcceptInput = true;
-			}),
-		.7f, 
-		false
-	);
+	if (InbSetTiemr)
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			ComboResetHandle,
+			FTimerDelegate::CreateLambda([this]()
+				{
+					bCanAcceptInput = true;
+				}),
+			.7f,
+			false
+		);
+	}
+	else
+	{
+		bCanAcceptInput = true;
+	}
 }
+
 
 

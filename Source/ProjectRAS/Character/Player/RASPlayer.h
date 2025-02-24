@@ -43,6 +43,8 @@ protected:
 	TObjectPtr<class UInputAction> QAttackAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> EAttackAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ParryingAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> MappingContext;
@@ -76,11 +78,14 @@ protected:
 
 	bool bIsPressShift = false;
 	bool bIsPressF = false;
+	bool bIsParrying = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UComboAttackComponent> ComboAttack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> SkillMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> ParryingMontage;
 
 	void PressComboAction();
 	void PressShift();
@@ -89,6 +94,9 @@ protected:
 	void PressFEnd();
 	void PressQ();
 	void PressE();
+	void PressRightClick();
+	void PressRightClickEnd();
+
 // AnimMontage Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))

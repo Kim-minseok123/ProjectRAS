@@ -88,6 +88,11 @@ ARASPlayer::ARASPlayer()
 		{
 			EAttackAction = EAttackActionRef.Object;
 		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> ParyyingActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_RightClick.IA_RightClick'"));
+		if (ParyyingActionRef.Object)
+		{
+			ParryingAction = ParyyingActionRef.Object;
+		}
 	}
 
 	ComboAttack = CreateDefaultSubobject<UComboAttackComponent>(TEXT("Combo"));
@@ -130,6 +135,8 @@ void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	EnhancedInput->BindAction(FAttackAction, ETriggerEvent::Completed, this, &ARASPlayer::PressFEnd);
 	EnhancedInput->BindAction(QAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressQ);
 	EnhancedInput->BindAction(EAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressE);
+	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Started, this, &ARASPlayer::PressRightClick);
+	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Completed, this, &ARASPlayer::PressRightClickEnd);
 }
 
 void ARASPlayer::Move(const FInputActionValue& Value)
@@ -138,6 +145,7 @@ void ARASPlayer::Move(const FInputActionValue& Value)
 	LastMoveInput = CurrentMovementInput;
 
 	if (bIsRolling || bIsAttacking) return;
+	if (bIsParrying) return;
 
 	const FRotator Rotation = GetController()->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -272,9 +280,10 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 		{
 			bIsRolling = false;
 			bIsAttacking = false;
+			bIsParrying = false;
 			if (ComboAttack)
 			{
-				ComboAttack->EndCombo();
+				ComboAttack->EndCombo(false);
 			}
 		});
 	AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, RollMontage);
@@ -295,6 +304,7 @@ void ARASPlayer::PressComboAction()
 {
 	if (ComboAttack)
 	{
+		if (bIsParrying) return;
 		if(bIsPressShift)
 			ComboAttack->PressComboAction(EAttackType::Shift);
 		else if(bIsPressF)
@@ -327,6 +337,8 @@ void ARASPlayer::PressFEnd()
 void ARASPlayer::PressQ()
 {
 	if (bIsRolling || bIsAttacking) return;
+	if (bIsParrying) return;
+
 	bIsAttacking = true;
 
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
@@ -346,6 +358,8 @@ void ARASPlayer::PressQ()
 void ARASPlayer::PressE()
 {
 	if (bIsRolling || bIsAttacking) return;
+	if (bIsParrying) return;
+
 	bIsAttacking = true;
 
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
@@ -360,5 +374,24 @@ void ARASPlayer::PressE()
 			ComboAttack->EndCombo();
 		});
 	MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, SkillMontage);
+}
+
+void ARASPlayer::PressRightClick()
+{
+	bIsParrying = true;
+	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
+	if (MyAnimInstance == nullptr) return;
+
+	MyAnimInstance->Montage_Play(ParryingMontage);
+	MyAnimInstance->Montage_JumpToSection(TEXT("Parrying"), ParryingMontage);
+}
+
+void ARASPlayer::PressRightClickEnd()
+{
+	bIsParrying = false;
+	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
+	if (MyAnimInstance == nullptr) return;
+
+	MyAnimInstance->Montage_Stop(0.1f, ParryingMontage);
 }
 
