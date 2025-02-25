@@ -4,6 +4,7 @@
 #include "Character/RASCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Component/Stat/RASStatComponent.h"
 
 // Sets default values
 ARASCharacterBase::ARASCharacterBase()
@@ -29,6 +30,8 @@ ARASCharacterBase::ARASCharacterBase()
 
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+
+	Stat = CreateDefaultSubobject<URASStatComponent>(TEXT("Stats"));
 }
 
 

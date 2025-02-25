@@ -15,4 +15,7 @@ public:
 	// Sets default values for this character's properties
 	ARASCharacterBase();
 
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats)
+	TObjectPtr<class URASStatComponent> Stat;
 };

@@ -81,7 +81,7 @@ protected:
 	bool bIsParrying = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UComboAttackComponent> ComboAttack;
+	TObjectPtr<class URASComboAttackComponent> ComboAttack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> SkillMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))

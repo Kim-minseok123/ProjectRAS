@@ -1,9 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Data/ComboAttackData.h"
+#include "Data/RASComboAttackData.h"
 
-UComboAttackData::UComboAttackData()
+URASComboAttackData::URASComboAttackData()
 {
 
 }

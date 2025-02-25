@@ -10,7 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
 #include "Animation//Player/RASPlayerAnimInstance.h"
-#include "Component/Player/ComboAttackComponent.h"
+#include "Component/Player/RASComboAttackComponent.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -95,7 +95,7 @@ ARASPlayer::ARASPlayer()
 		}
 	}
 
-	ComboAttack = CreateDefaultSubobject<UComboAttackComponent>(TEXT("Combo"));
+	ComboAttack = CreateDefaultSubobject<URASComboAttackComponent>(TEXT("Combo"));
 }
 
 void ARASPlayer::BeginPlay()

@@ -1,10 +1,10 @@
-﻿#include "Component/Player/ComboAttackComponent.h"
+﻿#include "Component/Player/RASComboAttackComponent.h"
 #include "Character/Player/RASPlayer.h"
 #include "Animation/AnimInstance.h"
-#include "Data/ComboAttackData.h"
+#include "Data/RASComboAttackData.h"
 #include "TimerManager.h"
 
-UComboAttackComponent::UComboAttackComponent()
+URASComboAttackComponent::URASComboAttackComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
@@ -14,7 +14,7 @@ UComboAttackComponent::UComboAttackComponent()
 	bCanAcceptInput = true;
 }
 
-void UComboAttackComponent::BeginPlay()
+void URASComboAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -33,7 +33,7 @@ void UComboAttackComponent::BeginPlay()
 	}
 }
 
-void UComboAttackComponent::PressComboAction(EAttackType InAttackType)
+void URASComboAttackComponent::PressComboAction(EAttackType InAttackType)
 {
 	// 입력 제한이 활성화 중이면 입력 무시
 	if (!bCanAcceptInput)
@@ -73,7 +73,7 @@ void UComboAttackComponent::PressComboAction(EAttackType InAttackType)
 	}
 }
 
-void UComboAttackComponent::StartCombo()
+void URASComboAttackComponent::StartCombo()
 {
 	// 플레이어 공격 상태 활성화
 	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
@@ -94,7 +94,7 @@ void UComboAttackComponent::StartCombo()
 	SetComboTimer();
 }
 
-void UComboAttackComponent::SetComboTimer()
+void URASComboAttackComponent::SetComboTimer()
 {
 	if (ComboStateMap.Contains(CurrentState))
 	{
@@ -105,12 +105,12 @@ void UComboAttackComponent::SetComboTimer()
 		if (ComboStateMap[CurrentState].bIsLast == false)
 		{
 			// 입력 가능한 상태라면 타이머를 설정
-			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &UComboAttackComponent::ComboTimerExpired, EffectiveTime, false);
+			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &URASComboAttackComponent::ComboTimerExpired, EffectiveTime, false);
 		}
 		else
 		{
 			FTimerDelegate TimerDel;
-			TimerDel.BindUObject(this, &UComboAttackComponent::EndCombo, true);
+			TimerDel.BindUObject(this, &URASComboAttackComponent::EndCombo, true);
 			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, TimerDel, EffectiveTime, false);
 		}
 	}
@@ -120,7 +120,7 @@ void UComboAttackComponent::SetComboTimer()
 	}
 }
 
-void UComboAttackComponent::ComboTimerExpired()
+void URASComboAttackComponent::ComboTimerExpired()
 {
 	// 입력이 있었다면 상태 전이 시도
 	if (bHasPendingInput)
@@ -162,7 +162,7 @@ void UComboAttackComponent::ComboTimerExpired()
 	}
 }
 
-bool UComboAttackComponent::GetNextState(EAttackType InAttackType, FName& OutNextState)
+bool URASComboAttackComponent::GetNextState(EAttackType InAttackType, FName& OutNextState)
 {
 	if (ComboStateMap.Contains(CurrentState))
 	{
@@ -180,7 +180,7 @@ bool UComboAttackComponent::GetNextState(EAttackType InAttackType, FName& OutNex
 	return false;
 }
 
-void UComboAttackComponent::EndCombo(bool InbSetTiemr /*= true*/)
+void URASComboAttackComponent::EndCombo(bool InbSetTiemr /*= true*/)
 {
 	// 타이머 초기화 및 콤보 상태 리셋
 	GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);

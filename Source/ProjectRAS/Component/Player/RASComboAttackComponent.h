@@ -2,16 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Data/ComboAttackData.h"
-#include "ComboAttackComponent.generated.h"
+#include "Data/RASComboAttackData.h"
+#include "RASComboAttackComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class PROJECTRAS_API UComboAttackComponent : public UActorComponent
+class PROJECTRAS_API URASComboAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	UComboAttackComponent();
+	URASComboAttackComponent();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combo")
 	TObjectPtr<class UAnimMontage> ComboAttackMontage;
@@ -25,7 +25,7 @@ public:
 
     // 에디터에서 할당할 Data Asset
     UPROPERTY(EditAnywhere, Category = "Combo")
-    TObjectPtr<class UComboAttackData> ComboDataAsset;
+    TObjectPtr<class URASComboAttackData> ComboDataAsset;
 
 protected:
 	virtual void BeginPlay() override;

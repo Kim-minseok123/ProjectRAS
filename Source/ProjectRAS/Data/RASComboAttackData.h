@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "ComboAttackData.generated.h"
+#include "RASComboAttackData.generated.h"
 /** 공격 입력 타입 (에디터와 블루프린트에서 사용하기 위해 BlueprintType으로 지정) */
 UENUM(BlueprintType)
 enum class EAttackType : uint8 {
@@ -54,11 +54,11 @@ struct FComboState
  * 
  */
 UCLASS()
-class PROJECTRAS_API UComboAttackData : public UPrimaryDataAsset
+class PROJECTRAS_API URASComboAttackData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 public:
-    UComboAttackData();
+    URASComboAttackData();
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combo")
     TArray<FComboState> ComboStates;
