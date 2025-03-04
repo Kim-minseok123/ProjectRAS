@@ -22,12 +22,12 @@ ARASAICommonController::ARASAICommonController()
 
 void ARASAICommonController::RunAI()
 {
-	
+	Super::RunAI();
 }
 
 void ARASAICommonController::StopAI()
 {
-	
+	Super::StopAI();
 }
 
 void ARASAICommonController::OnPossess(APawn* InPawn)

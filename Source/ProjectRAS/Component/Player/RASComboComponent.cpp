@@ -1,10 +1,14 @@
-﻿#include "Component/Player/RASComboAttackComponent.h"
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Component/Player/RASComboComponent.h"
 #include "Character/Player/RASPlayer.h"
 #include "Animation/AnimInstance.h"
 #include "Data/RASComboAttackData.h"
 #include "TimerManager.h"
 
-URASComboAttackComponent::URASComboAttackComponent()
+// Sets default values for this component's properties
+URASComboComponent::URASComboComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
@@ -12,9 +16,15 @@ URASComboAttackComponent::URASComboAttackComponent()
 	bHasPendingInput = false;
 
 	bCanAcceptInput = true;
+
+	static ConstructorHelpers::FObjectFinder<URASComboAttackData> ComboAttackDataRef(TEXT("/Script/ProjectRAS.RASComboAttackData'/Game/1_ProjectRAS/Data/DA_RASComboAttack.DA_RASComboAttack'"));
+	if (ComboAttackDataRef.Object)
+	{
+		ComboDataAsset = ComboAttackDataRef.Object;
+	}
 }
 
-void URASComboAttackComponent::BeginPlay()
+void URASComboComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -33,14 +43,15 @@ void URASComboAttackComponent::BeginPlay()
 	}
 }
 
-void URASComboAttackComponent::PressComboAction(EAttackType InAttackType)
+void URASComboComponent::PressComboAction(EAttackType InAttackType)
 {
 	// 입력 제한이 활성화 중이면 입력 무시
 	if (!bCanAcceptInput)
 	{
+		
 		return;
 	}
-
+	UE_LOG(LogTemp, Log, TEXT("asd"));
 	// 만약 콤보 진행 중이 아니라면 시작
 	if (CurrentState == NAME_None)
 	{
@@ -57,7 +68,7 @@ void URASComboAttackComponent::PressComboAction(EAttackType InAttackType)
 		}
 		return;
 	}
-	
+
 	// 터미널 상태(마지막 공격)가 진행 중이면 새로운 입력은 무시
 	if (ComboStateMap.Contains(CurrentState) && ComboStateMap[CurrentState].bIsLast)
 	{
@@ -73,7 +84,7 @@ void URASComboAttackComponent::PressComboAction(EAttackType InAttackType)
 	}
 }
 
-void URASComboAttackComponent::StartCombo()
+void URASComboComponent::StartCombo()
 {
 	// 플레이어 공격 상태 활성화
 	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
@@ -94,7 +105,7 @@ void URASComboAttackComponent::StartCombo()
 	SetComboTimer();
 }
 
-void URASComboAttackComponent::SetComboTimer()
+void URASComboComponent::SetComboTimer()
 {
 	if (ComboStateMap.Contains(CurrentState))
 	{
@@ -105,12 +116,12 @@ void URASComboAttackComponent::SetComboTimer()
 		if (ComboStateMap[CurrentState].bIsLast == false)
 		{
 			// 입력 가능한 상태라면 타이머를 설정
-			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &URASComboAttackComponent::ComboTimerExpired, EffectiveTime, false);
+			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &URASComboComponent::ComboTimerExpired, EffectiveTime, false);
 		}
 		else
 		{
 			FTimerDelegate TimerDel;
-			TimerDel.BindUObject(this, &URASComboAttackComponent::EndCombo, true);
+			TimerDel.BindUObject(this, &URASComboComponent::EndCombo, true);
 			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, TimerDel, EffectiveTime, false);
 		}
 	}
@@ -120,7 +131,7 @@ void URASComboAttackComponent::SetComboTimer()
 	}
 }
 
-void URASComboAttackComponent::ComboTimerExpired()
+void URASComboComponent::ComboTimerExpired()
 {
 	// 입력이 있었다면 상태 전이 시도
 	if (bHasPendingInput)
@@ -162,7 +173,7 @@ void URASComboAttackComponent::ComboTimerExpired()
 	}
 }
 
-bool URASComboAttackComponent::GetNextState(EAttackType InAttackType, FName& OutNextState)
+bool URASComboComponent::GetNextState(EAttackType InAttackType, FName& OutNextState)
 {
 	if (ComboStateMap.Contains(CurrentState))
 	{
@@ -180,7 +191,7 @@ bool URASComboAttackComponent::GetNextState(EAttackType InAttackType, FName& Out
 	return false;
 }
 
-void URASComboAttackComponent::EndCombo(bool InbSetTiemr /*= true*/)
+void URASComboComponent::EndCombo(bool InbSetTiemr /*= true*/)
 {
 	// 타이머 초기화 및 콤보 상태 리셋
 	GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);
@@ -212,6 +223,3 @@ void URASComboAttackComponent::EndCombo(bool InbSetTiemr /*= true*/)
 		bCanAcceptInput = true;
 	}
 }
-
-
-

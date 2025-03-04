@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/OverlapResult.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 ARASCommonMonster::ARASCommonMonster()
 {
@@ -16,7 +17,7 @@ ARASCommonMonster::ARASCommonMonster()
 		GetMesh()->SetSkeletalMesh(SkeletalMeshRef.Object);
 	}
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceRef(TEXT("/Script/Engine.AnimBlueprint'/Game/ParagonKhaimera/Characters/Heroes/Khaimera/Khaimera_AnimBlueprint.Khaimera_AnimBlueprint_C'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceRef(TEXT("/Script/Engine.AnimBlueprint'/Game/1_ProjectRAS/Animation/Monster/Common/BP_RASCommonMonsterAnimation.BP_RASCommonMonsterAnimation_C'"));
 	if (AnimInstanceRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceRef.Class);

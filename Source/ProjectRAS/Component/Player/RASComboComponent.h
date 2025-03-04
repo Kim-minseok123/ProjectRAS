@@ -1,17 +1,21 @@
-﻿#pragma once
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Data/RASComboAttackData.h"
-#include "RASComboAttackComponent.generated.h"
+#include "RASComboComponent.generated.h"
 
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class PROJECTRAS_API URASComboAttackComponent : public UActorComponent
+
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class PROJECTRAS_API URASComboComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:
-	URASComboAttackComponent();
+public:	
+	// Sets default values for this component's properties
+	URASComboComponent();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combo")
 	TObjectPtr<class UAnimMontage> ComboAttackMontage;
@@ -26,8 +30,8 @@ public:
     // 에디터에서 할당할 Data Asset
     UPROPERTY(EditAnywhere, Category = "Combo")
     TObjectPtr<class URASComboAttackData> ComboDataAsset;
-
 protected:
+	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	// 콤보 시작 (상태 "A"로 초기화)
