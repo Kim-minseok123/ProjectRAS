@@ -4,7 +4,10 @@
 #include "AI/Task/BTTask_SetMoveTarget.h"
 #include "AIController.h"
 #include "NavigationSystem.h"
+#include "Utils/RASCollisionChannels.h"
+#include "Utils/RASBlackBoardKey.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Character/RASCharacterBase.h"
 
 UBTTask_SetMoveTarget::UBTTask_SetMoveTarget()
 {
@@ -27,12 +30,12 @@ EBTNodeResult::Type UBTTask_SetMoveTarget::ExecuteTask(UBehaviorTreeComponent& O
 		return EBTNodeResult::Failed;
 	}
 
-	FVector Origin = OwnerComp.GetBlackboardComponent()->GetValueAsVector(TEXT("HOME_POS"));
+	FVector Origin = OwnerComp.GetBlackboardComponent()->GetValueAsVector(BBHomePos);
 	FNavLocation NextPatrolPos;
 
 	if (NavSystem->GetRandomPointInNavigableRadius(Origin, 500.f, NextPatrolPos))
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector(TEXT("MOVE_TARGET_POS"), NextPatrolPos);
+		OwnerComp.GetBlackboardComponent()->SetValueAsVector(BBMoveTargetPos, NextPatrolPos);
 		return EBTNodeResult::Succeeded;
 	}
 

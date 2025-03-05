@@ -5,6 +5,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Utils/RASBlackBoardKey.h"
 
 ARASAICommonController::ARASAICommonController()
 {
@@ -38,5 +39,5 @@ void ARASAICommonController::OnPossess(APawn* InPawn)
 
 void ARASAICommonController::SetupBlackBoard()
 {
-	Blackboard->SetValueAsVector(TEXT("HOME_POS"), GetPawn()->GetActorLocation());
+	Blackboard->SetValueAsVector(BBHomePos, GetPawn()->GetActorLocation());
 }

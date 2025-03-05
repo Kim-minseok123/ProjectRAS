@@ -34,4 +34,21 @@ ARASCharacterBase::ARASCharacterBase()
 	Stat = CreateDefaultSubobject<URASStatComponent>(TEXT("Stats"));
 }
 
+void ARASCharacterBase::SetAttackFinishedDelegate(const FCharacterAttackFinished& InOnAttackFinished)
+{
+}
+
+void ARASCharacterBase::StartAttackMontage(int InAttackNumber /*= 0*/)
+{
+}
+
+void ARASCharacterBase::AttackTo(int InAttackNumber /*= 0*/)
+{
+
+}
+
+void ARASCharacterBase::EndAttack()
+{
+
+}
 

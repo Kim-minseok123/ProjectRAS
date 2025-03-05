@@ -14,3 +14,23 @@ void ARASMonster::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 }
+
+ARASCharacterBase* ARASMonster::GetTarget()
+{
+	return Target;
+}
+
+void ARASMonster::SetAttackFinishedDelegate(const FCharacterAttackFinished& InOnAttackFinished)
+{
+	OnAttackFinished = InOnAttackFinished;
+}
+
+void ARASMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
+{
+
+}
+
+void ARASMonster::EndAttack()
+{
+	OnAttackFinished.ExecuteIfBound();
+}

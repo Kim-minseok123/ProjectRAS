@@ -32,3 +32,23 @@ void ARASCommonMonster::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 }
+
+void ARASCommonMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		AnimInstance->Montage_Play(AttackMontage);
+		AnimInstance->Montage_JumpToSection(TEXT("Attack"));
+
+		bUnflinching = true;
+	}
+}
+
+void ARASCommonMonster::EndAttack()
+{
+	Super::EndAttack();
+
+	bUnflinching = false;
+
+}

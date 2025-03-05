@@ -18,5 +18,7 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
+	virtual void StartAttackMontage(int InAttackNumber = 0) override;
 
+	virtual void EndAttack() override;
 };
