@@ -51,7 +51,6 @@ void URASComboComponent::PressComboAction(EAttackType InAttackType)
 		
 		return;
 	}
-	UE_LOG(LogTemp, Log, TEXT("asd"));
 	// 만약 콤보 진행 중이 아니라면 시작
 	if (CurrentState == NAME_None)
 	{

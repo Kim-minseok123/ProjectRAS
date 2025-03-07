@@ -17,8 +17,17 @@ public:
 	UAnimNotifyState_AttackTo();
 
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
+	
+	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference) override;
+
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Attack)
 	int32 AttackNum;
+
+protected:
+	virtual void MakeLineTrace(USkeletalMeshComponent* Attacker);
+
+	UPROPERTY()
+	TSet<TObjectPtr<AActor>> HitActors;
 };

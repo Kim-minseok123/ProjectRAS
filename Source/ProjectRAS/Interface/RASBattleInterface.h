@@ -28,7 +28,7 @@ public:
 
 	virtual void StartAttackMontage(int InAttackNumber = 0) = 0;
 
-	virtual void AttackTo(int InAttackNumber = 0) = 0;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) = 0;
 
 	virtual void EndAttack() = 0;
 };

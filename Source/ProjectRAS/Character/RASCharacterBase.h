@@ -20,7 +20,7 @@ public:
 
 	virtual void StartAttackMontage(int InAttackNumber = 0) override;
 	
-	virtual void AttackTo(int InAttackNumber = 0) override;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
 
 	virtual void EndAttack() override;
 protected:

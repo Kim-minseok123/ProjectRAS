@@ -38,7 +38,8 @@ void ARASCommonMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
-		AnimInstance->Montage_Play(AttackMontage);
+		float PlayRate = FMath::FRandRange(1.0f, 1.5f);
+		AnimInstance->Montage_Play(AttackMontage, PlayRate);
 		AnimInstance->Montage_JumpToSection(TEXT("Attack"));
 
 		bUnflinching = true;
