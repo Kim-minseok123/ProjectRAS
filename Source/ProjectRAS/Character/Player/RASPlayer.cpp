@@ -11,6 +11,7 @@
 #include "InputAction.h"
 #include "Animation//Player/RASPlayerAnimInstance.h"
 #include "Component/Player/RASComboComponent.h"
+#include "Component/Stat/RASStatComponent.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -96,6 +97,8 @@ ARASPlayer::ARASPlayer()
 	}
 
 	ComboAttack = CreateDefaultSubobject<URASComboComponent>(TEXT("Combo"));
+
+	CreatureName = TEXT("Player");
 }
 
 void ARASPlayer::BeginPlay()
@@ -283,12 +286,11 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 			bIsParrying = false;
 			if (ComboAttack)
 			{
-				ComboAttack->EndCombo(false);
+				ComboAttack->EndCombo(true, .7f);
 			}
 		});
 	AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, RollMontage);
 }
-
 
 void ARASPlayer::LockOn()
 {
@@ -304,7 +306,7 @@ void ARASPlayer::PressComboAction()
 {
 	if (ComboAttack)
 	{
-		if (bIsParrying) return;
+		if (bIsParrying || bIsSkilling || bIsRolling) return;
 		if(bIsPressShift)
 			ComboAttack->PressComboAction(EAttackType::Shift);
 		else if(bIsPressF)
@@ -340,7 +342,7 @@ void ARASPlayer::PressQ()
 	if (bIsParrying) return;
 
 	bIsAttacking = true;
-
+	bIsSkilling = true;
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (MyAnimInstance == nullptr) return;
 
@@ -350,7 +352,8 @@ void ARASPlayer::PressQ()
 	MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
 		{
 			bIsAttacking = false;
-			ComboAttack->EndCombo();
+			bIsSkilling = false;
+			ComboAttack->EndCombo(true, .9f);
 		});
 	MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, SkillMontage);
 }
@@ -371,7 +374,7 @@ void ARASPlayer::PressE()
 	MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
 		{
 			bIsAttacking = false;
-			ComboAttack->EndCombo();
+			ComboAttack->EndCombo(true, .9f);
 		});
 	MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, SkillMontage);
 }
@@ -393,5 +396,34 @@ void ARASPlayer::PressRightClickEnd()
 	if (MyAnimInstance == nullptr) return;
 
 	MyAnimInstance->Montage_Stop(0.1f, ParryingMontage);
+}
+
+void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
+{
+	Super::HitFromActor(InFrom, InDamage);
+	if (bIsParrying == true)
+	{
+		// TODO : 패링
+	}
+	else if (bIsParrying == false)
+	{
+		if (float ActualDamage = Stat->ApplyDamage(InDamage) > 0)
+		{
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			if (AnimInstance == nullptr)
+				return;
+			AnimInstance->Montage_Stop(0.1f);
+			ComboAttack->EndCombo(true, 1.f);
+			AnimInstance->Montage_Play(HitMontage);
+			if (ActualDamage >= KnockbackFigure)
+			{
+				AnimInstance->Montage_JumpToSection(TEXT("Knockback"));
+			}
+			else
+			{
+				AnimInstance->Montage_JumpToSection(TEXT("Hit"));
+			}
+		}
+	}
 }
 

@@ -34,3 +34,11 @@ void ARASMonster::EndAttack()
 {
 	OnAttackFinished.ExecuteIfBound();
 }
+
+void ARASMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
+{
+	Super::HitFromActor(InFrom, InDamage);
+
+	ARASMonster* FromMonster = Cast<ARASMonster>(InFrom);
+	if (FromMonster != nullptr) return;
+}

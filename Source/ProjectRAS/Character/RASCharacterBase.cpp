@@ -32,6 +32,8 @@ ARASCharacterBase::ARASCharacterBase()
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
 
 	Stat = CreateDefaultSubobject<URASStatComponent>(TEXT("Stats"));
+
+	CreatureName = TEXT("UnKnown");
 }
 
 void ARASCharacterBase::SetAttackFinishedDelegate(const FCharacterAttackFinished& InOnAttackFinished)
@@ -44,7 +46,7 @@ void ARASCharacterBase::StartAttackMontage(int InAttackNumber /*= 0*/)
 
 void ARASCharacterBase::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 {
-	UE_LOG(LogTemp, Log, TEXT("%s Attacked %s"), *InFrom->GetName(), *GetName());
+	UE_LOG(LogTemp, Log, TEXT("%s Attacked %s with Damage of %d"), *InFrom->GetCreatureName(), *GetCreatureName(), InDamage);
 }
 
 void ARASCharacterBase::EndAttack()

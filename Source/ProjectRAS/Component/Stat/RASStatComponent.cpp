@@ -13,9 +13,27 @@ URASStatComponent::URASStatComponent()
 	// ...
 }
 
-void URASStatComponent::ApplyDamage(float InDamageAmount)
+float URASStatComponent::ApplyDamage(float InDamageAmount)
 {
+	const float PrevHp = GetHp();
+	const float ActualDamage = FMath::Clamp<float>(InDamageAmount, 0, InDamageAmount);
 
+	SetHp(PrevHp - ActualDamage);
+	if (GetHp() <= KINDA_SMALL_NUMBER)
+	{
+		OnHpZero.Broadcast();
+	}
+
+	return ActualDamage;
+}
+
+void URASStatComponent::SetHp(float InHp)
+{
+	float CurrentHp = FMath::Clamp<float>(InHp, 0.0f, BaseStats.MaxHP);
+	
+	BaseStats.HP = CurrentHp;
+
+	OnHpChanged.Broadcast(CurrentHp);
 }
 
 // Called when the game starts
@@ -27,12 +45,4 @@ void URASStatComponent::BeginPlay()
 	
 }
 
-
-// Called every frame
-void URASStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
 

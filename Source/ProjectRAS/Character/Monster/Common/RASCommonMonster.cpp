@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/OverlapResult.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Component/Stat/RASStatComponent.h"
 
 ARASCommonMonster::ARASCommonMonster()
 {
@@ -26,6 +27,7 @@ ARASCommonMonster::ARASCommonMonster()
 	AIControllerClass = ARASAICommonController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	CreatureName = TEXT("Hector");
 }
 
 void ARASCommonMonster::PostInitializeComponents()
@@ -52,4 +54,31 @@ void ARASCommonMonster::EndAttack()
 
 	bUnflinching = false;
 
+}
+
+void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
+{
+	Super::HitFromActor(InFrom, InDamage);
+
+	Target = InFrom;
+
+	if (float ActualDamage = Stat->ApplyDamage(InDamage) > 0)
+	{
+		if (bUnflinching == false)
+		{
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			if (AnimInstance == nullptr)
+				return;
+
+			AnimInstance->Montage_Play(HitMontage);
+			if (ActualDamage >= KnockbackFigure)
+			{
+				AnimInstance->Montage_JumpToSection(TEXT("Knockback"));
+			}
+			else
+			{
+				AnimInstance->Montage_JumpToSection(TEXT("Hit"));
+			}
+		}
+	}
 }

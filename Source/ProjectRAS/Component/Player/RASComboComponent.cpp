@@ -48,7 +48,6 @@ void URASComboComponent::PressComboAction(EAttackType InAttackType)
 	// 입력 제한이 활성화 중이면 입력 무시
 	if (!bCanAcceptInput)
 	{
-		
 		return;
 	}
 	// 만약 콤보 진행 중이 아니라면 시작
@@ -120,7 +119,7 @@ void URASComboComponent::SetComboTimer()
 		else
 		{
 			FTimerDelegate TimerDel;
-			TimerDel.BindUObject(this, &URASComboComponent::EndCombo, true);
+			TimerDel.BindUObject(this, &URASComboComponent::EndCombo, true, 0.7f);
 			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, TimerDel, EffectiveTime, false);
 		}
 	}
@@ -190,7 +189,7 @@ bool URASComboComponent::GetNextState(EAttackType InAttackType, FName& OutNextSt
 	return false;
 }
 
-void URASComboComponent::EndCombo(bool InbSetTiemr /*= true*/)
+void URASComboComponent::EndCombo(bool InbSetTiemr /*= true*/, float InSeconds /*= 0.7f*/)
 {
 	// 타이머 초기화 및 콤보 상태 리셋
 	GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);
@@ -213,7 +212,7 @@ void URASComboComponent::EndCombo(bool InbSetTiemr /*= true*/)
 				{
 					bCanAcceptInput = true;
 				}),
-			.7f,
+			InSeconds,
 			false
 		);
 	}

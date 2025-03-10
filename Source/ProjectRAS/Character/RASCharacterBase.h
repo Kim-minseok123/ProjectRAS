@@ -23,7 +23,18 @@ public:
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
 
 	virtual void EndAttack() override;
+
+	FString& GetCreatureName() { return CreatureName; }
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats)
 	TObjectPtr<class URASStatComponent> Stat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
+	TObjectPtr<class UAnimMontage> HitMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
+	FString CreatureName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
+	float KnockbackFigure = 30;
 };

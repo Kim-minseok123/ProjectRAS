@@ -79,6 +79,7 @@ protected:
 	bool bIsPressShift = false;
 	bool bIsPressF = false;
 	bool bIsParrying = false;
+	bool bIsSkilling = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class URASComboComponent> ComboAttack;
@@ -97,6 +98,8 @@ protected:
 	void PressRightClick();
 	void PressRightClickEnd();
 
+public:
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
 // AnimMontage Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))

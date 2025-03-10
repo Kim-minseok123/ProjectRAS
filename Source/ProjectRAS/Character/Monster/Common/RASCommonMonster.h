@@ -21,4 +21,6 @@ public:
 	virtual void StartAttackMontage(int InAttackNumber = 0) override;
 
 	virtual void EndAttack() override;
+
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
 };

@@ -93,6 +93,6 @@ void UAnimNotifyState_AttackTo::MakeLineTrace(USkeletalMeshComponent* Attacker)
 			return;
 		// TODO AttackNum에 따라 데미지 가져오기
 
-		BattleInterface->HitFromActor(From, 0);
+		BattleInterface->HitFromActor(From, 1);
 	}
 }

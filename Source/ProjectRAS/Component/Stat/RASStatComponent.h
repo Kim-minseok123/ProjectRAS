@@ -9,7 +9,6 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*CurrentHp*/);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnStatChangedDelegate, const FRASCharacterStats& /*BaseStat*/, const FRASCharacterStats& /*ModifierStat*/);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRAS_API URASStatComponent : public UActorComponent
@@ -22,23 +21,21 @@ public:
 
 	FOnHpZeroDelegate OnHpZero;
 	FOnHpChangedDelegate OnHpChanged;
-	FOnStatChangedDelegate OnStatChanged;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
 	FRASCharacterStats BaseStats;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats")
-	FRASCharacterStats ModifierStat;
-
     UFUNCTION(BlueprintCallable, Category = "Stats")
-    void ApplyDamage(float InDamageAmount);
+	float ApplyDamage(float InDamageAmount);
+
+	void SetHp(float InHp);
+	FORCEINLINE const float	GetHp() const						{ return BaseStats.HP; }
+	FORCEINLINE void		SetStamina(float InStamina)			{ BaseStats.Stamina = InStamina; }
+	FORCEINLINE const float	GetStamina() const					{ return BaseStats.Stamina; }
+	FORCEINLINE void		SetAttackPower(float InAttackPower) { BaseStats.AttackPower = InAttackPower; }
+	FORCEINLINE const float	GetAttackPower() const				{ return BaseStats.AttackPower; }
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 		
 };

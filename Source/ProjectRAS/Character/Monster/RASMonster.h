@@ -27,6 +27,8 @@ public:
 
 	virtual void EndAttack() override;
 
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> AttackMontage; 
