@@ -9,6 +9,7 @@
 #include "Engine/OverlapResult.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Component/Stat/RASStatComponent.h"
+#include "Character/Player/RASPlayer.h"
 
 ARASCommonMonster::ARASCommonMonster()
 {
@@ -59,6 +60,9 @@ void ARASCommonMonster::EndAttack()
 void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 {
 	Super::HitFromActor(InFrom, InDamage);
+
+	ARASPlayer* FromPlayer = Cast<ARASPlayer>(InFrom);
+	if (FromPlayer == nullptr) return;
 
 	Target = InFrom;
 

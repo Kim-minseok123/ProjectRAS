@@ -4,6 +4,7 @@
 #include "Character/Monster/RASMonster.h"
 #include "Controller/Monster/RASAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Character/Player/RASPlayer.h"
 
 ARASMonster::ARASMonster()
 {
@@ -39,6 +40,7 @@ void ARASMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 {
 	Super::HitFromActor(InFrom, InDamage);
 
-	ARASMonster* FromMonster = Cast<ARASMonster>(InFrom);
-	if (FromMonster != nullptr) return;
+	ARASPlayer* FromPlayer = Cast<ARASPlayer>(InFrom);
+	if (FromPlayer == nullptr) return;
+	FromPlayer->SetLockedOnTarget(this);
 }

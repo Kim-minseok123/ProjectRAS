@@ -12,6 +12,9 @@
 #include "Animation//Player/RASPlayerAnimInstance.h"
 #include "Component/Player/RASComboComponent.h"
 #include "Component/Stat/RASStatComponent.h"
+#include "Utils/RASCollisionChannels.h"
+#include "Engine/OverlapResult.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -96,6 +99,9 @@ ARASPlayer::ARASPlayer()
 		}
 	}
 
+	bIsAttacking = false;
+	bLockOn = false;
+
 	ComboAttack = CreateDefaultSubobject<URASComboComponent>(TEXT("Combo"));
 
 	CreatureName = TEXT("Player");
@@ -119,6 +125,26 @@ void ARASPlayer::BeginPlay()
 void ARASPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (LockOnTarget != nullptr)
+	{
+		float CurDistanceToTarget = GetDistanceTo(LockOnTarget);
+		if (CurDistanceToTarget > 2000.f)
+		{
+			LockOnTarget = nullptr;
+			PressTab();
+			return;
+		}
+		FRotator CurrentControlRot = GetControlRotation();
+		FVector PlayerLocation = GetActorLocation();
+		FVector TargetLocation = LockOnTarget->GetActorLocation();
+
+		FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(PlayerLocation, TargetLocation);
+
+		FRotator NewRot = FMath::RInterpTo(CurrentControlRot, TargetRotation, DeltaTime, 5.f);
+
+		FRotator FinalRotation(CurrentControlRot.Pitch, NewRot.Yaw, CurrentControlRot.Roll);
+		GetController()->SetControlRotation(FinalRotation);
+	}
 }
 
 void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -130,7 +156,7 @@ void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	EnhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &ARASPlayer::Roll);
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARASPlayer::Move);
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARASPlayer::Look);
-	EnhancedInput->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ARASPlayer::LockOn);
+	EnhancedInput->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressTab);
 	EnhancedInput->BindAction(LeftAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressComboAction);
 	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Started, this, &ARASPlayer::PressShift);
 	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Completed, this, &ARASPlayer::PressShiftEnd);
@@ -163,8 +189,8 @@ void ARASPlayer::Move(const FInputActionValue& Value)
 void ARASPlayer::Look(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	AddControllerYawInput(LookAxisVector.X);
+	if(LockOnTarget == nullptr)
+		AddControllerYawInput(LookAxisVector.X);
 	AddControllerPitchInput(LookAxisVector.Y);
 }
 
@@ -286,10 +312,16 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 			bIsParrying = false;
 			if (ComboAttack)
 			{
-				ComboAttack->EndCombo(true, .7f);
+				ComboAttack->EndCombo(true, .5f);
 			}
 		});
 	AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, RollMontage);
+}
+
+void ARASPlayer::PressTab()
+{
+	FindAllEnemyInRange();
+	SetClosestLockedOnTarget();
 }
 
 void ARASPlayer::LockOn()
@@ -298,7 +330,17 @@ void ARASPlayer::LockOn()
 	if (MyAnimInstance == nullptr)
 		return;
 
-	bUseControllerRotationYaw = !bUseControllerRotationYaw;
+	bUseControllerRotationYaw = true;
+	MyAnimInstance->SetLockOn(bUseControllerRotationYaw);
+}
+
+void ARASPlayer::LockOff()
+{
+	URASPlayerAnimInstance* MyAnimInstance = Cast<URASPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (MyAnimInstance == nullptr)
+		return;
+
+	bUseControllerRotationYaw = false;
 	MyAnimInstance->SetLockOn(bUseControllerRotationYaw);
 }
 
@@ -385,6 +427,8 @@ void ARASPlayer::PressRightClick()
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (MyAnimInstance == nullptr) return;
 
+	ComboAttack->EndCombo(false, 0.f);
+
 	MyAnimInstance->Montage_Play(ParryingMontage);
 	MyAnimInstance->Montage_JumpToSection(TEXT("Parrying"), ParryingMontage);
 }
@@ -395,15 +439,126 @@ void ARASPlayer::PressRightClickEnd()
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (MyAnimInstance == nullptr) return;
 
-	MyAnimInstance->Montage_Stop(0.1f, ParryingMontage);
+	MyAnimInstance->Montage_Stop(0.25f, ParryingMontage);
+	UE_LOG(LogTemp, Log, TEXT("asd"));
+}
+
+void ARASPlayer::FindAllEnemyInRange()
+{
+	if (LockOnTarget != nullptr)
+		return;
+	TargetEnemys.Empty();
+
+	FVector Center = GetActorLocation();
+	const float SphereRadius = 2000.f;
+
+	FCollisionShape CollisionSphere = FCollisionShape::MakeSphere(SphereRadius);
+
+	FCollisionQueryParams Params(FName(TEXT("FindEnemy")), false, this);
+
+	TArray<FOverlapResult> Results;
+
+	DrawDebugSphere(GetWorld(), Center, SphereRadius, 12, FColor::Green, false, 1.0f, 0, 2.0f);
+
+	bool bIsHit = GetWorld()->OverlapMultiByChannel(
+		Results,           
+		Center,           
+		FQuat::Identity,   
+		ECC_RASChannel,		
+		CollisionSphere,   
+		Params           
+	);
+
+	if (bIsHit)
+	{
+		for (const FOverlapResult& Result : Results)
+		{
+			ARASCharacterBase* FindEnemy = Cast<ARASCharacterBase>(Result.GetActor());
+			if (FindEnemy != nullptr)
+			{
+				TargetEnemys.Add(FindEnemy);
+			}
+		}
+	}
+}
+
+void ARASPlayer::SetClosestLockedOnTarget()
+{
+	if (LockOnTarget != nullptr)
+		return;
+	ARASCharacterBase* Target = nullptr;
+	float MaxDistance = 21000.f;
+	for (auto& Enemy : TargetEnemys)
+	{
+		float CurDistance = GetDistanceTo(Enemy);
+		if (CurDistance < MaxDistance)
+		{
+			MaxDistance = CurDistance;
+			Target = Enemy;
+		}
+	}
+	
+	SetLockedOnTarget(Target);
+}
+
+void ARASPlayer::SetLockedOnTarget(ARASCharacterBase* Target)
+{
+	if (Target != nullptr && LockOnTarget == nullptr)
+	{
+		LockOnTarget = Target;
+		LockOn();
+	}
+	else if (Target == nullptr && LockOnTarget == nullptr)
+		LockOff();
+	
 }
 
 void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 {
 	Super::HitFromActor(InFrom, InDamage);
+
+	SetLockedOnTarget(InFrom);
+
 	if (bIsParrying == true)
 	{
 		// TODO : 패링
+		// 스테미나 감소
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance == nullptr)
+			return;
+
+		if (Stat->GetStamina() > 0)
+		{
+			AnimInstance->Montage_Play(ParryingMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("ParryingBreak"), ParryingMontage);
+			PressRightClickEnd();
+
+			/*FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindLambda([AnimInstance, this](UAnimMontage* Montage, bool bInterrupted)
+				{
+					UE_LOG(LogTemp, Log, TEXT("Asd"));
+					PressRightClickEnd();
+					UE_LOG(LogTemp, Log, TEXT("asD"));
+
+				});
+			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);*/
+		}
+		else
+		{
+			AnimInstance->Montage_Play(ParryingMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("ParryingHit"),ParryingMontage);
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindLambda([AnimInstance, this](UAnimMontage* Montage, bool bInterrupted)
+				{
+					if (bIsParrying && AnimInstance)
+					{
+						AnimInstance->Montage_Play(ParryingMontage);
+						AnimInstance->Montage_JumpToSection(TEXT("Parrying"));
+					}
+				});
+			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);
+		}
+
 	}
 	else if (bIsParrying == false)
 	{
@@ -417,11 +572,11 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 			AnimInstance->Montage_Play(HitMontage);
 			if (ActualDamage >= KnockbackFigure)
 			{
-				AnimInstance->Montage_JumpToSection(TEXT("Knockback"));
+				AnimInstance->Montage_JumpToSection(TEXT("Knockback"), HitMontage);
 			}
 			else
 			{
-				AnimInstance->Montage_JumpToSection(TEXT("Hit"));
+				AnimInstance->Montage_JumpToSection(TEXT("Hit"), HitMontage);
 			}
 		}
 	}

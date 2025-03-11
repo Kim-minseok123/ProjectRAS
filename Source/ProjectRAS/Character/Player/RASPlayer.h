@@ -52,12 +52,13 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Roll(const FInputActionValue& Value);
+	void PressTab();
 
 	FVector2D LastMoveInput;
 public:
 	bool bIsRolling = false;
 	void LockOn();
-
+	void LockOff();
 // Camera Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -98,7 +99,12 @@ protected:
 	void PressRightClick();
 	void PressRightClickEnd();
 
+	void FindAllEnemyInRange();
+	void SetClosestLockedOnTarget();
+	TSet<TObjectPtr<ARASCharacterBase>> TargetEnemys;
+	TObjectPtr<ARASCharacterBase> LockOnTarget;
 public:
+	void SetLockedOnTarget(ARASCharacterBase* Target);
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
 // AnimMontage Section
 protected:
