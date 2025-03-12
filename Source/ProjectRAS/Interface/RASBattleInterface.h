@@ -31,4 +31,6 @@ public:
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) = 0;
 
 	virtual void EndAttack() = 0;
+
+	virtual void SetVisibleIndicator(bool InbIsVisible) = 0;
 };

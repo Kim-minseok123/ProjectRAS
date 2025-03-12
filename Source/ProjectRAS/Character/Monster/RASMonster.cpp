@@ -9,6 +9,8 @@
 ARASMonster::ARASMonster()
 {
 
+	Indicator = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Indicator"));
+	Indicator->SetupAttachment(RootComponent);
 }
 
 void ARASMonster::PostInitializeComponents()
@@ -43,4 +45,10 @@ void ARASMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 	ARASPlayer* FromPlayer = Cast<ARASPlayer>(InFrom);
 	if (FromPlayer == nullptr) return;
 	FromPlayer->SetLockedOnTarget(this);
+}
+
+void ARASMonster::SetVisibleIndicator(bool InbIsVisible)
+{
+	if (Indicator == nullptr) return;
+	Indicator->SetVisibility(InbIsVisible);
 }

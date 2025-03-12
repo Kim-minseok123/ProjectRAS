@@ -175,6 +175,7 @@ void ARASPlayer::Move(const FInputActionValue& Value)
 
 	if (bIsRolling || bIsAttacking) return;
 	if (bIsParrying) return;
+	if (bIsBreaking) return;
 
 	const FRotator Rotation = GetController()->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -200,6 +201,7 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance == nullptr) return;
+	if (bIsBreaking) return;
 
 	if (bIsRolling) return;
 	bIsRolling = true;
@@ -321,7 +323,15 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 void ARASPlayer::PressTab()
 {
 	FindAllEnemyInRange();
-	SetClosestLockedOnTarget();
+
+	if (LockOnTarget == nullptr)
+	{
+		SetClosestLockedOnTarget();
+	}
+	else
+	{
+		CycleLockOnTarget();
+	}
 }
 
 void ARASPlayer::LockOn()
@@ -382,7 +392,7 @@ void ARASPlayer::PressQ()
 {
 	if (bIsRolling || bIsAttacking) return;
 	if (bIsParrying) return;
-
+	if (bIsBreaking) return;
 	bIsAttacking = true;
 	bIsSkilling = true;
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
@@ -404,6 +414,7 @@ void ARASPlayer::PressE()
 {
 	if (bIsRolling || bIsAttacking) return;
 	if (bIsParrying) return;
+	if (bIsBreaking) return;
 
 	bIsAttacking = true;
 
@@ -435,25 +446,31 @@ void ARASPlayer::PressRightClick()
 
 void ARASPlayer::PressRightClickEnd()
 {
-	bIsParrying = false;
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (MyAnimInstance == nullptr) return;
 
-	MyAnimInstance->Montage_Stop(0.25f, ParryingMontage);
-	UE_LOG(LogTemp, Log, TEXT("asd"));
+	if (bIsBreaking) return;
+	UAnimMontage* CurrentMontage = MyAnimInstance->GetCurrentActiveMontage();
+	if (CurrentMontage)
+	{
+		FName CurrentSection = MyAnimInstance->Montage_GetCurrentSection(CurrentMontage);
+		if (CurrentSection != TEXT("ParryingBreak"))
+		{
+			bIsParrying = false;
+			MyAnimInstance->Montage_Stop(0.25f, ParryingMontage);
+		}
+	}
+	
 }
 
 void ARASPlayer::FindAllEnemyInRange()
 {
-	if (LockOnTarget != nullptr)
-		return;
 	TargetEnemys.Empty();
 
 	FVector Center = GetActorLocation();
 	const float SphereRadius = 2000.f;
 
 	FCollisionShape CollisionSphere = FCollisionShape::MakeSphere(SphereRadius);
-
 	FCollisionQueryParams Params(FName(TEXT("FindEnemy")), false, this);
 
 	TArray<FOverlapResult> Results;
@@ -461,12 +478,12 @@ void ARASPlayer::FindAllEnemyInRange()
 	DrawDebugSphere(GetWorld(), Center, SphereRadius, 12, FColor::Green, false, 1.0f, 0, 2.0f);
 
 	bool bIsHit = GetWorld()->OverlapMultiByChannel(
-		Results,           
-		Center,           
-		FQuat::Identity,   
-		ECC_RASChannel,		
-		CollisionSphere,   
-		Params           
+		Results,
+		Center,
+		FQuat::Identity,
+		ECC_RASChannel,
+		CollisionSphere,
+		Params
 	);
 
 	if (bIsHit)
@@ -486,38 +503,63 @@ void ARASPlayer::SetClosestLockedOnTarget()
 {
 	if (LockOnTarget != nullptr)
 		return;
+
 	ARASCharacterBase* Target = nullptr;
-	float MaxDistance = 21000.f;
-	for (auto& Enemy : TargetEnemys)
+	float MinDistance = 21000.f;
+	for (ARASCharacterBase* Enemy : TargetEnemys)
 	{
 		float CurDistance = GetDistanceTo(Enemy);
-		if (CurDistance < MaxDistance)
+		if (CurDistance < MinDistance)
 		{
-			MaxDistance = CurDistance;
+			MinDistance = CurDistance;
 			Target = Enemy;
 		}
 	}
-	
+
 	SetLockedOnTarget(Target);
 }
 
 void ARASPlayer::SetLockedOnTarget(ARASCharacterBase* Target)
 {
-	if (Target != nullptr && LockOnTarget == nullptr)
+	if (LockOnTarget)
 	{
-		LockOnTarget = Target;
+		LockOnTarget->SetVisibleIndicator(false);
+	}
+	LockOnTarget = Target;
+	if (LockOnTarget)
+	{
+		LockOnTarget->SetVisibleIndicator(true);
 		LockOn();
 	}
-	else if (Target == nullptr && LockOnTarget == nullptr)
+	else
+	{
 		LockOff();
-	
+	}
+}
+
+void ARASPlayer::CycleLockOnTarget()
+{
+	if (TargetEnemys.Num() == 0)
+		return;
+
+	TArray<ARASCharacterBase*> EnemyArray = TargetEnemys.Array();
+
+	EnemyArray.Sort([this](const ARASCharacterBase& A, const ARASCharacterBase& B)
+		{
+			return GetDistanceTo(&A) < GetDistanceTo(&B);
+		});
+
+	int32 CurrentIndex = EnemyArray.IndexOfByKey(LockOnTarget);
+	int32 NextIndex = (CurrentIndex + 1) % EnemyArray.Num();
+
+	SetLockedOnTarget(EnemyArray[NextIndex]);
 }
 
 void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 {
 	Super::HitFromActor(InFrom, InDamage);
-
-	SetLockedOnTarget(InFrom);
+	if(LockOnTarget == nullptr)
+		SetLockedOnTarget(InFrom);
 
 	if (bIsParrying == true)
 	{
@@ -527,36 +569,24 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 		if (AnimInstance == nullptr)
 			return;
 
-		if (Stat->GetStamina() > 0)
+		if (Stat->GetStamina() <= 0)
 		{
 			AnimInstance->Montage_Play(ParryingMontage);
 			AnimInstance->Montage_JumpToSection(TEXT("ParryingBreak"), ParryingMontage);
-			PressRightClickEnd();
+			bIsBreaking = true;
 
-			/*FOnMontageEnded MontageEndedDelegate;
-			MontageEndedDelegate.BindLambda([AnimInstance, this](UAnimMontage* Montage, bool bInterrupted)
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
 				{
-					UE_LOG(LogTemp, Log, TEXT("Asd"));
-					PressRightClickEnd();
-					UE_LOG(LogTemp, Log, TEXT("asD"));
-
+					bIsParrying = false;
+					bIsBreaking = false;
 				});
-			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);*/
+			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);
 		}
 		else
 		{
 			AnimInstance->Montage_Play(ParryingMontage);
 			AnimInstance->Montage_JumpToSection(TEXT("ParryingHit"),ParryingMontage);
-			FOnMontageEnded MontageEndedDelegate;
-			MontageEndedDelegate.BindLambda([AnimInstance, this](UAnimMontage* Montage, bool bInterrupted)
-				{
-					if (bIsParrying && AnimInstance)
-					{
-						AnimInstance->Montage_Play(ParryingMontage);
-						AnimInstance->Montage_JumpToSection(TEXT("Parrying"));
-					}
-				});
-			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);
 		}
 
 	}

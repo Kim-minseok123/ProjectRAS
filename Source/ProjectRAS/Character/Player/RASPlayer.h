@@ -81,6 +81,7 @@ protected:
 	bool bIsPressF = false;
 	bool bIsParrying = false;
 	bool bIsSkilling = false;
+	bool bIsBreaking = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class URASComboComponent> ComboAttack;
@@ -105,6 +106,7 @@ protected:
 	TObjectPtr<ARASCharacterBase> LockOnTarget;
 public:
 	void SetLockedOnTarget(ARASCharacterBase* Target);
+	void CycleLockOnTarget();
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
 // AnimMontage Section
 protected:

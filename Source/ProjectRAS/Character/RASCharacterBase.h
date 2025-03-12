@@ -24,6 +24,11 @@ public:
 
 	virtual void EndAttack() override;
 
+	virtual void SetVisibleIndicator(bool InbIsVisible) override
+	{
+
+	}
+
 	FString& GetCreatureName() { return CreatureName; }
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats)

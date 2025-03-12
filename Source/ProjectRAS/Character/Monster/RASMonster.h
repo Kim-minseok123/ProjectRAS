@@ -29,9 +29,14 @@ public:
 
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
 
+	virtual void SetVisibleIndicator(bool InbIsVisible) override;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> AttackMontage; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Indicator, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UStaticMeshComponent> Indicator;
 
 	UPROPERTY()
 	TObjectPtr<class ARASCharacterBase> Target; 
