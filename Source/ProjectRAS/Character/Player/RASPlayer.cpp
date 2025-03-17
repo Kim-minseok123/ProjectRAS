@@ -15,6 +15,7 @@
 #include "Utils/RASCollisionChannels.h"
 #include "Engine/OverlapResult.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Utils/RASUtils.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -434,6 +435,8 @@ void ARASPlayer::PressE()
 
 void ARASPlayer::PressRightClick()
 {
+	if (bIsBreaking) return;
+
 	bIsParrying = true;
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (MyAnimInstance == nullptr) return;
@@ -441,6 +444,7 @@ void ARASPlayer::PressRightClick()
 	ComboAttack->EndCombo(false, 0.f);
 
 	MyAnimInstance->Montage_Play(ParryingMontage);
+	ParryingTime = RASUtils::GetCurrentPlatformTime();
 	MyAnimInstance->Montage_JumpToSection(TEXT("Parrying"), ParryingMontage);
 }
 
@@ -454,7 +458,7 @@ void ARASPlayer::PressRightClickEnd()
 	if (CurrentMontage)
 	{
 		FName CurrentSection = MyAnimInstance->Montage_GetCurrentSection(CurrentMontage);
-		if (CurrentSection != TEXT("ParryingBreak"))
+		if (CurrentSection != TEXT("ParryingBreak") || CurrentSection != TEXT("ParryingExact"))
 		{
 			bIsParrying = false;
 			MyAnimInstance->Montage_Stop(0.25f, ParryingMontage);
@@ -557,10 +561,14 @@ void ARASPlayer::CycleLockOnTarget()
 
 void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 {
+	if (bIsRolling) return;
 	Super::HitFromActor(InFrom, InDamage);
 	if(LockOnTarget == nullptr)
 		SetLockedOnTarget(InFrom);
+	// 데미지
 
+	// Motion
+	if (bIsBreaking == true) return;
 	if (bIsParrying == true)
 	{
 		// TODO : 패링
@@ -569,10 +577,12 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 		if (AnimInstance == nullptr)
 			return;
 
-		if (Stat->GetStamina() <= 0)
+		float CurrentTime = RASUtils::GetCurrentPlatformTime();
+		UE_LOG(LogTemp, Log, TEXT("%f : %f = %f"), CurrentTime, ParryingTime, CurrentTime - ParryingTime);
+		if (CurrentTime - ParryingTime <= .1f)
 		{
 			AnimInstance->Montage_Play(ParryingMontage);
-			AnimInstance->Montage_JumpToSection(TEXT("ParryingBreak"), ParryingMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("ParryingExact"), ParryingMontage);
 			bIsBreaking = true;
 
 			FOnMontageEnded MontageEndedDelegate;
@@ -580,6 +590,22 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 				{
 					bIsParrying = false;
 					bIsBreaking = false;
+				});
+			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);
+			return;
+		}
+		if (Stat->GetStamina() <= 0)
+		{
+			AnimInstance->Montage_Play(ParryingMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("ParryingBreak"), ParryingMontage);
+			bIsBreaking = true;
+			GetWorldSettings()->SetTimeDilation(0.7f);
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
+				{
+					bIsParrying = false;
+					bIsBreaking = false;
+					GetWorldSettings()->SetTimeDilation(1.f);
 				});
 			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);
 		}
@@ -600,13 +626,26 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 			AnimInstance->Montage_Stop(0.1f);
 			ComboAttack->EndCombo(true, 1.f);
 			AnimInstance->Montage_Play(HitMontage);
+			bIsBreaking = true;
 			if (ActualDamage >= KnockbackFigure)
 			{
 				AnimInstance->Montage_JumpToSection(TEXT("Knockback"), HitMontage);
+				FOnMontageEnded MontageEndedDelegate;
+				MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
+					{
+						bIsBreaking = false;
+					});
+				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, HitMontage);
 			}
 			else
 			{
 				AnimInstance->Montage_JumpToSection(TEXT("Hit"), HitMontage);
+				FOnMontageEnded MontageEndedDelegate;
+				MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
+					{
+						bIsBreaking = false;
+					});
+				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, HitMontage);
 			}
 		}
 	}

@@ -54,3 +54,31 @@ void ARASCharacterBase::EndAttack()
 
 }
 
+void ARASCharacterBase::KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower)
+{
+    if (!Direction.IsNearlyZero())
+    {
+        Direction.Normalize();
+
+        UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+        if (AnimInstance)
+        {
+            AnimInstance->Montage_Play(HitMontage);
+            AnimInstance->Montage_JumpToSection(TEXT("Knockback"));
+            AnimInstance->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
+        }
+
+        float KnockbackStrength = InPower;
+        LaunchCharacter(Direction * KnockbackStrength, true, true);
+
+        FTimerHandle TimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, AnimInstance]()
+            {
+                if (AnimInstance)
+                {
+                    AnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
+                }
+            }, 0.2f, false);
+    }
+}
+

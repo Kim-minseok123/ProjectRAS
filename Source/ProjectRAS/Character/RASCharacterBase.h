@@ -30,6 +30,9 @@ public:
 	}
 
 	FString& GetCreatureName() { return CreatureName; }
+
+	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats)
 	TObjectPtr<class URASStatComponent> Stat;

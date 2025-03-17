@@ -104,6 +104,8 @@ protected:
 	void SetClosestLockedOnTarget();
 	TSet<TObjectPtr<ARASCharacterBase>> TargetEnemys;
 	TObjectPtr<ARASCharacterBase> LockOnTarget;
+
+	float ParryingTime = 0.f;
 public:
 	void SetLockedOnTarget(ARASCharacterBase* Target);
 	void CycleLockOnTarget();

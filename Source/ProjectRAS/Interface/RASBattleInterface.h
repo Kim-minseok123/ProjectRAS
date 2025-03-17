@@ -33,4 +33,6 @@ public:
 	virtual void EndAttack() = 0;
 
 	virtual void SetVisibleIndicator(bool InbIsVisible) = 0;
+
+	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) = 0;
 };
