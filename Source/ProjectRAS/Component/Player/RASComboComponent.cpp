@@ -6,6 +6,7 @@
 #include "Animation/AnimInstance.h"
 #include "Data/RASComboAttackData.h"
 #include "TimerManager.h"
+#include "Data/RASPlayerState.h"
 
 // Sets default values for this component's properties
 URASComboComponent::URASComboComponent()
@@ -88,7 +89,7 @@ void URASComboComponent::StartCombo()
 	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
 	if (Player)
 	{
-		Player->SetIsAttacking(true);
+		Player->SetCombatState(EPlayerCombatState::Attacking);
 
 		// 몽타주 재생
 		UAnimInstance* AnimInstance = Player->GetMesh()->GetAnimInstance();
@@ -108,7 +109,7 @@ void URASComboComponent::SetComboTimer()
 	if (ComboStateMap.Contains(CurrentState))
 	{
 		ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
-		if (Player) if (Player->bIsRolling == true) return;
+		if (Player) if (Player->GetCombatState() == EPlayerCombatState::Rolling) return;
 
 		float EffectiveTime = ComboStateMap[CurrentState].EffectiveTime;
 		if (ComboStateMap[CurrentState].bIsLast == false)
@@ -135,7 +136,7 @@ void URASComboComponent::ComboTimerExpired()
 	if (bHasPendingInput)
 	{
 		ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
-		if (Player) if (Player->bIsRolling == true) return;
+		if (Player) if (Player->GetCombatState() == EPlayerCombatState::Rolling) return;
 
 		FName NextState;
 		if (GetNextState(PendingAttackType, NextState))
@@ -200,7 +201,7 @@ void URASComboComponent::EndCombo(bool InbSetTiemr /*= true*/, float InSeconds /
 	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
 	if (Player)
 	{
-		Player->SetIsAttacking(false);
+		Player->SetCombatState(EPlayerCombatState::Idle);
 	}
 
 	bCanAcceptInput = false;

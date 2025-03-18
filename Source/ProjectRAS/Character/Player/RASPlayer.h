@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/RASCharacterBase.h"
 #include "InputActionValue.h"
+#include "Data/RASPlayerState.h"
 #include "RASPlayer.generated.h"
 
 /**
@@ -56,7 +57,6 @@ protected:
 
 	FVector2D LastMoveInput;
 public:
-	bool bIsRolling = false;
 	void LockOn();
 	void LockOff();
 // Camera Section
@@ -68,20 +68,19 @@ protected:
 
 // Battle Section
 public:
-	void SetIsAttacking(bool InIsAttacking) { bIsAttacking = InIsAttacking; }
+	void SetCombatState(EPlayerCombatState InState) { CombatState = InState; }
+	EPlayerCombatState GetCombatState() const { return CombatState; }
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	EPlayerCombatState CombatState;
+
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	uint8 bLockOn : 1;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
-	uint8 bIsAttacking : 1;
-
 	bool bIsPressShift = false;
 	bool bIsPressF = false;
-	bool bIsParrying = false;
-	bool bIsSkilling = false;
-	bool bIsBreaking = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class URASComboComponent> ComboAttack;

@@ -16,6 +16,7 @@
 #include "Engine/OverlapResult.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Utils/RASUtils.h"
+#include "Data/RASPlayerState.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -100,7 +101,8 @@ ARASPlayer::ARASPlayer()
 		}
 	}
 
-	bIsAttacking = false;
+	CombatState = EPlayerCombatState::Idle;
+
 	bLockOn = false;
 
 	ComboAttack = CreateDefaultSubobject<URASComboComponent>(TEXT("Combo"));
@@ -174,9 +176,7 @@ void ARASPlayer::Move(const FInputActionValue& Value)
 	FVector2D CurrentMovementInput = Value.Get<FVector2D>();
 	LastMoveInput = CurrentMovementInput;
 
-	if (bIsRolling || bIsAttacking) return;
-	if (bIsParrying) return;
-	if (bIsBreaking) return;
+	if (CombatState != EPlayerCombatState::Idle) return;
 
 	const FRotator Rotation = GetController()->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -202,10 +202,8 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance == nullptr) return;
-	if (bIsBreaking) return;
-
-	if (bIsRolling) return;
-	bIsRolling = true;
+	if(CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking) return;
+	CombatState = EPlayerCombatState::Rolling;
 
 	AnimInstance->Montage_Stop(0.1f);
 
@@ -310,9 +308,7 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 	FOnMontageEnded MontageEndedDelegate;
 	MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
 		{
-			bIsRolling = false;
-			bIsAttacking = false;
-			bIsParrying = false;
+			CombatState = EPlayerCombatState::Idle;
 			if (ComboAttack)
 			{
 				ComboAttack->EndCombo(true, .5f);
@@ -357,15 +353,17 @@ void ARASPlayer::LockOff()
 
 void ARASPlayer::PressComboAction()
 {
-	if (ComboAttack)
+	if (CombatState == EPlayerCombatState::Idle || CombatState == EPlayerCombatState::Attacking)
 	{
-		if (bIsParrying || bIsSkilling || bIsRolling) return;
-		if(bIsPressShift)
-			ComboAttack->PressComboAction(EAttackType::Shift);
-		else if(bIsPressF)
-			ComboAttack->PressComboAction(EAttackType::F);
-		else
-			ComboAttack->PressComboAction(EAttackType::LeftClick);
+		if (ComboAttack)
+		{
+			if (bIsPressShift)
+				ComboAttack->PressComboAction(EAttackType::Shift);
+			else if (bIsPressF)
+				ComboAttack->PressComboAction(EAttackType::F);
+			else
+				ComboAttack->PressComboAction(EAttackType::LeftClick);
+		}
 	}
 }
 
@@ -391,80 +389,95 @@ void ARASPlayer::PressFEnd()
 
 void ARASPlayer::PressQ()
 {
-	if (bIsRolling || bIsAttacking) return;
-	if (bIsParrying) return;
-	if (bIsBreaking) return;
-	bIsAttacking = true;
-	bIsSkilling = true;
+	if (CombatState != EPlayerCombatState::Idle)
+		return;
+
+	CombatState = EPlayerCombatState::Skilling; 
+
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
-	if (MyAnimInstance == nullptr) return;
+	if (MyAnimInstance == nullptr)
+		return;
 
 	MyAnimInstance->Montage_Play(SkillMontage);
-	MyAnimInstance->Montage_JumpToSection(TEXT("Skill1"));
+	MyAnimInstance->Montage_JumpToSection(TEXT("Skill1"), SkillMontage);
+
 	FOnMontageEnded MontageEndedDelegate;
-	MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
+	MontageEndedDelegate.BindLambda([this, MyAnimInstance](UAnimMontage* Montage, bool bInterrupted)
 		{
-			bIsAttacking = false;
-			bIsSkilling = false;
-			ComboAttack->EndCombo(true, .9f);
+			CombatState = EPlayerCombatState::Idle;
+			if (ComboAttack)
+			{
+				ComboAttack->EndCombo(true, 0.9f);
+			}
 		});
 	MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, SkillMontage);
 }
 
 void ARASPlayer::PressE()
 {
-	if (bIsRolling || bIsAttacking) return;
-	if (bIsParrying) return;
-	if (bIsBreaking) return;
+	if (CombatState != EPlayerCombatState::Idle)
+		return;
 
-	bIsAttacking = true;
+	CombatState = EPlayerCombatState::Skilling;
 
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
-	if (MyAnimInstance == nullptr) return;
+	if (MyAnimInstance == nullptr)
+		return;
 
 	MyAnimInstance->Montage_Play(SkillMontage);
-	MyAnimInstance->Montage_JumpToSection(TEXT("Skill2"));
+	MyAnimInstance->Montage_JumpToSection(TEXT("Skill2"), SkillMontage);
+
 	FOnMontageEnded MontageEndedDelegate;
-	MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
+	MontageEndedDelegate.BindLambda([this, MyAnimInstance](UAnimMontage* Montage, bool bInterrupted)
 		{
-			bIsAttacking = false;
-			ComboAttack->EndCombo(true, .9f);
+			CombatState = EPlayerCombatState::Idle;
+			if (ComboAttack)
+			{
+				ComboAttack->EndCombo(true, 0.9f);
+			}
 		});
 	MyAnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, SkillMontage);
 }
 
 void ARASPlayer::PressRightClick()
 {
-	if (bIsBreaking) return;
+	if (CombatState == EPlayerCombatState::Breaking)
+		return;
 
-	bIsParrying = true;
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
-	if (MyAnimInstance == nullptr) return;
+	if (!MyAnimInstance)
+		return;
 
 	ComboAttack->EndCombo(false, 0.f);
+
+	CombatState = EPlayerCombatState::Parrying;
 
 	MyAnimInstance->Montage_Play(ParryingMontage);
 	ParryingTime = RASUtils::GetCurrentPlatformTime();
 	MyAnimInstance->Montage_JumpToSection(TEXT("Parrying"), ParryingMontage);
+
 }
 
 void ARASPlayer::PressRightClickEnd()
 {
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
-	if (MyAnimInstance == nullptr) return;
+	if (!MyAnimInstance)
+		return;
 
-	if (bIsBreaking) return;
+	if (CombatState == EPlayerCombatState::Breaking)
+		return;
+
 	UAnimMontage* CurrentMontage = MyAnimInstance->GetCurrentActiveMontage();
 	if (CurrentMontage)
 	{
 		FName CurrentSection = MyAnimInstance->Montage_GetCurrentSection(CurrentMontage);
 		if (CurrentSection != TEXT("ParryingBreak") || CurrentSection != TEXT("ParryingExact"))
 		{
-			bIsParrying = false;
+			CombatState = EPlayerCombatState::Idle;
+
 			MyAnimInstance->Montage_Stop(0.25f, ParryingMontage);
 		}
 	}
-	
 }
 
 void ARASPlayer::FindAllEnemyInRange()
@@ -559,37 +572,34 @@ void ARASPlayer::CycleLockOnTarget()
 	SetLockedOnTarget(EnemyArray[NextIndex]);
 }
 
-void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
+void ARASPlayer::HitFromActor(ARASCharacterBase* InFrom, int InDamage)
 {
-	if (bIsRolling) return;
-	Super::HitFromActor(InFrom, InDamage);
-	if(LockOnTarget == nullptr)
-		SetLockedOnTarget(InFrom);
-	// 데미지
+	if (CombatState == EPlayerCombatState::Rolling)
+		return;
 
-	// Motion
-	if (bIsBreaking == true) return;
-	if (bIsParrying == true)
+	Super::HitFromActor(InFrom, InDamage);
+	if (LockOnTarget == nullptr)
+		SetLockedOnTarget(InFrom);
+
+
+	if (CombatState == EPlayerCombatState::Parrying)
 	{
-		// TODO : 패링
-		// 스테미나 감소
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance == nullptr)
+		if (!AnimInstance)
 			return;
 
 		float CurrentTime = RASUtils::GetCurrentPlatformTime();
-		UE_LOG(LogTemp, Log, TEXT("%f : %f = %f"), CurrentTime, ParryingTime, CurrentTime - ParryingTime);
-		if (CurrentTime - ParryingTime <= .1f)
+		UE_LOG(LogTemp, Log, TEXT("Parrying time diff: %f"), CurrentTime - ParryingTime);
+
+		if (CurrentTime - ParryingTime <= 0.1f)
 		{
 			AnimInstance->Montage_Play(ParryingMontage);
 			AnimInstance->Montage_JumpToSection(TEXT("ParryingExact"), ParryingMontage);
-			bIsBreaking = true;
-
+			CombatState = EPlayerCombatState::Breaking;
 			FOnMontageEnded MontageEndedDelegate;
 			MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
 				{
-					bIsParrying = false;
-					bIsBreaking = false;
+					CombatState = EPlayerCombatState::Idle;
 				});
 			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);
 			return;
@@ -598,13 +608,12 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 		{
 			AnimInstance->Montage_Play(ParryingMontage);
 			AnimInstance->Montage_JumpToSection(TEXT("ParryingBreak"), ParryingMontage);
-			bIsBreaking = true;
+			CombatState = EPlayerCombatState::Breaking;
 			GetWorldSettings()->SetTimeDilation(0.7f);
 			FOnMontageEnded MontageEndedDelegate;
 			MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
 				{
-					bIsParrying = false;
-					bIsBreaking = false;
+					CombatState = EPlayerCombatState::Idle;
 					GetWorldSettings()->SetTimeDilation(1.f);
 				});
 			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ParryingMontage);
@@ -612,42 +621,35 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 		else
 		{
 			AnimInstance->Montage_Play(ParryingMontage);
-			AnimInstance->Montage_JumpToSection(TEXT("ParryingHit"),ParryingMontage);
+			AnimInstance->Montage_JumpToSection(TEXT("ParryingHit"), ParryingMontage);
 		}
-
 	}
-	else if (bIsParrying == false)
+	else
 	{
-		if (float ActualDamage = Stat->ApplyDamage(InDamage) > 0)
+		float ActualDamage = Stat->ApplyDamage(InDamage);
+		if (ActualDamage > 0)
 		{
 			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-			if (AnimInstance == nullptr)
+			if (!AnimInstance)
 				return;
 			AnimInstance->Montage_Stop(0.1f);
 			ComboAttack->EndCombo(true, 1.f);
 			AnimInstance->Montage_Play(HitMontage);
-			bIsBreaking = true;
+			CombatState = EPlayerCombatState::Breaking;
 			if (ActualDamage >= KnockbackFigure)
 			{
 				AnimInstance->Montage_JumpToSection(TEXT("Knockback"), HitMontage);
-				FOnMontageEnded MontageEndedDelegate;
-				MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
-					{
-						bIsBreaking = false;
-					});
-				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, HitMontage);
 			}
 			else
 			{
 				AnimInstance->Montage_JumpToSection(TEXT("Hit"), HitMontage);
-				FOnMontageEnded MontageEndedDelegate;
-				MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
-					{
-						bIsBreaking = false;
-					});
-				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, HitMontage);
 			}
+			FOnMontageEnded MontageEndedDelegate;
+			MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
+				{
+					CombatState = EPlayerCombatState::Idle;
+				});
+			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, HitMontage);
 		}
 	}
 }
-
