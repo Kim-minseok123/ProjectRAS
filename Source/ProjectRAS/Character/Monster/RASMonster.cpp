@@ -18,6 +18,11 @@ void ARASMonster::PostInitializeComponents()
 	Super::PostInitializeComponents();
 }
 
+void ARASMonster::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+}
+
 ARASCharacterBase* ARASMonster::GetTarget()
 {
 	return Target;

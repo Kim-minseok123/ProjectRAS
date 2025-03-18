@@ -21,6 +21,7 @@ protected:
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Character)
 	TObjectPtr<class ARASCommonMonster> Owner;
 

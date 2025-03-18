@@ -17,4 +17,8 @@ public:
 	UBTTask_CommonMonsterAttack();
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	UPROPERTY()
+    TObjectPtr<UBehaviorTreeComponent> CachedOwnerComp;
+	UFUNCTION()
+	void EndTask();
 };

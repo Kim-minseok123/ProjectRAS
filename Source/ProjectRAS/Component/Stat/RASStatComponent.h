@@ -9,6 +9,7 @@
 
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*CurrentHp*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnStaminaChangedDelegate, float /*CurrentHp*/);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTRAS_API URASStatComponent : public UActorComponent
@@ -21,6 +22,7 @@ public:
 
 	FOnHpZeroDelegate OnHpZero;
 	FOnHpChangedDelegate OnHpChanged;
+	FOnStaminaChangedDelegate OnStaminaChanged;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
 	FRASCharacterStats BaseStats;
@@ -29,9 +31,11 @@ public:
 	float ApplyDamage(float InDamageAmount);
 
 	void SetHp(float InHp);
+	void SetStamina(float InStamina);
 	FORCEINLINE const float	GetHp() const						{ return BaseStats.HP; }
-	FORCEINLINE void		SetStamina(float InStamina)			{ BaseStats.Stamina = InStamina; }
 	FORCEINLINE const float	GetStamina() const					{ return BaseStats.Stamina; }
+	FORCEINLINE const float GetMaxHp() const						{ return BaseStats.MaxHP; }
+	FORCEINLINE const float GetMaxstamina() const					{ return BaseStats.MaxStamina; }
 	FORCEINLINE void		SetAttackPower(float InAttackPower) { BaseStats.AttackPower = InAttackPower; }
 	FORCEINLINE const float	GetAttackPower() const				{ return BaseStats.AttackPower; }
 protected:

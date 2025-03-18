@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/Monster/RASMonster.h"
 #include "RASCommonMonster.generated.h"
-
+DECLARE_MULTICAST_DELEGATE(FOnStopAttackDelegate);
 /**
  * 
  */
@@ -15,7 +15,10 @@ class PROJECTRAS_API ARASCommonMonster : public ARASMonster
 	GENERATED_BODY()
 public:
 	ARASCommonMonster();
+	
+	FOnStopAttackDelegate OnStopAttack;
 
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void PostInitializeComponents() override;
 
 	virtual void StartAttackMontage(int InAttackNumber = 0) override;
@@ -23,4 +26,9 @@ public:
 	virtual void EndAttack() override;
 
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
+
+	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;
+protected:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UWidgetComponent> StatusBarWidgetComponent;
 };

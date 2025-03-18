@@ -7,6 +7,7 @@
 #include "AIController.h"
 #include "Utils/RASBlackBoardKey.h"
 #include "Character/RASCharacterBase.h"
+#include "Character/Monster/Common/RASCommonMonster.h"
 
 UBTTask_CommonMonsterAttack::UBTTask_CommonMonsterAttack()
 {
@@ -29,6 +30,13 @@ EBTNodeResult::Type UBTTask_CommonMonsterAttack::ExecuteTask(UBehaviorTreeCompon
 	if (nullptr == Target)
 		return EBTNodeResult::Failed;
 
+	CachedOwnerComp = &OwnerComp;
+	ARASCommonMonster* CommonMonster = Cast<ARASCommonMonster>(ControllingPawn);
+	if (CommonMonster == nullptr)
+		return EBTNodeResult::Failed;
+	CommonMonster->OnStopAttack.RemoveAll(this); 
+	CommonMonster->OnStopAttack.AddUObject(this, &UBTTask_CommonMonsterAttack::EndTask);
+
 	FCharacterAttackFinished OnAttackFinished;
 	OnAttackFinished.BindLambda(
 		[&]()
@@ -47,6 +55,13 @@ EBTNodeResult::Type UBTTask_CommonMonsterAttack::ExecuteTask(UBehaviorTreeCompon
 	BattleInterface->SetAttackFinishedDelegate(OnAttackFinished);
 	BattleInterface->StartAttackMontage();
 
+
+
 	return EBTNodeResult::InProgress;
+}
+
+void UBTTask_CommonMonsterAttack::EndTask()
+{
+	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
 }
 

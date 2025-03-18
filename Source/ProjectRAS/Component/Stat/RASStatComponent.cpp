@@ -36,6 +36,15 @@ void URASStatComponent::SetHp(float InHp)
 	OnHpChanged.Broadcast(CurrentHp);
 }
 
+void URASStatComponent::SetStamina(float InStamina)
+{
+	float CurrentStamina = FMath::Clamp<float>(InStamina, 0.0f, BaseStats.MaxStamina);
+
+	BaseStats.Stamina = CurrentStamina;
+
+	OnStaminaChanged.Broadcast(CurrentStamina);
+}
+
 // Called when the game starts
 void URASStatComponent::BeginPlay()
 {

@@ -10,6 +10,9 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Component/Stat/RASStatComponent.h"
 #include "Character/Player/RASPlayer.h"
+#include "Components/WidgetComponent.h"
+#include "UI/RASStatusBarWidget.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ARASCommonMonster::ARASCommonMonster()
 {
@@ -25,15 +28,55 @@ ARASCommonMonster::ARASCommonMonster()
 		GetMesh()->SetAnimInstanceClass(AnimInstanceRef.Class);
 	}
 
+	StatusBarWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StatusBar"));
+	StatusBarWidgetComponent->SetupAttachment(GetMesh());
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> StatusBarWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/1_ProjectRAS/UI/WBP_StatusBar.WBP_StatusBar_C'"));
+	if(StatusBarWidgetRef.Class)
+	{
+		StatusBarWidgetComponent->SetWidgetClass(StatusBarWidgetRef.Class);
+		StatusBarWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+		StatusBarWidgetComponent->SetDrawSize(FVector2D(175, 50));
+		StatusBarWidgetComponent->SetRelativeLocation(FVector(0, 0, 150));
+	}
+
 	AIControllerClass = ARASAICommonController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	CreatureName = TEXT("Hector");
 }
 
+void ARASCommonMonster::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (Target && bUnflinching)
+	{
+		FVector MyLocation = GetActorLocation();
+		FVector TargetLocation = Target->GetActorLocation();
+
+		FRotator CurrentRotation = GetActorRotation();
+		FRotator DesiredRotation = UKismetMathLibrary::FindLookAtRotation(MyLocation, TargetLocation);
+		FRotator NewRotation = FMath::RInterpTo(CurrentRotation, FRotator(CurrentRotation.Pitch, DesiredRotation.Yaw, CurrentRotation.Roll), DeltaSeconds, 100.f);
+
+		SetActorRotation(NewRotation);
+	}
+}
+
 void ARASCommonMonster::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	StatusBarWidgetComponent->InitWidget();
+
+	auto Widget = Cast<URASStatusBarWidget>(StatusBarWidgetComponent->GetUserWidgetObject());
+	if (Widget == nullptr) return;
+
+	Widget->BindHP(Stat);
+	Widget->BindStamina(Stat);
+
+	Stat->SetHp(100000);
+	Stat->SetStamina(100000);
 }
 
 void ARASCommonMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
@@ -85,4 +128,16 @@ void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDama
 			}
 		}
 	}
+}
+
+void ARASCommonMonster::KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower)
+{
+	Super::KnockbackToDirection(InFrom, Direction, InPower);
+
+	if(OnStopAttack.IsBound() == true) 	
+	{
+		OnStopAttack.Broadcast();
+	}
+
+	EndAttack();
 }
