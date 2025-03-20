@@ -11,5 +11,6 @@ enum class EPlayerCombatState : uint8
     Parrying    UMETA(DisplayName = "Parrying"),
     Breaking    UMETA(DisplayName = "Breaking"),
     Rolling     UMETA(DisplayName = "Rolling"),
-    Skilling    UMETA(DisplayName = "Skilling")
+    Skilling    UMETA(DisplayName = "Skilling"),
+    Armoring    UMETA(DisplayName = "Armoring")
 };

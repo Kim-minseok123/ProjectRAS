@@ -44,12 +44,13 @@ ARASCommonMonster::ARASCommonMonster()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	CreatureName = TEXT("Hector");
+
+	StatusBarWidgetComponent->SetVisibility(false);
 }
 
 void ARASCommonMonster::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
 	if (Target && bUnflinching)
 	{
 		FVector MyLocation = GetActorLocation();
@@ -111,6 +112,7 @@ void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDama
 
 	if (float ActualDamage = Stat->ApplyDamage(InDamage) > 0)
 	{
+		StatusBarWidgetComponent->SetVisibility(true);
 		if (bUnflinching == false)
 		{
 			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();

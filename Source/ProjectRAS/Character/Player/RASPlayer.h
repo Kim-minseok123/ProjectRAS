@@ -66,6 +66,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> FollowCamera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USceneComponent> HeadPoint;
+
 // Battle Section
 public:
 	void SetCombatState(EPlayerCombatState InState) { CombatState = InState; }
@@ -108,6 +111,7 @@ protected:
 public:
 	void SetLockedOnTarget(ARASCharacterBase* Target);
 	void CycleLockOnTarget();
+	class ARASCharacterBase* GetLockedOnTarget() const { return LockOnTarget; }
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
 // AnimMontage Section
 protected:
@@ -115,4 +119,11 @@ protected:
 	TObjectPtr<class UAnimMontage> RollMontage;
 
 	int rollTime = 1;
+
+// Widget Section
+protected:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class URASPlayerHUDWidget> PlayerHUDWidgetClass;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class URASPlayerHUDWidget> PlayerHUDWidget;
 };

@@ -17,6 +17,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Utils/RASUtils.h"
 #include "Data/RASPlayerState.h"
+#include "UI/RASAimWidget.h"
+#include "UI/RASPlayerHUDWidget.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -31,8 +33,11 @@ ARASPlayer::ARASPlayer()
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
 
+	HeadPoint = CreateDefaultSubobject<USceneComponent>(TEXT("HeadPoint"));
+	HeadPoint->SetupAttachment(RootComponent);
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->SetupAttachment(HeadPoint);
 
 	CameraBoom->TargetArmLength = 600.f;
 	CameraBoom->bUsePawnControlRotation = true;
@@ -108,6 +113,12 @@ ARASPlayer::ARASPlayer()
 	ComboAttack = CreateDefaultSubobject<URASComboComponent>(TEXT("Combo"));
 
 	CreatureName = TEXT("Player");
+
+	static ConstructorHelpers::FClassFinder<URASPlayerHUDWidget> PlayerHUDWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/1_ProjectRAS/UI/WBP_PlayerHUD.WBP_PlayerHUD_C'"));
+	if (PlayerHUDWidgetRef.Class)
+	{
+		PlayerHUDWidgetClass = PlayerHUDWidgetRef.Class;
+	}
 }
 
 void ARASPlayer::BeginPlay()
@@ -121,6 +132,21 @@ void ARASPlayer::BeginPlay()
 		{
 			Subsystem->ClearAllMappings();
 			Subsystem->AddMappingContext(MappingContext, 0);
+		}
+	}
+
+	if (PlayerHUDWidgetClass)
+	{
+		PlayerHUDWidget = CreateWidget<URASPlayerHUDWidget>(GetWorld()->GetFirstPlayerController(), PlayerHUDWidgetClass);
+		if (PlayerHUDWidget)
+		{
+			PlayerHUDWidget->AddToViewport();
+
+			PlayerHUDWidget->BindHP(Stat);
+			PlayerHUDWidget->BindStamina(Stat);
+
+			Stat->SetHp(10000);
+			Stat->SetStamina(10000);
 		}
 	}
 }
@@ -441,7 +467,7 @@ void ARASPlayer::PressE()
 
 void ARASPlayer::PressRightClick()
 {
-	if (CombatState == EPlayerCombatState::Breaking)
+	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring)
 		return;
 
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
@@ -464,7 +490,7 @@ void ARASPlayer::PressRightClickEnd()
 	if (!MyAnimInstance)
 		return;
 
-	if (CombatState == EPlayerCombatState::Breaking)
+	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring)
 		return;
 
 	UAnimMontage* CurrentMontage = MyAnimInstance->GetCurrentActiveMontage();
@@ -574,7 +600,7 @@ void ARASPlayer::CycleLockOnTarget()
 
 void ARASPlayer::HitFromActor(ARASCharacterBase* InFrom, int InDamage)
 {
-	if (CombatState == EPlayerCombatState::Rolling)
+	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring)
 		return;
 
 	Super::HitFromActor(InFrom, InDamage);
@@ -595,7 +621,7 @@ void ARASPlayer::HitFromActor(ARASCharacterBase* InFrom, int InDamage)
 		{
 			AnimInstance->Montage_Play(ParryingMontage);
 			AnimInstance->Montage_JumpToSection(TEXT("ParryingExact"), ParryingMontage);
-			CombatState = EPlayerCombatState::Breaking;
+			CombatState = EPlayerCombatState::Armoring;
 			FOnMontageEnded MontageEndedDelegate;
 			MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
 				{

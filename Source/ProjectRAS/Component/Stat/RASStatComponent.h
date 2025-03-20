@@ -35,7 +35,7 @@ public:
 	FORCEINLINE const float	GetHp() const						{ return BaseStats.HP; }
 	FORCEINLINE const float	GetStamina() const					{ return BaseStats.Stamina; }
 	FORCEINLINE const float GetMaxHp() const						{ return BaseStats.MaxHP; }
-	FORCEINLINE const float GetMaxstamina() const					{ return BaseStats.MaxStamina; }
+	FORCEINLINE const float GetMaxStamina() const					{ return BaseStats.MaxStamina; }
 	FORCEINLINE void		SetAttackPower(float InAttackPower) { BaseStats.AttackPower = InAttackPower; }
 	FORCEINLINE const float	GetAttackPower() const				{ return BaseStats.AttackPower; }
 protected:

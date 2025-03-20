@@ -74,6 +74,7 @@ void UBTService_FindTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 				float DotResult = MonsterToPlayer.Dot(ForwardVector);
 				if (DotResult > 0)
 				{
+					MonsterInfo->SetTarget(Pawn);
 					OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBTarget, Pawn);
 				}
 				DrawDebugSphere(World, Center, DetectRadius, 16, FColor::Green, false, 0.2f);

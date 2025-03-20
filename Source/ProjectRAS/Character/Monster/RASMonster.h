@@ -23,6 +23,8 @@ public:
 
 	virtual class ARASCharacterBase* GetTarget() override;
 
+	virtual void SetTarget(ARASCharacterBase* InTarget) override;
+
 	virtual void SetAttackFinishedDelegate(const FCharacterAttackFinished& InOnAttackFinished) override;
 
 	virtual void StartAttackMontage(int InAttackNumber = 0) override;
@@ -37,8 +39,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> AttackMontage; 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Indicator, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UStaticMeshComponent> Indicator;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UWidgetComponent> IndicatorWideget;
 
 	UPROPERTY()
 	TObjectPtr<class ARASCharacterBase> Target; 

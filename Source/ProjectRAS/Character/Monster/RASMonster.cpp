@@ -5,17 +5,35 @@
 #include "Controller/Monster/RASAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Player/RASPlayer.h"
+#include "Components/WidgetComponent.h"
+#include "UI/RASAimWidget.h"
 
 ARASMonster::ARASMonster()
 {
 
-	Indicator = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Indicator"));
-	Indicator->SetupAttachment(RootComponent);
+	IndicatorWideget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Indicator"));
+	IndicatorWideget->SetupAttachment(GetMesh());
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> IndicatorWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/1_ProjectRAS/UI/WBP_Indicator.WBP_Indicator_C'"));
+	if (IndicatorWidgetRef.Class)
+	{
+		IndicatorWideget->SetWidgetClass(IndicatorWidgetRef.Class);
+		IndicatorWideget->SetWidgetSpace(EWidgetSpace::Screen);
+		IndicatorWideget->SetDrawSize(FVector2D(74, 74));
+		IndicatorWideget->SetRelativeLocation(FVector(0, 0, 60));
+	}
 }
 
 void ARASMonster::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	if(IndicatorWideget == nullptr) return;
+
+	IndicatorWideget->InitWidget();
+
+	URASAimWidget* Widget = Cast<URASAimWidget>(IndicatorWideget->GetUserWidgetObject());
+	if(Widget ==nullptr) return;
+	Widget->SetupAim();
 }
 
 void ARASMonster::Tick(float DeltaSeconds)
@@ -26,6 +44,11 @@ void ARASMonster::Tick(float DeltaSeconds)
 ARASCharacterBase* ARASMonster::GetTarget()
 {
 	return Target;
+}
+
+void ARASMonster::SetTarget(ARASCharacterBase* InTarget)
+{
+	Target = InTarget;
 }
 
 void ARASMonster::SetAttackFinishedDelegate(const FCharacterAttackFinished& InOnAttackFinished)
@@ -49,11 +72,14 @@ void ARASMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
 
 	ARASPlayer* FromPlayer = Cast<ARASPlayer>(InFrom);
 	if (FromPlayer == nullptr) return;
-	FromPlayer->SetLockedOnTarget(this);
+	if(FromPlayer->GetLockedOnTarget() == nullptr)
+		FromPlayer->SetLockedOnTarget(this);
 }
 
 void ARASMonster::SetVisibleIndicator(bool InbIsVisible)
 {
-	if (Indicator == nullptr) return;
-	Indicator->SetVisibility(InbIsVisible);
+	if (IndicatorWideget == nullptr) return;
+	URASAimWidget* Widget = Cast<URASAimWidget>(IndicatorWideget->GetUserWidgetObject());
+	if (Widget == nullptr) return;
+	Widget->VisibleAim(InbIsVisible);
 }

@@ -40,6 +40,6 @@ void URASStatusBarWidget::UpdateStamina(float InStamina)
 {
 	if (StatComponent->IsValidLowLevel())
 	{
-		Stamina_Bar->SetPercent(InStamina / StatComponent->GetMaxstamina());
+		Stamina_Bar->SetPercent(InStamina / StatComponent->GetMaxStamina());
 	}
 }
