@@ -91,8 +91,8 @@ void UAnimNotifyState_AttackTo::MakeLineTrace(USkeletalMeshComponent* Attacker)
 		ARASCharacterBase* From = Cast<ARASCharacterBase>(Owner);
 		if (BattleInterface == nullptr)
 			return;
-		// TODO AttackNum에 따라 데미지 가져오기
 
-		BattleInterface->HitFromActor(From, 10);
+		float AcutalDamage = From->GetDamageOfAttackNumber(AttackNum);
+		BattleInterface->HitFromActor(From, AcutalDamage);
 	}
 }

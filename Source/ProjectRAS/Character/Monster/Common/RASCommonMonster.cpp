@@ -12,6 +12,7 @@
 #include "Character/Player/RASPlayer.h"
 #include "Components/WidgetComponent.h"
 #include "UI/RASStatusBarWidget.h"
+#include "Data/RASGameSingleton.h"
 #include "Kismet/KismetMathLibrary.h"
 
 ARASCommonMonster::ARASCommonMonster()
@@ -68,6 +69,9 @@ void ARASCommonMonster::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	Stat->BaseStats = URASGameSingleton::Get().GetStatForName(CreatureName);
+	CreatureDamageInfo = URASGameSingleton::Get().GetDamageInfoForName(CreatureName);
+
 	StatusBarWidgetComponent->InitWidget();
 
 	auto Widget = Cast<URASStatusBarWidget>(StatusBarWidgetComponent->GetUserWidgetObject());
@@ -101,7 +105,7 @@ void ARASCommonMonster::EndAttack()
 
 }
 
-void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
+void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
 {
 	Super::HitFromActor(InFrom, InDamage);
 

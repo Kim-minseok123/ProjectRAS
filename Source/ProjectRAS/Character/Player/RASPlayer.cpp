@@ -19,6 +19,7 @@
 #include "Data/RASPlayerState.h"
 #include "UI/RASAimWidget.h"
 #include "UI/RASPlayerHUDWidget.h"
+#include "Data/RASGameSingleton.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -140,6 +141,9 @@ void ARASPlayer::BeginPlay()
 		PlayerHUDWidget = CreateWidget<URASPlayerHUDWidget>(GetWorld()->GetFirstPlayerController(), PlayerHUDWidgetClass);
 		if (PlayerHUDWidget)
 		{
+			Stat->BaseStats = URASGameSingleton::Get().GetStatForName(CreatureName);
+			CreatureDamageInfo = URASGameSingleton::Get().GetDamageInfoForName(CreatureName);
+
 			PlayerHUDWidget->AddToViewport();
 
 			PlayerHUDWidget->BindHP(Stat);
@@ -377,12 +381,23 @@ void ARASPlayer::LockOff()
 	MyAnimInstance->SetLockOn(bUseControllerRotationYaw);
 }
 
+void ARASPlayer::SetInBattleTimer()
+{
+	GetWorld()->GetTimerManager().ClearTimer(BattleTimer);
+	SetInBattle(true);
+	GetWorld()->GetTimerManager().SetTimer(BattleTimer, [this]()
+		{
+			SetInBattle(false);
+		}, 4.f, false);
+}
+
 void ARASPlayer::PressComboAction()
 {
 	if (CombatState == EPlayerCombatState::Idle || CombatState == EPlayerCombatState::Attacking)
 	{
 		if (ComboAttack)
 		{
+			SetInBattleTimer();
 			if (bIsPressShift)
 				ComboAttack->PressComboAction(EAttackType::Shift);
 			else if (bIsPressF)
@@ -419,6 +434,7 @@ void ARASPlayer::PressQ()
 		return;
 
 	CombatState = EPlayerCombatState::Skilling; 
+	SetInBattleTimer();
 
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (MyAnimInstance == nullptr)
@@ -445,6 +461,7 @@ void ARASPlayer::PressE()
 		return;
 
 	CombatState = EPlayerCombatState::Skilling;
+	SetInBattleTimer();
 
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (MyAnimInstance == nullptr)
@@ -473,6 +490,7 @@ void ARASPlayer::PressRightClick()
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (!MyAnimInstance)
 		return;
+	SetInBattleTimer();
 
 	ComboAttack->EndCombo(false, 0.f);
 
@@ -569,6 +587,8 @@ void ARASPlayer::SetLockedOnTarget(ARASCharacterBase* Target)
 		LockOnTarget->SetVisibleIndicator(false);
 	}
 	LockOnTarget = Target;
+	SetInBattleTimer();
+
 	if (LockOnTarget)
 	{
 		LockOnTarget->SetVisibleIndicator(true);
@@ -598,7 +618,7 @@ void ARASPlayer::CycleLockOnTarget()
 	SetLockedOnTarget(EnemyArray[NextIndex]);
 }
 
-void ARASPlayer::HitFromActor(ARASCharacterBase* InFrom, int InDamage)
+void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
 {
 	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring)
 		return;
@@ -607,7 +627,7 @@ void ARASPlayer::HitFromActor(ARASCharacterBase* InFrom, int InDamage)
 	if (LockOnTarget == nullptr)
 		SetLockedOnTarget(InFrom);
 
-
+	SetInBattleTimer();
 	if (CombatState == EPlayerCombatState::Parrying)
 	{
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();

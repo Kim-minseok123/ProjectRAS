@@ -66,7 +66,7 @@ void ARASMonster::EndAttack()
 	OnAttackFinished.ExecuteIfBound();
 }
 
-void ARASMonster::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
+void ARASMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
 {
 	Super::HitFromActor(InFrom, InDamage);
 

@@ -70,4 +70,6 @@ public:
 	float MoveDirectionY;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
 	uint8 bLockOn : 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Character)
+	uint8 bInBattle : 1;
 };

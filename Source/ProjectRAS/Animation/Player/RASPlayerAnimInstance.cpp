@@ -30,6 +30,8 @@ void URASPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Super::NativeUpdateAnimation(DeltaSeconds);
 	// IsValid
 	if (Owner == nullptr) return;
+	// Set InBattle
+	bInBattle = Owner->GetInBattle();
 	// Set IsInAir
 	IsInAir = Movement->IsFalling();
 	// Set Speed

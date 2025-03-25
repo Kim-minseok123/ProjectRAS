@@ -74,6 +74,10 @@ public:
 	void SetCombatState(EPlayerCombatState InState) { CombatState = InState; }
 	EPlayerCombatState GetCombatState() const { return CombatState; }
 
+	void SetInBattle(bool InBattle) { bInBattle = InBattle; }
+	bool GetInBattle() const { return bInBattle; }
+	void SetInBattleTimer();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	EPlayerCombatState CombatState;
@@ -84,6 +88,8 @@ protected:
 
 	bool bIsPressShift = false;
 	bool bIsPressF = false;
+	FTimerHandle BattleTimer;
+	bool bInBattle = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class URASComboComponent> ComboAttack;
@@ -112,7 +118,7 @@ public:
 	void SetLockedOnTarget(ARASCharacterBase* Target);
 	void CycleLockOnTarget();
 	class ARASCharacterBase* GetLockedOnTarget() const { return LockOnTarget; }
-	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage) override;
 // AnimMontage Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))

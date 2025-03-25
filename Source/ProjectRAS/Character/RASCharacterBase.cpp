@@ -44,9 +44,9 @@ void ARASCharacterBase::StartAttackMontage(int InAttackNumber /*= 0*/)
 {
 }
 
-void ARASCharacterBase::HitFromActor(class ARASCharacterBase* InFrom, int InDamage)
+void ARASCharacterBase::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
 {
-	UE_LOG(LogTemp, Log, TEXT("%s Attacked %s with Damage of %d"), *InFrom->GetCreatureName(), *GetCreatureName(), InDamage);
+
 }
 
 void ARASCharacterBase::EndAttack()

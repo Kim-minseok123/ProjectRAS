@@ -30,7 +30,6 @@ public:
 
     static const float GetCurrentPlatformTime()
     {
-        
 		static const double StartTime = FPlatformTime::Seconds();
 		return static_cast<float>(FPlatformTime::Seconds() - StartTime);
     }

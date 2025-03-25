@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Data/RASDamageData.h"
 #include "RASBattleInterface.generated.h"
 
 // This class does not need to be modified.
@@ -28,11 +29,13 @@ public:
 
 	virtual void StartAttackMontage(int InAttackNumber = 0) = 0;
 
-	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) = 0;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage) = 0;
 
 	virtual void EndAttack() = 0;
 
 	virtual void SetVisibleIndicator(bool InbIsVisible) = 0;
 
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) = 0;
+
+	virtual float GetDamageOfAttackNumber(int InAttackNumber) = 0;
 };

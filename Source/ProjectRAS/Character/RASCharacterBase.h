@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/RASBattleInterface.h"
+#include "Data/RASDamageData.h"
 #include "RASCharacterBase.generated.h"
 
 UCLASS()
@@ -20,7 +21,7 @@ public:
 
 	virtual void StartAttackMontage(int InAttackNumber = 0) override;
 	
-	virtual void HitFromActor(class ARASCharacterBase* InFrom, int InDamage) override;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage) override;
 
 	virtual void EndAttack() override;
 
@@ -29,7 +30,16 @@ public:
 
 	}
 
-	FString& GetCreatureName() { return CreatureName; }
+	virtual float GetDamageOfAttackNumber(int InAttackNumber) override
+	{
+		float AcutalDamage = 0.f;
+		if(CreatureDamageInfo.DamageInfo.Contains(InAttackNumber))
+			AcutalDamage = CreatureDamageInfo.DamageInfo[InAttackNumber];
+
+		return AcutalDamage;
+	}
+
+	FName& GetCreatureName() { return CreatureName; }
 
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;
 
@@ -41,8 +51,11 @@ protected:
 	TObjectPtr<class UAnimMontage> HitMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
-	FString CreatureName;
+	FName CreatureName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
 	float KnockbackFigure = 30;
+
+	FCreatureDamageInfo CreatureDamageInfo;
+
 };

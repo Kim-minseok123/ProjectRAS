@@ -20,6 +20,8 @@ public:
 	void BindStamina(class URASStatComponent* InStatComponent);
 
 protected:
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
 	UFUNCTION()
 	void UpdateHp(float InHp);
 	UFUNCTION()
@@ -30,4 +32,11 @@ protected:
 	TObjectPtr<class UProgressBar> HP_Bar;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UProgressBar> Stamina_Bar;
+
+	float CurrentHPPercent = 0.f;
+	float TargetHPPercent = 0.f;
+
+	float CurrentStaminaPercent = 0.f;
+	float TargetStaminaPercent = 0.f;
+
 };
