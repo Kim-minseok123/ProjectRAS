@@ -233,6 +233,7 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance == nullptr) return;
 	if(CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking) return;
+	if (Stat->GetStamina() <= 0) return;
 	CombatState = EPlayerCombatState::Rolling;
 
 	AnimInstance->Montage_Stop(0.1f);
@@ -335,6 +336,8 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 	AnimInstance->Montage_Play(RollMontage);
 	AnimInstance->Montage_JumpToSection(RollSection);
 
+	Stat->ApplyStaminaDamage(30.f);
+
 	FOnMontageEnded MontageEndedDelegate;
 	MontageEndedDelegate.BindLambda([this](UAnimMontage* Montage, bool bInterrupted)
 		{
@@ -397,6 +400,8 @@ void ARASPlayer::PressComboAction()
 	{
 		if (ComboAttack)
 		{
+			if (Stat->GetStamina() <= 0) return;
+
 			SetInBattleTimer();
 			if (bIsPressShift)
 				ComboAttack->PressComboAction(EAttackType::Shift);
@@ -486,7 +491,8 @@ void ARASPlayer::PressRightClick()
 {
 	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring)
 		return;
-
+	if (CombatState != EPlayerCombatState::Idle)
+		return;
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
 	if (!MyAnimInstance)
 		return;
@@ -587,7 +593,6 @@ void ARASPlayer::SetLockedOnTarget(ARASCharacterBase* Target)
 		LockOnTarget->SetVisibleIndicator(false);
 	}
 	LockOnTarget = Target;
-	SetInBattleTimer();
 
 	if (LockOnTarget)
 	{
@@ -618,12 +623,12 @@ void ARASPlayer::CycleLockOnTarget()
 	SetLockedOnTarget(EnemyArray[NextIndex]);
 }
 
-void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
+void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
 	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring)
 		return;
 
-	Super::HitFromActor(InFrom, InDamage);
+	Super::HitFromActor(InFrom, InDamage, InStaminaDamage);
 	if (LockOnTarget == nullptr)
 		SetLockedOnTarget(InFrom);
 
@@ -633,7 +638,7 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (!AnimInstance)
 			return;
-
+		Stat->ApplyStaminaDamage(InStaminaDamage);
 		float CurrentTime = RASUtils::GetCurrentPlatformTime();
 		UE_LOG(LogTemp, Log, TEXT("Parrying time diff: %f"), CurrentTime - ParryingTime);
 
@@ -642,6 +647,14 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
 			AnimInstance->Montage_Play(ParryingMontage);
 			AnimInstance->Montage_JumpToSection(TEXT("ParryingExact"), ParryingMontage);
 			CombatState = EPlayerCombatState::Armoring;
+
+			GetWorldSettings()->SetTimeDilation(0.6f);
+			FTimerHandle TimeDilationTimer;
+			GetWorld()->GetTimerManager().SetTimer(TimeDilationTimer, [this]()
+				{
+					GetWorldSettings()->SetTimeDilation(1.f);
+				}, 0.8f, false);
+
 			FOnMontageEnded MontageEndedDelegate;
 			MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
 				{

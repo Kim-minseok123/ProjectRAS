@@ -21,7 +21,7 @@ public:
 
 	virtual void StartAttackMontage(int InAttackNumber = 0) override;
 	
-	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage) override;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage) override;
 
 	virtual void EndAttack() override;
 
@@ -37,6 +37,14 @@ public:
 			AcutalDamage = CreatureDamageInfo.DamageInfo[InAttackNumber];
 
 		return AcutalDamage;
+	}
+
+	virtual float GetStaminaDamageOfAttackNumber(int InAttackNumber) override
+	{
+		float AcutalStaminaDamage = 0.f;
+		if (CreatureDamageInfo.StaminaDamageInfo.Contains(InAttackNumber))
+			AcutalStaminaDamage = CreatureDamageInfo.StaminaDamageInfo[InAttackNumber];
+		return AcutalStaminaDamage;
 	}
 
 	FName& GetCreatureName() { return CreatureName; }

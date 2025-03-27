@@ -118,7 +118,7 @@ public:
 	void SetLockedOnTarget(ARASCharacterBase* Target);
 	void CycleLockOnTarget();
 	class ARASCharacterBase* GetLockedOnTarget() const { return LockOnTarget; }
-	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage) override;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage) override;
 // AnimMontage Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))

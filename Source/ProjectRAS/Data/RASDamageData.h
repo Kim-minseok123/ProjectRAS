@@ -13,6 +13,9 @@ struct FCreatureDamageInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	TMap<int, float> DamageInfo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StaminaDamage")
+	TMap<int, float> StaminaDamageInfo;
+
 };
 
 /**

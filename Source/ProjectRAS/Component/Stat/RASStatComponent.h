@@ -29,7 +29,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Stats")
 	float ApplyDamage(float InDamageAmount);
-
+    UFUNCTION(BlueprintCallable, Category = "Stats")
+	float ApplyStaminaDamage(float InStaminaDamageAmount);
 	void SetHp(float InHp);
 	void SetStamina(float InStamina);
 	FORCEINLINE const float	GetHp() const						{ return BaseStats.HP; }
@@ -41,5 +42,13 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-		
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	float RecoveryDelayDuration = 2.f;
+	float RecoveryDelayRemaining = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	uint8 bRecoveryStamina : 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
+	float RecoveryRate = 0.f; 
 };

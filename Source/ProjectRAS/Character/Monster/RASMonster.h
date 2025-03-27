@@ -31,7 +31,7 @@ public:
 
 	virtual void EndAttack() override;
 
-	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage) override;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage) override;
 
 	virtual void SetVisibleIndicator(bool InbIsVisible) override;
 

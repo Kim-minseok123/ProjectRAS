@@ -44,7 +44,7 @@ void ARASCharacterBase::StartAttackMontage(int InAttackNumber /*= 0*/)
 {
 }
 
-void ARASCharacterBase::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
+void ARASCharacterBase::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
 
 }

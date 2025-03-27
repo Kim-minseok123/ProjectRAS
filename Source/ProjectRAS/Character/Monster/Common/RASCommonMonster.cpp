@@ -105,17 +105,18 @@ void ARASCommonMonster::EndAttack()
 
 }
 
-void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDamage)
+void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
-	Super::HitFromActor(InFrom, InDamage);
+	Super::HitFromActor(InFrom, InDamage, InStaminaDamage);
 
 	ARASPlayer* FromPlayer = Cast<ARASPlayer>(InFrom);
 	if (FromPlayer == nullptr) return;
 
 	Target = InFrom;
 
-	if (float ActualDamage = Stat->ApplyDamage(InDamage) > 0)
+	if (float ActualDamage = Stat->ApplyDamage(InDamage) > 0 )
 	{
+		Stat->ApplyStaminaDamage(InStaminaDamage);
 		StatusBarWidgetComponent->SetVisibility(true);
 		if (bUnflinching == false)
 		{

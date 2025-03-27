@@ -29,7 +29,7 @@ public:
 
 	virtual void StartAttackMontage(int InAttackNumber = 0) = 0;
 
-	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage) = 0;
+	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage) = 0;
 
 	virtual void EndAttack() = 0;
 
@@ -38,4 +38,6 @@ public:
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) = 0;
 
 	virtual float GetDamageOfAttackNumber(int InAttackNumber) = 0;
+
+	virtual float GetStaminaDamageOfAttackNumber(int InAttackNumber) = 0;
 };

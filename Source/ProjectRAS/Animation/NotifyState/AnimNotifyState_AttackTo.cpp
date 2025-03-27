@@ -93,6 +93,7 @@ void UAnimNotifyState_AttackTo::MakeLineTrace(USkeletalMeshComponent* Attacker)
 			return;
 
 		float AcutalDamage = From->GetDamageOfAttackNumber(AttackNum);
-		BattleInterface->HitFromActor(From, AcutalDamage);
+		float AcutalStaminaDamage = From->GetStaminaDamageOfAttackNumber(AttackNum);
+		BattleInterface->HitFromActor(From, AcutalDamage, AcutalStaminaDamage);
 	}
 }

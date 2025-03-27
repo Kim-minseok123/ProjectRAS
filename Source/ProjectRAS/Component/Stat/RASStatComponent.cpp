@@ -27,6 +27,18 @@ float URASStatComponent::ApplyDamage(float InDamageAmount)
 	return ActualDamage;
 }
 
+float URASStatComponent::ApplyStaminaDamage(float InStaminaDamageAmount)
+{
+	const float PrevStamina = GetStamina();
+	const float ActualStaminaDamage = FMath::Clamp<float>(InStaminaDamageAmount, 0, InStaminaDamageAmount);
+
+	if (ActualStaminaDamage > 0)
+		RecoveryDelayRemaining = RecoveryDelayDuration;
+
+	SetStamina(PrevStamina - ActualStaminaDamage);
+	return ActualStaminaDamage;
+}
+
 void URASStatComponent::SetHp(float InHp)
 {
 	float CurrentHp = FMath::Clamp<float>(InHp, 0.0f, BaseStats.MaxHP);
@@ -54,4 +66,16 @@ void URASStatComponent::BeginPlay()
 	
 }
 
+void URASStatComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (bRecoveryStamina == false) return;
+	if (RecoveryDelayRemaining > 0.f)
+	{
+		RecoveryDelayRemaining -= DeltaTime;
+		return;
+	}
+	float CurStamina = GetStamina();
+	SetStamina(CurStamina + RecoveryRate);
+}
 
