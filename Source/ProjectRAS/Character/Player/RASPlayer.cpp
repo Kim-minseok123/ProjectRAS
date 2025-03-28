@@ -151,6 +151,8 @@ void ARASPlayer::BeginPlay()
 
 			Stat->SetHp(10000);
 			Stat->SetStamina(10000);
+
+			Stat->OnHpZero.AddUObject(this, &ARASPlayer::Death);
 		}
 	}
 }
@@ -220,6 +222,7 @@ void ARASPlayer::Move(const FInputActionValue& Value)
 
 void ARASPlayer::Look(const FInputActionValue& Value)
 {
+	if (CombatState == EPlayerCombatState::Deathing) return;
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 	if(LockOnTarget == nullptr)
 		AddControllerYawInput(LookAxisVector.X);
@@ -234,6 +237,8 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 	if (AnimInstance == nullptr) return;
 	if(CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking) return;
 	if (Stat->GetStamina() <= 0) return;
+	if (CombatState == EPlayerCombatState::Deathing) return;
+
 	CombatState = EPlayerCombatState::Rolling;
 
 	AnimInstance->Montage_Stop(0.1f);
@@ -352,7 +357,11 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 
 void ARASPlayer::PressTab()
 {
+	if (CombatState == EPlayerCombatState::Deathing) return;
+
 	FindAllEnemyInRange();
+	if (TargetEnemys.IsEmpty())
+		LockOnTarget = nullptr;
 
 	if (LockOnTarget == nullptr)
 	{
@@ -366,6 +375,8 @@ void ARASPlayer::PressTab()
 
 void ARASPlayer::LockOn()
 {
+	if (CombatState == EPlayerCombatState::Deathing) return;
+
 	URASPlayerAnimInstance* MyAnimInstance = Cast<URASPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	if (MyAnimInstance == nullptr)
 		return;
@@ -376,6 +387,8 @@ void ARASPlayer::LockOn()
 
 void ARASPlayer::LockOff()
 {
+	if (CombatState == EPlayerCombatState::Deathing) return;
+
 	URASPlayerAnimInstance* MyAnimInstance = Cast<URASPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	if (MyAnimInstance == nullptr)
 		return;
@@ -386,6 +399,8 @@ void ARASPlayer::LockOff()
 
 void ARASPlayer::SetInBattleTimer()
 {
+	if (CombatState == EPlayerCombatState::Deathing) return;
+
 	GetWorld()->GetTimerManager().ClearTimer(BattleTimer);
 	SetInBattle(true);
 	GetWorld()->GetTimerManager().SetTimer(BattleTimer, [this]()
@@ -396,6 +411,8 @@ void ARASPlayer::SetInBattleTimer()
 
 void ARASPlayer::PressComboAction()
 {
+	if (CombatState == EPlayerCombatState::Deathing) return;
+
 	if (CombatState == EPlayerCombatState::Idle || CombatState == EPlayerCombatState::Attacking)
 	{
 		if (ComboAttack)
@@ -625,7 +642,7 @@ void ARASPlayer::CycleLockOnTarget()
 
 void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
-	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring)
+	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing)
 		return;
 
 	Super::HitFromActor(InFrom, InDamage, InStaminaDamage);
@@ -688,27 +705,44 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, f
 		float ActualDamage = Stat->ApplyDamage(InDamage);
 		if (ActualDamage > 0)
 		{
-			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-			if (!AnimInstance)
-				return;
-			AnimInstance->Montage_Stop(0.1f);
-			ComboAttack->EndCombo(true, 1.f);
-			AnimInstance->Montage_Play(HitMontage);
-			CombatState = EPlayerCombatState::Breaking;
-			if (ActualDamage >= KnockbackFigure)
+			if (Stat->GetHp() > 0)
 			{
-				AnimInstance->Montage_JumpToSection(TEXT("Knockback"), HitMontage);
-			}
-			else
-			{
-				AnimInstance->Montage_JumpToSection(TEXT("Hit"), HitMontage);
-			}
-			FOnMontageEnded MontageEndedDelegate;
-			MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
+				UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+				if (!AnimInstance)
+					return;
+				AnimInstance->Montage_Stop(0.1f);
+				ComboAttack->EndCombo(true, 1.f);
+				AnimInstance->Montage_Play(HitMontage);
+				CombatState = EPlayerCombatState::Breaking;
+				if (ActualDamage >= KnockbackFigure)
 				{
-					CombatState = EPlayerCombatState::Idle;
-				});
-			AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, HitMontage);
+					AnimInstance->Montage_JumpToSection(TEXT("Knockback"), HitMontage);
+				}
+				else
+				{
+					AnimInstance->Montage_JumpToSection(TEXT("Hit"), HitMontage);
+				}
+				FOnMontageEnded MontageEndedDelegate;
+				MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
+					{
+						CombatState = EPlayerCombatState::Idle;
+					});
+				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, HitMontage);
+			}
 		}
 	}
+}
+
+void ARASPlayer::Death()
+{
+	Super::Death();
+
+	CombatState = EPlayerCombatState::Deathing;
+
+	FTimerHandle DeathHandle;
+	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
+		{
+			// 플레이어 사망 UI 띄움, UI에서 다시하기 버튼 클릭시  게임모드에서 플레이어를 저장된 위치로 리스폰
+		}, 
+		4.f, false);
 }

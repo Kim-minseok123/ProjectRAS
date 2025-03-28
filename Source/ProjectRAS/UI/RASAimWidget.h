@@ -19,7 +19,7 @@ public:
 	void SetupAim();
 	void VisibleAim(bool bVisible);
 	void VisibleLastAim(bool bVisible);
-
+	void VisibleAllAim(bool bVisible);
 protected:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UImage> Aim;

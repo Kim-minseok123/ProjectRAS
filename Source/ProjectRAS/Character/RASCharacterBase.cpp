@@ -82,3 +82,33 @@ void ARASCharacterBase::KnockbackToDirection(class AActor* InFrom, FVector Direc
     }
 }
 
+void ARASCharacterBase::Death()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance == nullptr) return;
+
+	int DeathType = FMath::RandRange(0, 1);
+	DeathType = 1;
+	UE_LOG(LogTemp, Log, TEXT("%d"), DeathType);
+	// front
+	if (DeathType == 0)
+	{
+		if (DeathMontage == nullptr) return;
+		AnimInstance->StopAllMontages(0.1f);
+		float PlayResult = AnimInstance->Montage_Play(DeathMontage);
+		UE_LOG(LogTemp, Log, TEXT("DeathMontage PlayResult: %f"), PlayResult);
+
+		AnimInstance->Montage_JumpToSection(TEXT("FrontDeath"));
+	}
+	// back
+	else if (DeathType == 1)
+	{
+		if (DeathMontage == nullptr) return;
+		AnimInstance->StopAllMontages(0.1f);
+		float PlayResult = AnimInstance->Montage_Play(DeathMontage);
+		UE_LOG(LogTemp, Log, TEXT("DeathMontage PlayResult: %f"), PlayResult);
+
+		AnimInstance->Montage_JumpToSection(TEXT("BackDeath"));
+	}
+}
+

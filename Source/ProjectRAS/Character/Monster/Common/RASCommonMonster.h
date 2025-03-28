@@ -28,7 +28,13 @@ public:
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage) override;
 
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWidgetComponent> StatusBarWidgetComponent;
+
+	bool bIsDeath = false;
+
+public:
+	virtual void Death() override;
 };

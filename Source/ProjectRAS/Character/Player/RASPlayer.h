@@ -53,8 +53,9 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Roll(const FInputActionValue& Value);
+public:
 	void PressTab();
-
+protected:
 	FVector2D LastMoveInput;
 public:
 	void LockOn();
@@ -132,4 +133,8 @@ protected:
 	TSubclassOf<class URASPlayerHUDWidget> PlayerHUDWidgetClass;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class URASPlayerHUDWidget> PlayerHUDWidget;
+
+// Death Section
+public:
+	virtual void Death() override;
 };

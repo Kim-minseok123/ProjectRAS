@@ -40,3 +40,17 @@ void URASAimWidget::VisibleLastAim(bool bVisible)
 		Aim->SetVisibility(ESlateVisibility::Visible);
 	}
 }
+
+void URASAimWidget::VisibleAllAim(bool bVisible)
+{
+	if (bVisible)
+	{
+		Last_Aim->SetVisibility(ESlateVisibility::Visible);
+		Aim->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		Last_Aim->SetVisibility(ESlateVisibility::Collapsed);
+		Aim->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}

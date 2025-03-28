@@ -6,7 +6,7 @@
 #include "Utils/RASBlackBoardKey.h"
 #include "Character/RASCharacterBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
-
+#include "Interface/Monster/RASMonsterInfoInterface.h"
 UBTService_IsInAttackRange::UBTService_IsInAttackRange()
 {
 
@@ -20,8 +20,18 @@ void UBTService_IsInAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 	if (ControllingPawn == nullptr) return;
 
 	ARASCharacterBase* Target = Cast<ARASCharacterBase>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBTarget));
-	if (Target == nullptr) return;
-
+	if (Target == nullptr)
+	{
+		return;
+	}
+	IRASMonsterInfoInterface* MonsterInfo = Cast<IRASMonsterInfoInterface>(ControllingPawn);
+	if (MonsterInfo == nullptr) return;
+	ARASCharacterBase* MonsterToTarget = MonsterInfo->GetTarget();
+	if (MonsterToTarget == nullptr)
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBTarget, nullptr);
+		return;
+	}
 	float Distance = ControllingPawn->GetDistanceTo(Target);
 	if (Distance <= 175.f)
 	{

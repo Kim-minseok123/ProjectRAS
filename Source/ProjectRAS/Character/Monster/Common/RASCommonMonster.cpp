@@ -14,6 +14,7 @@
 #include "UI/RASStatusBarWidget.h"
 #include "Data/RASGameSingleton.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "UI/RASAimWidget.h"
 
 ARASCommonMonster::ARASCommonMonster()
 {
@@ -52,7 +53,7 @@ ARASCommonMonster::ARASCommonMonster()
 void ARASCommonMonster::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (Target && bUnflinching)
+	if (Target && bUnflinching && bIsDeath == false)
 	{
 		FVector MyLocation = GetActorLocation();
 		FVector TargetLocation = Target->GetActorLocation();
@@ -82,6 +83,8 @@ void ARASCommonMonster::PostInitializeComponents()
 
 	Stat->SetHp(100000);
 	Stat->SetStamina(100000);
+
+	Stat->OnHpZero.AddUObject(this, &ARASCommonMonster::Death);
 }
 
 void ARASCommonMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
@@ -147,4 +150,28 @@ void ARASCommonMonster::KnockbackToDirection(class AActor* InFrom, FVector Direc
 	}
 
 	EndAttack();
+}
+
+void ARASCommonMonster::Death()
+{
+	ARASAICommonController* MyController = Cast<ARASAICommonController>(GetController());
+	MyController->StopAI();
+	IndicatorWideget->SetVisibility(false);
+	StatusBarWidgetComponent->SetVisibility(false);
+	bIsDeath = true;
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));
+	
+	ARASPlayer* Player = Cast<ARASPlayer>(Target);
+	if (Player != nullptr) 
+		Player->PressTab();
+
+	Super::Death();
+
+	FTimerHandle DeathHandle;
+	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
+		{
+			Destroy();
+		},
+		5.f, false);
 }

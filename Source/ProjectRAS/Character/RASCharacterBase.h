@@ -51,12 +51,18 @@ public:
 
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;
 
+	UFUNCTION()
+	virtual void Death();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats)
 	TObjectPtr<class URASStatComponent> Stat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
 	TObjectPtr<class UAnimMontage> HitMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
+	TObjectPtr<class UAnimMontage> DeathMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
 	FName CreatureName;
