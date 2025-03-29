@@ -68,8 +68,14 @@ void ARASCharacterBase::KnockbackToDirection(class AActor* InFrom, FVector Direc
             AnimInstance->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
         }
 
-        float KnockbackStrength = InPower;
-        LaunchCharacter(Direction * KnockbackStrength, true, true);
+		FVector KnockbackForce = Direction * InPower;
+
+		// If using root motion, directly add impulse to the character's movement component
+		UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+		if (MovementComponent)
+		{
+			MovementComponent->AddImpulse(KnockbackForce, true);
+		}
 
         FTimerHandle TimerHandle;
         GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, AnimInstance]()
@@ -87,16 +93,16 @@ void ARASCharacterBase::Death()
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance == nullptr) return;
 
+	AnimInstance->OnMontageEnded.RemoveAll(this);
+	AnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
+
 	int DeathType = FMath::RandRange(0, 1);
-	DeathType = 1;
-	UE_LOG(LogTemp, Log, TEXT("%d"), DeathType);
 	// front
 	if (DeathType == 0)
 	{
 		if (DeathMontage == nullptr) return;
-		AnimInstance->StopAllMontages(0.1f);
+
 		float PlayResult = AnimInstance->Montage_Play(DeathMontage);
-		UE_LOG(LogTemp, Log, TEXT("DeathMontage PlayResult: %f"), PlayResult);
 
 		AnimInstance->Montage_JumpToSection(TEXT("FrontDeath"));
 	}
@@ -104,9 +110,8 @@ void ARASCharacterBase::Death()
 	else if (DeathType == 1)
 	{
 		if (DeathMontage == nullptr) return;
-		AnimInstance->StopAllMontages(0.1f);
+
 		float PlayResult = AnimInstance->Montage_Play(DeathMontage);
-		UE_LOG(LogTemp, Log, TEXT("DeathMontage PlayResult: %f"), PlayResult);
 
 		AnimInstance->Montage_JumpToSection(TEXT("BackDeath"));
 	}

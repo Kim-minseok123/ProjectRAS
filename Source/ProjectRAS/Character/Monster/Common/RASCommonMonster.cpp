@@ -155,9 +155,10 @@ void ARASCommonMonster::KnockbackToDirection(class AActor* InFrom, FVector Direc
 void ARASCommonMonster::Death()
 {
 	ARASAICommonController* MyController = Cast<ARASAICommonController>(GetController());
+
 	MyController->StopAI();
 	IndicatorWideget->SetVisibility(false);
-	StatusBarWidgetComponent->SetVisibility(false);
+	StatusBarWidgetComponent->SetHiddenInGame(false);
 	bIsDeath = true;
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));

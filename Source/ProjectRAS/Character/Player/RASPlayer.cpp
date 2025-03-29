@@ -531,7 +531,7 @@ void ARASPlayer::PressRightClickEnd()
 	if (!MyAnimInstance)
 		return;
 
-	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring)
+	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing)
 		return;
 
 	UAnimMontage* CurrentMontage = MyAnimInstance->GetCurrentActiveMontage();
@@ -644,7 +644,6 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, f
 {
 	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing)
 		return;
-
 	Super::HitFromActor(InFrom, InDamage, InStaminaDamage);
 	if (LockOnTarget == nullptr)
 		SetLockedOnTarget(InFrom);
