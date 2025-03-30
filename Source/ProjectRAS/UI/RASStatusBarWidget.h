@@ -18,6 +18,7 @@ public:
 
 	void BindHP(class URASStatComponent* InStatComponent);
 	void BindStamina(class URASStatComponent* InStatComponent);
+	void SetVisibilityBar(bool InVisibilty);
 
 protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;

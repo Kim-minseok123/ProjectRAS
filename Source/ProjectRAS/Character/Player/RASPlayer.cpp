@@ -734,9 +734,9 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, f
 
 void ARASPlayer::Death()
 {
-	Super::Death();
-
 	CombatState = EPlayerCombatState::Deathing;
+
+	Super::Death();
 
 	FTimerHandle DeathHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()

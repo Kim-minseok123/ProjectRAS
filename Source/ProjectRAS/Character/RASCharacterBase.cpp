@@ -68,14 +68,8 @@ void ARASCharacterBase::KnockbackToDirection(class AActor* InFrom, FVector Direc
             AnimInstance->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
         }
 
-		FVector KnockbackForce = Direction * InPower;
-
-		// If using root motion, directly add impulse to the character's movement component
-		UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-		if (MovementComponent)
-		{
-			MovementComponent->AddImpulse(KnockbackForce, true);
-		}
+		float KnockbackStrength = InPower;
+		LaunchCharacter(Direction * KnockbackStrength, true, true);
 
         FTimerHandle TimerHandle;
         GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, AnimInstance]()
@@ -90,30 +84,28 @@ void ARASCharacterBase::KnockbackToDirection(class AActor* InFrom, FVector Direc
 
 void ARASCharacterBase::Death()
 {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance == nullptr) return;
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (AnimInstance == nullptr) return;
 
-	AnimInstance->OnMontageEnded.RemoveAll(this);
-	AnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
+    AnimInstance->StopAllMontages(0.1f);
 
-	int DeathType = FMath::RandRange(0, 1);
-	// front
-	if (DeathType == 0)
-	{
-		if (DeathMontage == nullptr) return;
+    AnimInstance->OnMontageEnded.RemoveAll(this);
+    AnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
 
-		float PlayResult = AnimInstance->Montage_Play(DeathMontage);
+    int DeathType = FMath::RandRange(0, 1);
+    if (DeathMontage == nullptr) return;
 
-		AnimInstance->Montage_JumpToSection(TEXT("FrontDeath"));
-	}
-	// back
-	else if (DeathType == 1)
-	{
-		if (DeathMontage == nullptr) return;
+    AnimInstance->StopSlotAnimation(0.1f, TEXT("DefaultSlot"));
+    float PlayResult = AnimInstance->Montage_Play(DeathMontage);
+    UE_LOG(LogTemp, Log, TEXT("DeathMontage PlayResult: %f"), PlayResult);
 
-		float PlayResult = AnimInstance->Montage_Play(DeathMontage);
-
-		AnimInstance->Montage_JumpToSection(TEXT("BackDeath"));
-	}
+    if (DeathType == 0)
+    {
+        AnimInstance->Montage_JumpToSection(TEXT("FrontDeath"));
+    }
+    else
+    {
+        AnimInstance->Montage_JumpToSection(TEXT("BackDeath"));
+    }
 }
 

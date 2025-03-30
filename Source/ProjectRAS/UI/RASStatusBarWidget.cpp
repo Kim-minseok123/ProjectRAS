@@ -28,6 +28,21 @@ void URASStatusBarWidget::BindStamina(class URASStatComponent* InStatComponent)
 	}
 }
 
+void URASStatusBarWidget::SetVisibilityBar(bool InVisibilty)
+{
+    if (InVisibilty == false)
+    {
+        HP_Bar->SetVisibility(ESlateVisibility::Collapsed);
+        Stamina_Bar->SetVisibility(ESlateVisibility::Collapsed);
+    }
+    else
+    {
+        HP_Bar->SetVisibility(ESlateVisibility::Visible);
+        Stamina_Bar->SetVisibility(ESlateVisibility::Visible);
+    }
+    
+}
+
 void URASStatusBarWidget::UpdateHp(float InHp)
 {
     if (StatComponent->IsValidLowLevel() && HP_Bar)

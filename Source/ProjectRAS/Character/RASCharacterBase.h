@@ -68,7 +68,7 @@ protected:
 	FName CreatureName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
-	float KnockbackFigure = 30;
+	float KnockbackFigure = 100;
 
 	FCreatureDamageInfo CreatureDamageInfo;
 

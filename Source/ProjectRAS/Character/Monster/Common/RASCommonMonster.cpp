@@ -120,6 +120,7 @@ void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDa
 	if (float ActualDamage = Stat->ApplyDamage(InDamage) > 0 )
 	{
 		Stat->ApplyStaminaDamage(InStaminaDamage);
+		if (Stat->GetHp() <= 0) return;
 		StatusBarWidgetComponent->SetVisibility(true);
 		if (bUnflinching == false)
 		{
@@ -158,8 +159,12 @@ void ARASCommonMonster::Death()
 
 	MyController->StopAI();
 	IndicatorWideget->SetVisibility(false);
-	StatusBarWidgetComponent->SetHiddenInGame(false);
+	auto Widget = Cast<URASStatusBarWidget>(StatusBarWidgetComponent->GetUserWidgetObject());
+	if (Widget == nullptr) return;
+	Widget->SetVisibilityBar(false);
 	bIsDeath = true;
+
+	Super::Death();
 
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));
 	
@@ -167,7 +172,6 @@ void ARASCommonMonster::Death()
 	if (Player != nullptr) 
 		Player->PressTab();
 
-	Super::Death();
 
 	FTimerHandle DeathHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
