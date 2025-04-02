@@ -119,6 +119,8 @@ void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDa
 
 	if (float ActualDamage = Stat->ApplyDamage(InDamage) > 0 )
 	{
+		FRotator LookAtFrom = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), InFrom->GetActorLocation());
+		SetActorRotation(LookAtFrom);
 		Stat->ApplyStaminaDamage(InStaminaDamage);
 		if (Stat->GetHp() <= 0) return;
 		StatusBarWidgetComponent->SetVisibility(true);
