@@ -182,3 +182,26 @@ void ARASCommonMonster::Death()
 		},
 		5.f, false);
 }
+
+void ARASCommonMonster::ExecuteDeath(int32 InDeathNumber)
+{
+	ARASAICommonController* MyController = Cast<ARASAICommonController>(GetController());
+
+	MyController->StopAI();
+	IndicatorWideget->SetVisibility(false);
+	auto Widget = Cast<URASStatusBarWidget>(StatusBarWidgetComponent->GetUserWidgetObject());
+	if (Widget == nullptr) return;
+	Widget->SetVisibilityBar(false);
+	bIsDeath = true;
+
+	Super::ExecuteDeath(InDeathNumber);
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));
+
+	FTimerHandle DeathHandle;
+	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
+		{
+			Destroy();
+		},
+		5.f, false);
+}

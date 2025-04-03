@@ -5,6 +5,7 @@
 #include "Controller/Monster/RASAIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Player/RASPlayer.h"
+#include "Component/Stat/RASStatComponent.h"
 #include "Components/WidgetComponent.h"
 #include "UI/RASAimWidget.h"
 
@@ -34,6 +35,8 @@ void ARASMonster::PostInitializeComponents()
 	URASAimWidget* Widget = Cast<URASAimWidget>(IndicatorWideget->GetUserWidgetObject());
 	if(Widget ==nullptr) return;
 	Widget->SetupAim();
+
+	Stat->OnStaminaZero.AddUObject(Widget, &URASAimWidget::VisibleLastAim);
 }
 
 void ARASMonster::Tick(float DeltaSeconds)

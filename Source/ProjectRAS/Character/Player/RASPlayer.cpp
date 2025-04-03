@@ -160,7 +160,7 @@ void ARASPlayer::BeginPlay()
 void ARASPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (LockOnTarget != nullptr)
+	if (LockOnTarget != nullptr && CombatState != EPlayerCombatState::Executing)
 	{
 		float CurDistanceToTarget = GetDistanceTo(LockOnTarget);
 		if (CurDistanceToTarget > 2000.f)
@@ -192,11 +192,10 @@ void ARASPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputCom
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARASPlayer::Move);
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARASPlayer::Look);
 	EnhancedInput->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressTab);
+	EnhancedInput->BindAction(FAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressF);
 	EnhancedInput->BindAction(LeftAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressComboAction);
 	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Started, this, &ARASPlayer::PressShift);
 	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Completed, this, &ARASPlayer::PressShiftEnd);
-	EnhancedInput->BindAction(FAttackAction, ETriggerEvent::Started, this, &ARASPlayer::PressF);
-	EnhancedInput->BindAction(FAttackAction, ETriggerEvent::Completed, this, &ARASPlayer::PressFEnd);
 	EnhancedInput->BindAction(QAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressQ);
 	EnhancedInput->BindAction(EAttackAction, ETriggerEvent::Triggered, this, &ARASPlayer::PressE);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Started, this, &ARASPlayer::PressRightClick);
@@ -222,7 +221,7 @@ void ARASPlayer::Move(const FInputActionValue& Value)
 
 void ARASPlayer::Look(const FInputActionValue& Value)
 {
-	if (CombatState == EPlayerCombatState::Deathing) return;
+	if (CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing) return;
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 	if(LockOnTarget == nullptr)
 		AddControllerYawInput(LookAxisVector.X);
@@ -357,7 +356,7 @@ void ARASPlayer::Roll(const FInputActionValue& Value)
 
 void ARASPlayer::PressTab()
 {
-	if (CombatState == EPlayerCombatState::Deathing) return;
+	if (CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing) return;
 
 	FindAllEnemyInRange();
 	if (TargetEnemys.IsEmpty())
@@ -375,7 +374,8 @@ void ARASPlayer::PressTab()
 
 void ARASPlayer::LockOn()
 {
-	if (CombatState == EPlayerCombatState::Deathing) return;
+	if (CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing) return;
+
 
 	URASPlayerAnimInstance* MyAnimInstance = Cast<URASPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	if (MyAnimInstance == nullptr)
@@ -387,7 +387,8 @@ void ARASPlayer::LockOn()
 
 void ARASPlayer::LockOff()
 {
-	if (CombatState == EPlayerCombatState::Deathing) return;
+	if (CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing) return;
+
 
 	URASPlayerAnimInstance* MyAnimInstance = Cast<URASPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	if (MyAnimInstance == nullptr)
@@ -412,18 +413,17 @@ void ARASPlayer::SetInBattleTimer()
 void ARASPlayer::PressComboAction()
 {
 	if (CombatState == EPlayerCombatState::Deathing) return;
+	if (CombatState == EPlayerCombatState::Executing) return;
 
 	if (CombatState == EPlayerCombatState::Idle || CombatState == EPlayerCombatState::Attacking)
 	{
 		if (ComboAttack)
 		{
 			if (Stat->GetStamina() <= 0) return;
-
 			SetInBattleTimer();
+
 			if (bIsPressShift)
 				ComboAttack->PressComboAction(EAttackType::Shift);
-			else if (bIsPressF)
-				ComboAttack->PressComboAction(EAttackType::F);
 			else
 				ComboAttack->PressComboAction(EAttackType::LeftClick);
 		}
@@ -442,12 +442,22 @@ void ARASPlayer::PressShiftEnd()
 
 void ARASPlayer::PressF()
 {
-	bIsPressF = true;
-}
+	ComboAttack->EndCombo();
+	if (CombatState == EPlayerCombatState::Deathing) return;
+	if (CombatState == EPlayerCombatState::Idle || CombatState == EPlayerCombatState::Attacking)
+	{
+		if (Stat->GetStamina() <= 0) return;
+		SetInBattleTimer();
 
-void ARASPlayer::PressFEnd()
-{
-	bIsPressF = false;
+		if (LockOnTarget != nullptr && LockOnTarget->GetTotalStamina() <= 0.f && this->GetDistanceTo(LockOnTarget) <= 150.f)
+		{
+			if (CombatState != EPlayerCombatState::Executing)
+			{
+				CombatState = EPlayerCombatState::Executing; 
+				KillTarget(LockOnTarget);
+			}
+		}
+	}
 }
 
 void ARASPlayer::PressQ()
@@ -506,8 +516,6 @@ void ARASPlayer::PressE()
 
 void ARASPlayer::PressRightClick()
 {
-	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring)
-		return;
 	if (CombatState != EPlayerCombatState::Idle)
 		return;
 	UAnimInstance* MyAnimInstance = GetMesh()->GetAnimInstance();
@@ -531,14 +539,14 @@ void ARASPlayer::PressRightClickEnd()
 	if (!MyAnimInstance)
 		return;
 
-	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing)
+	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing)
 		return;
 
 	UAnimMontage* CurrentMontage = MyAnimInstance->GetCurrentActiveMontage();
 	if (CurrentMontage)
 	{
 		FName CurrentSection = MyAnimInstance->Montage_GetCurrentSection(CurrentMontage);
-		if (CurrentSection != TEXT("ParryingBreak") || CurrentSection != TEXT("ParryingExact"))
+		if (CurrentSection != TEXT("ParryingBreak") && CurrentSection != TEXT("ParryingExact"))
 		{
 			CombatState = EPlayerCombatState::Idle;
 
@@ -704,7 +712,7 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, f
 		float ActualDamage = Stat->ApplyDamage(InDamage);
 		if (ActualDamage > 0)
 		{
-			if (Stat->GetHp() > 0)
+			if (Stat->GetHp() > 0 && CombatState != EPlayerCombatState::Executing)
 			{
 				UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 				if (!AnimInstance)
@@ -730,6 +738,38 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, f
 			}
 		}
 	}
+}
+
+void ARASPlayer::KillTarget(ARASCharacterBase* Target)
+{
+	if (Target == nullptr) return;
+	if (ExecuteMontage == nullptr) return;
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!AnimInstance)
+		return;
+
+	LockOnTarget = nullptr;
+	int32 DeathNumber = FMath::RandRange(1, 2);
+	FString MontageSectionName = FString::Printf(TEXT("Execute%d"), DeathNumber);
+
+	AnimInstance->StopAllMontages(0.1f);
+
+	AnimInstance->Montage_Play(ExecuteMontage);
+	AnimInstance->Montage_JumpToSection(FName(*MontageSectionName), ExecuteMontage);
+
+	Target->ExecuteDeath(DeathNumber);
+
+	FOnMontageEnded MontageEndedDelegate;
+	MontageEndedDelegate.BindLambda([this, AnimInstance](UAnimMontage* Montage, bool bInterrupted)
+		{
+			CombatState = EPlayerCombatState::Idle;
+			if (ComboAttack)
+			{
+				PressTab();
+				ComboAttack->EndCombo(true, 1.f);
+			}
+		});
+	AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, ExecuteMontage);
 }
 
 void ARASPlayer::Death()

@@ -8,6 +8,7 @@
 #include "RASStatComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnStaminaZeroDelegate, bool /*Visible*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*CurrentHp*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStaminaChangedDelegate, float /*CurrentHp*/);
 
@@ -21,6 +22,7 @@ public:
 	URASStatComponent();
 
 	FOnHpZeroDelegate OnHpZero;
+	FOnStaminaZeroDelegate OnStaminaZero;
 	FOnHpChangedDelegate OnHpChanged;
 	FOnStaminaChangedDelegate OnStaminaChanged;
 

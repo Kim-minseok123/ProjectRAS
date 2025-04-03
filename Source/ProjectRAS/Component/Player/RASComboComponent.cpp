@@ -190,7 +190,7 @@ bool URASComboComponent::GetNextState(EAttackType InAttackType, FName& OutNextSt
 	return false;
 }
 
-void URASComboComponent::EndCombo(bool InbSetTiemr /*= true*/, float InSeconds /*= 0.7f*/)
+void URASComboComponent::EndCombo(bool InbSetTimer /*= true*/, float InSeconds /*= 0.7f*/)
 {
 	// 타이머 초기화 및 콤보 상태 리셋
 	GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);
@@ -206,7 +206,7 @@ void URASComboComponent::EndCombo(bool InbSetTiemr /*= true*/, float InSeconds /
 	}
 
 	bCanAcceptInput = false;
-	if (InbSetTiemr)
+	if (InbSetTimer)
 	{
 		GetWorld()->GetTimerManager().SetTimer(
 			ComboResetHandle,

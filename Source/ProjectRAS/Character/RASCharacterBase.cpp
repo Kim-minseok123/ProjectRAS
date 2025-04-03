@@ -109,3 +109,25 @@ void ARASCharacterBase::Death()
     }
 }
 
+void ARASCharacterBase::ExecuteDeath(int32 InDeathNumber)
+{
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance)
+        return;
+
+    AnimInstance->StopAllMontages(0.1f);
+
+    AnimInstance->OnMontageEnded.RemoveAll(this);
+    AnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
+
+    FString MontageSectionName = FString::Printf(TEXT("ExecuteDeath%d"), InDeathNumber);
+
+    AnimInstance->Montage_Play(DeathMontage);
+    AnimInstance->Montage_JumpToSection(FName(*MontageSectionName), DeathMontage);
+}
+
+float ARASCharacterBase::GetTotalStamina()
+{
+    return Stat->GetStamina();
+}
+

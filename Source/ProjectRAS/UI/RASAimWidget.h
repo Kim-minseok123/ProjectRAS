@@ -17,7 +17,9 @@ public:
 	URASAimWidget(const FObjectInitializer& ObjectInitializer);
 
 	void SetupAim();
+	UFUNCTION()
 	void VisibleAim(bool bVisible);
+	UFUNCTION()
 	void VisibleLastAim(bool bVisible);
 	void VisibleAllAim(bool bVisible);
 protected:

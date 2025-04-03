@@ -37,4 +37,6 @@ protected:
 
 public:
 	virtual void Death() override;
+
+	virtual void ExecuteDeath(int32 InDeathNumber) override;
 };

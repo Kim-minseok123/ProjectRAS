@@ -88,7 +88,6 @@ protected:
 	uint8 bLockOn : 1;
 
 	bool bIsPressShift = false;
-	bool bIsPressF = false;
 	FTimerHandle BattleTimer;
 	bool bInBattle = false;
 
@@ -98,12 +97,13 @@ protected:
 	TObjectPtr<class UAnimMontage> SkillMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> ParryingMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Battle, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> ExecuteMontage;
 
 	void PressComboAction();
 	void PressShift();
 	void PressShiftEnd();
 	void PressF();
-	void PressFEnd();
 	void PressQ();
 	void PressE();
 	void PressRightClick();
@@ -120,6 +120,9 @@ public:
 	void CycleLockOnTarget();
 	class ARASCharacterBase* GetLockedOnTarget() const { return LockOnTarget; }
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage) override;
+
+protected:
+	void KillTarget(ARASCharacterBase* Target);
 // AnimMontage Section
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))

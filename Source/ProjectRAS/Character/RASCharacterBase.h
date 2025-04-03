@@ -54,6 +54,13 @@ public:
 	UFUNCTION()
 	virtual void Death();
 
+	UFUNCTION()
+	virtual void ExecuteDeath(int32 InDeathNumber);
+
+	float GetTotalStamina();
+
+	class URASStatComponent* GetStat() { return Stat; }
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Stats)
 	TObjectPtr<class URASStatComponent> Stat;

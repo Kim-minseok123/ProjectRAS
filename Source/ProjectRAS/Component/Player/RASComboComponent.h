@@ -42,7 +42,7 @@ protected:
 
 public:
 	// 현재 콤보를 종료하고 상태를 초기화
-	void EndCombo(bool InbSetTiemr = true, float InSeconds = 0.7f);
+	void EndCombo(bool InbSetTimer = true, float InSeconds = 0.7f);
 protected:
 	// 현재 상태에 맞는 타이머 설정
 	void SetComboTimer();

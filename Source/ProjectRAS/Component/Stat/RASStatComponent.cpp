@@ -36,6 +36,11 @@ float URASStatComponent::ApplyStaminaDamage(float InStaminaDamageAmount)
 		RecoveryDelayRemaining = RecoveryDelayDuration;
 
 	SetStamina(PrevStamina - ActualStaminaDamage);
+	if (GetStamina() <= KINDA_SMALL_NUMBER)
+	{
+		OnStaminaZero.Broadcast(true);
+	}
+
 	return ActualStaminaDamage;
 }
 

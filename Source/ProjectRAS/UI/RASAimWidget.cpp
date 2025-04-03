@@ -3,6 +3,8 @@
 
 #include "UI/RASAimWidget.h"
 #include "Components/Image.h"
+#include "Character/RASCharacterBase.h"
+#include "Component/Stat/RASStatComponent.h"
 
 URASAimWidget::URASAimWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
