@@ -20,6 +20,8 @@
 #include "UI/RASAimWidget.h"
 #include "UI/RASPlayerHUDWidget.h"
 #include "Data/RASGameSingleton.h"
+#include "Controller/Player/RASPlayerController.h"
+#include "Camera/CameraActor.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -46,6 +48,11 @@ ARASPlayer::ARASPlayer()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	/*ExecuteCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ExecuteCamera"));
+	ExecuteCamera->SetupAttachment(RootComponent);
+	ExecuteCamera->bUsePawnControlRotation = false;*/
+
 
 	// Input Action
 	{
@@ -153,6 +160,30 @@ void ARASPlayer::BeginPlay()
 			Stat->SetStamina(10000);
 
 			Stat->OnHpZero.AddUObject(this, &ARASPlayer::Death);
+		}
+	}
+	if (GetWorld())
+	{
+		FVector PlayerLocation = GetActorLocation();
+		FVector SpawnOffset(0.f, 218.7f, 56.3f);
+		FVector SpawnLocation = PlayerLocation + SpawnOffset;
+
+		FRotator SpawnRotation(-5.f, -50.f, 0.f);
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		ExecuteCameraActor = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+
+		if (ExecuteCameraActor)
+		{
+			ExecuteCameraActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			UCameraComponent* CameraComp = ExecuteCameraActor->FindComponentByClass<UCameraComponent>();
+			if (CameraComp)
+			{
+				CameraComp->bConstrainAspectRatio = false;
+			}
 		}
 	}
 }
@@ -398,6 +429,32 @@ void ARASPlayer::LockOff()
 	MyAnimInstance->SetLockOn(bUseControllerRotationYaw);
 }
 
+void ARASPlayer::SwitchToExecutionCamera(float BlendTime)
+{
+	if (CombatState == EPlayerCombatState::Deathing) return;
+
+	ARASPlayerController* PlayerController = Cast<ARASPlayerController>(GetController());
+	if (PlayerController)
+	{
+		OriginalCameraActor = PlayerController->GetViewTarget();
+		PlayerController->SetViewTargetWithBlend(ExecuteCameraActor, BlendTime);
+	}
+
+}
+
+void ARASPlayer::SwitchBackToOriginalCamera(float BlendTime)
+{
+	if (CombatState == EPlayerCombatState::Deathing) return;
+
+	ARASPlayerController* PlayerController = Cast<ARASPlayerController>(GetController());
+	if (PlayerController)
+	{
+		PlayerController->SetViewTargetWithBlend(OriginalCameraActor, BlendTime);
+		OriginalCameraActor = nullptr;
+	}
+}
+
+
 void ARASPlayer::SetInBattleTimer()
 {
 	if (CombatState == EPlayerCombatState::Deathing) return;
@@ -449,7 +506,7 @@ void ARASPlayer::PressF()
 		if (Stat->GetStamina() <= 0) return;
 		SetInBattleTimer();
 
-		if (LockOnTarget != nullptr && LockOnTarget->GetTotalStamina() <= 0.f && this->GetDistanceTo(LockOnTarget) <= 150.f)
+		if (LockOnTarget != nullptr && LockOnTarget->GetTotalStamina() <= 0.f && this->GetDistanceTo(LockOnTarget) <= 200.f)
 		{
 			if (CombatState != EPlayerCombatState::Executing)
 			{

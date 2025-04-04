@@ -66,9 +66,18 @@ protected:
 	TObjectPtr<class USpringArmComponent> CameraBoom;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> FollowCamera;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UCameraComponent> ExecuteCamera;*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class ACameraActor> ExecuteCameraActor;
+
+	TObjectPtr<class AActor> OriginalCameraActor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USceneComponent> HeadPoint;
+public:
+	void SwitchToExecutionCamera(float BlendTime);
+	void SwitchBackToOriginalCamera(float BlendTime);
 
 // Battle Section
 public:

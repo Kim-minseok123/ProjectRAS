@@ -167,8 +167,6 @@ void ARASCommonMonster::Death()
 	bIsDeath = true;
 
 	Super::Death();
-
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));
 	
 	ARASPlayer* Player = Cast<ARASPlayer>(Target);
 	if (Player != nullptr) 
@@ -196,7 +194,6 @@ void ARASCommonMonster::ExecuteDeath(int32 InDeathNumber)
 
 	Super::ExecuteDeath(InDeathNumber);
 
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));
 
 	FTimerHandle DeathHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
