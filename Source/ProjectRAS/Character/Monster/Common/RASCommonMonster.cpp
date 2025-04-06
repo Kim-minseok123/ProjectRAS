@@ -15,6 +15,9 @@
 #include "Data/RASGameSingleton.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UI/RASAimWidget.h"
+#include "Component/Player/RASCombatComponent.h"
+#include "Component/Monster/RASMonsterAnimComponent.h"
+#include "Components/CapsuleComponent.h"
 
 ARASCommonMonster::ARASCommonMonster()
 {
@@ -93,8 +96,8 @@ void ARASCommonMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 	if (AnimInstance)
 	{
 		float PlayRate = FMath::FRandRange(1.0f, 1.5f);
-		AnimInstance->Montage_Play(AttackMontage, PlayRate);
-		AnimInstance->Montage_JumpToSection(TEXT("Attack"));
+		
+		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), TEXT("Attack"), 1.0f);
 
 		bUnflinching = true;
 	}
@@ -126,19 +129,7 @@ void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDa
 		StatusBarWidgetComponent->SetVisibility(true);
 		if (bUnflinching == false)
 		{
-			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-			if (AnimInstance == nullptr)
-				return;
-
-			AnimInstance->Montage_Play(HitMontage);
-			if (ActualDamage >= KnockbackFigure)
-			{
-				AnimInstance->Montage_JumpToSection(TEXT("Knockback"));
-			}
-			else
-			{
-				AnimInstance->Montage_JumpToSection(TEXT("Hit"));
-			}
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Hit")), TEXT("Hit"), 1.0f);
 		}
 	}
 }
@@ -146,6 +137,30 @@ void ARASCommonMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDa
 void ARASCommonMonster::KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower)
 {
 	Super::KnockbackToDirection(InFrom, Direction, InPower);
+
+	if (!Direction.IsNearlyZero())
+	{
+		Direction.Normalize();
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Hit")), TEXT("Knockback"), 1.0f);
+			AnimInstance->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
+		}
+
+		float KnockbackStrength = InPower;
+		LaunchCharacter(Direction * KnockbackStrength, true, true);
+
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, AnimInstance]()
+			{
+				if (AnimInstance)
+				{
+					AnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
+				}
+			}, 0.2f, false);
+	}
 
 	if(OnStopAttack.IsBound() == true) 	
 	{
@@ -159,6 +174,8 @@ void ARASCommonMonster::Death()
 {
 	ARASAICommonController* MyController = Cast<ARASAICommonController>(GetController());
 
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));
+
 	MyController->StopAI();
 	IndicatorWideget->SetVisibility(false);
 	auto Widget = Cast<URASStatusBarWidget>(StatusBarWidgetComponent->GetUserWidgetObject());
@@ -170,7 +187,7 @@ void ARASCommonMonster::Death()
 	
 	ARASPlayer* Player = Cast<ARASPlayer>(Target);
 	if (Player != nullptr) 
-		Player->PressTab();
+		Player->GetCombatComponent()->PressTab();
 
 
 	FTimerHandle DeathHandle;
@@ -184,6 +201,8 @@ void ARASCommonMonster::Death()
 void ARASCommonMonster::ExecuteDeath(int32 InDeathNumber)
 {
 	ARASAICommonController* MyController = Cast<ARASAICommonController>(GetController());
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));
 
 	MyController->StopAI();
 	IndicatorWideget->SetVisibility(false);

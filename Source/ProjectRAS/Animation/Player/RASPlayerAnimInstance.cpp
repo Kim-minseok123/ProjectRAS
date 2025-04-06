@@ -3,6 +3,7 @@
 
 #include "Animation/Player/RASPlayerAnimInstance.h"
 #include "Character/Player/RASPlayer.h"
+#include "Component/Player/RASCombatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 URASPlayerAnimInstance::URASPlayerAnimInstance()
@@ -31,7 +32,7 @@ void URASPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	// IsValid
 	if (Owner == nullptr) return;
 	// Set InBattle
-	bInBattle = Owner->GetInBattle();
+	bInBattle = Owner->GetCombatComponent()->GetInBattle();
 	// Set IsInAir
 	IsInAir = Movement->IsFalling();
 	// Set Speed

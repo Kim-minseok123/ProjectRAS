@@ -8,6 +8,8 @@
 #include "Component/Stat/RASStatComponent.h"
 #include "Components/WidgetComponent.h"
 #include "UI/RASAimWidget.h"
+#include "Component/Player/RASCombatComponent.h"
+#include "Component/Monster/RASMonsterAnimComponent.h"
 
 ARASMonster::ARASMonster()
 {
@@ -23,6 +25,8 @@ ARASMonster::ARASMonster()
 		IndicatorWideget->SetDrawSize(FVector2D(74, 74));
 		IndicatorWideget->SetRelativeLocation(FVector(0, 0, 60));
 	}
+	MonsterAnimComponent = CreateDefaultSubobject<URASMonsterAnimComponent>(TEXT("MonsterAnimComponent"));
+
 }
 
 void ARASMonster::PostInitializeComponents()
@@ -37,6 +41,8 @@ void ARASMonster::PostInitializeComponents()
 	Widget->SetupAim();
 
 	Stat->OnStaminaZero.AddUObject(Widget, &URASAimWidget::VisibleLastAim);
+
+	MonsterAnimComponent->SetAnimInstance(GetMesh()->GetAnimInstance());
 }
 
 void ARASMonster::Tick(float DeltaSeconds)
@@ -75,8 +81,8 @@ void ARASMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, 
 
 	ARASPlayer* FromPlayer = Cast<ARASPlayer>(InFrom);
 	if (FromPlayer == nullptr) return;
-	if(FromPlayer->GetLockedOnTarget() == nullptr)
-		FromPlayer->SetLockedOnTarget(this);
+	if(FromPlayer->GetCombatComponent()->GetLockedOnTarget() == nullptr)
+		FromPlayer->GetCombatComponent()->SetLockedOnTarget(this);
 }
 
 void ARASMonster::SetVisibleIndicator(bool InbIsVisible)

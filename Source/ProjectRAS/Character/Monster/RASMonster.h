@@ -36,12 +36,12 @@ public:
 	virtual void SetVisibleIndicator(bool InbIsVisible) override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UAnimMontage> AttackMontage; 
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UWidgetComponent> IndicatorWideget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Anim, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class URASMonsterAnimComponent> MonsterAnimComponent;
 	UPROPERTY()
 	TObjectPtr<class ARASCharacterBase> Target; 
 
