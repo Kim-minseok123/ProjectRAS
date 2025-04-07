@@ -1,34 +1,69 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Component/Player/RASUIComponent.h"
+#include "UI/RASPlayerHUDWidget.h"
+#include "Component/Stat/RASStatComponent.h"
+#include "Character/Player/RASPlayer.h"
 
 // Sets default values for this component's properties
 URASUIComponent::URASUIComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	static ConstructorHelpers::FClassFinder<URASPlayerHUDWidget> PlayerHUDWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/1_ProjectRAS/UI/WBP_PlayerHUD.WBP_PlayerHUD_C'"));
+	if (PlayerHUDWidgetRef.Class)
+	{
+		PlayerHUDWidgetClass = PlayerHUDWidgetRef.Class;
+	}
 }
 
 
-// Called when the game starts
-void URASUIComponent::BeginPlay()
+void URASUIComponent::InitUI()
 {
-	Super::BeginPlay();
-
-	// ...
 	
+	if (ShowHUD() == false)
+	{
+		ensure(false);
+		return;
+	}
+
+	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
+	URASStatComponent* Stat = Player->GetStat();
+
+	if (!Stat)
+	{
+		ensure(false);
+		return;
+	}
+
+	PlayerHUDWidget->BindHP(Stat);
+	PlayerHUDWidget->BindStamina(Stat);
+
+	Stat->SetHp(10000);
+	Stat->SetStamina(10000);
+
+	Stat->OnHpZero.AddUObject(Player, &ARASPlayer::Death);
 }
 
-
-// Called every frame
-void URASUIComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+bool URASUIComponent::ShowHUD()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	if (!PlayerHUDWidget && PlayerHUDWidgetClass)
+	{
+		PlayerHUDWidget = CreateWidget<URASPlayerHUDWidget>(GetWorld(), PlayerHUDWidgetClass);
+	}
+	if (PlayerHUDWidget && !PlayerHUDWidget->IsInViewport())
+	{
+		PlayerHUDWidget->AddToViewport();
+		return true;
+	}
+	return false;
 }
 
+bool URASUIComponent::HideHUD()
+{
+	if (PlayerHUDWidget && PlayerHUDWidget->IsInViewport())
+	{
+		PlayerHUDWidget->RemoveFromViewport();
+		return true;
+	}
+	return false;
+}

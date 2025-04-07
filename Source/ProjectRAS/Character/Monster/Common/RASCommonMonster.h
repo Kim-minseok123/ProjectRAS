@@ -20,14 +20,12 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void PostInitializeComponents() override;
-
 	virtual void StartAttackMontage(int InAttackNumber = 0) override;
-
 	virtual void EndAttack() override;
-
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage) override;
-
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;
+	virtual void Death() override;
+	virtual void ExecuteDeath(int32 InDeathNumber) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -35,8 +33,5 @@ protected:
 
 	bool bIsDeath = false;
 
-public:
-	virtual void Death() override;
-
-	virtual void ExecuteDeath(int32 InDeathNumber) override;
+	void PreDeath();
 };

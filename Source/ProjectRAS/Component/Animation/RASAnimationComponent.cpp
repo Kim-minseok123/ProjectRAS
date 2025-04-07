@@ -58,7 +58,34 @@ TObjectPtr<class UAnimMontage> URASAnimationComponent::GetMontageByName(FName Mo
 	{
 		return HitMontage;
 	}
+	if(MontageName == "Death")
+	{
+		return DeathMontage;
+	}
 	return nullptr;
+}
+
+void URASAnimationComponent::ClearAllDelegate()
+{
+	if (MyAnimInstance)
+	{
+		MyAnimInstance->OnMontageEnded.RemoveAll(GetOwner());
+	}
+}
+
+void URASAnimationComponent::ChangeRootMotionMode(bool bEnable)
+{
+	if (MyAnimInstance)
+	{
+		if (bEnable)
+		{
+			MyAnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
+		}
+		else
+		{
+			MyAnimInstance->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
+		}
+	}
 }
 
 void URASAnimationComponent::BeginPlay()

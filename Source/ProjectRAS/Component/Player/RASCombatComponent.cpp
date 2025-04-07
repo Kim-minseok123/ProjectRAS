@@ -108,7 +108,7 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 	if(AnimComponent == nullptr) return;
 
 	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Deathing) return;
-	if (OwnerPlayer->GetStat()->GetStamina() <= 0) return;
+	if (OwnerPlayer->GetStat()->GetStamina() < 30) return;
 
 	CombatState = EPlayerCombatState::Rolling;
 
@@ -510,5 +510,34 @@ void URASCombatComponent::KillTarget(ARASCharacterBase* Target)
 		});
 
 	Target->ExecuteDeath(DeathNumber);
+}
+
+void URASCombatComponent::Death()
+{
+	SetCombatState(EPlayerCombatState::Deathing);
+
+	URASPlayerAnimComponent* PlayerAnimComponent = OwnerPlayer->GetAnimComponent();
+
+	PlayerAnimComponent->StopMontage(nullptr, 0.1f);
+	PlayerAnimComponent->ClearAllDelegate();
+	PlayerAnimComponent->ChangeRootMotionMode(true);
+
+	int DeathType = FMath::RandRange(0, 1);
+
+	if (DeathType == 0)
+	{
+		PlayerAnimComponent->PlayMontageWithSection(PlayerAnimComponent->GetMontageByName(TEXT("Death")), TEXT("FrontDeath"), 1.f);
+	}
+	else
+	{
+		PlayerAnimComponent->PlayMontageWithSection(PlayerAnimComponent->GetMontageByName(TEXT("Death")), TEXT("BackDeath"), 1.f);
+	}
+
+	FTimerHandle DeathHandle;
+	OwnerPlayer->GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
+		{
+			// 플레이어 사망 UI 띄움, UI에서 다시하기 버튼 클릭시  게임모드에서 플레이어를 저장된 위치로 리스폰
+		},
+		4.f, false);
 }
 

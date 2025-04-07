@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -13,16 +13,23 @@ class PROJECTRAS_API URASUIComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	URASUIComponent();
 
+	void InitUI();
+
+	UFUNCTION(BlueprintCallable, Category="UI")
+	bool ShowHUD();
+
+	UFUNCTION(BlueprintCallable, Category="UI")
+	bool HideHUD();
+
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class URASPlayerHUDWidget> PlayerHUDWidgetClass;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class URASPlayerHUDWidget> PlayerHUDWidget;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
 };

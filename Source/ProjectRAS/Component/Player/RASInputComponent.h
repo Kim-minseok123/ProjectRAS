@@ -58,7 +58,4 @@ protected:
 	void HandlePressE();
 	void HandlePressRightClick();
 	void HandlePressRightClickEnd();
-
-public:	
-		
 };

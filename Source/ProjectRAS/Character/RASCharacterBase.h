@@ -66,8 +66,6 @@ protected:
 	TObjectPtr<class URASStatComponent> Stat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
-	TObjectPtr<class UAnimMontage> DeathMontage;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
 	FName CreatureName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)

@@ -61,46 +61,12 @@ void ARASCharacterBase::KnockbackToDirection(class AActor* InFrom, FVector Direc
 
 void ARASCharacterBase::Death()
 {
-    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (AnimInstance == nullptr) return;
-
-    AnimInstance->StopAllMontages(0.1f);
-
-    AnimInstance->OnMontageEnded.RemoveAll(this);
-    AnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
-
-    int DeathType = FMath::RandRange(0, 1);
-    if (DeathMontage == nullptr) return;
-
-    AnimInstance->StopSlotAnimation(0.1f, TEXT("DefaultSlot"));
-    float PlayResult = AnimInstance->Montage_Play(DeathMontage);
-    UE_LOG(LogTemp, Log, TEXT("DeathMontage PlayResult: %f"), PlayResult);
-
-    if (DeathType == 0)
-    {
-        AnimInstance->Montage_JumpToSection(TEXT("FrontDeath"));
-    }
-    else
-    {
-        AnimInstance->Montage_JumpToSection(TEXT("BackDeath"));
-    }
+    
 }
 
 void ARASCharacterBase::ExecuteDeath(int32 InDeathNumber)
 {
-    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance)
-        return;
-
-    AnimInstance->StopAllMontages(0.1f);
-
-    AnimInstance->OnMontageEnded.RemoveAll(this);
-    AnimInstance->SetRootMotionMode(ERootMotionMode::RootMotionFromMontagesOnly);
-
-    FString MontageSectionName = FString::Printf(TEXT("ExecuteDeath%d"), InDeathNumber);
-
-    AnimInstance->Montage_Play(DeathMontage);
-    AnimInstance->Montage_JumpToSection(FName(*MontageSectionName), DeathMontage);
+    
 }
 
 float ARASCharacterBase::GetTotalStamina()

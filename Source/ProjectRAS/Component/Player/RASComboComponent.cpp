@@ -8,6 +8,7 @@
 #include "TimerManager.h"
 #include "Data/RASPlayerState.h"
 #include "Component/Player/RASCombatComponent.h"
+#include "Component/Player/RASPlayerAnimComponent.h"
 
 // Sets default values for this component's properties
 URASComboComponent::URASComboComponent()
@@ -92,13 +93,12 @@ void URASComboComponent::StartCombo()
 	{
 		Player->GetCombatComponent()->SetCombatState(EPlayerCombatState::Attacking);
 
-		// 몽타주 재생
-		UAnimInstance* AnimInstance = Player->GetMesh()->GetAnimInstance();
-		if (AnimInstance && ComboAttackMontage)
+		URASPlayerAnimComponent* PlayerAnimComponent = Player->GetAnimComponent();
+		if (PlayerAnimComponent == nullptr)
 		{
-			AnimInstance->Montage_Play(ComboAttackMontage);
-			AnimInstance->Montage_JumpToSection(CurrentState, ComboAttackMontage);
+			return;
 		}
+		PlayerAnimComponent->PlayMontageWithSection(ComboAttackMontage, CurrentState, 1.f);
 	}
 
 	// 현재 상태의 입력 유효 시간에 맞춰 타이머 설정
@@ -148,13 +148,12 @@ void URASComboComponent::ComboTimerExpired()
 			// 몽타주에서 해당 섹션으로 점프
 			if (Player)
 			{
-				UAnimInstance* AnimInstance = Player->GetMesh()->GetAnimInstance();
-				if (AnimInstance && ComboAttackMontage)
+				URASPlayerAnimComponent* PlayerAnimComponent = Player->GetAnimComponent();
+				if (PlayerAnimComponent == nullptr)
 				{
-					// 다음 공격으로 전환할 때 Montage_JumpToSection을 호출
-					AnimInstance->Montage_Play(ComboAttackMontage);
-					AnimInstance->Montage_JumpToSection(CurrentState, ComboAttackMontage);
+					return;
 				}
+				PlayerAnimComponent->PlayMontageWithSection(ComboAttackMontage, CurrentState, 1.f);
 			}
 
 			// 새 상태에 맞춰 타이머 재설정

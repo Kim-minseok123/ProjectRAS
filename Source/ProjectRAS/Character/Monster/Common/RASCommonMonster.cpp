@@ -97,7 +97,7 @@ void ARASCommonMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 	{
 		float PlayRate = FMath::FRandRange(1.0f, 1.5f);
 		
-		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), TEXT("Attack"), 1.0f);
+		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), TEXT("Attack"), PlayRate);
 
 		bUnflinching = true;
 	}
@@ -170,7 +170,7 @@ void ARASCommonMonster::KnockbackToDirection(class AActor* InFrom, FVector Direc
 	EndAttack();
 }
 
-void ARASCommonMonster::Death()
+void ARASCommonMonster::PreDeath()
 {
 	ARASAICommonController* MyController = Cast<ARASAICommonController>(GetController());
 
@@ -183,7 +183,26 @@ void ARASCommonMonster::Death()
 	Widget->SetVisibilityBar(false);
 	bIsDeath = true;
 
-	Super::Death();
+	MonsterAnimComponent->StopMontage(nullptr, 0.1f);
+	MonsterAnimComponent->ClearAllDelegate();
+	MonsterAnimComponent->ChangeRootMotionMode(true);
+}
+
+void ARASCommonMonster::Death()
+{
+	PreDeath();
+
+	int DeathType = FMath::RandRange(0, 1);
+
+
+	if (DeathType == 0)
+	{
+		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Death")), TEXT("FrontDeath"), 1.f);
+	}
+	else
+	{
+		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Death")), TEXT("BackDeath"), 1.f);
+	}
 	
 	ARASPlayer* Player = Cast<ARASPlayer>(Target);
 	if (Player != nullptr) 
@@ -200,20 +219,13 @@ void ARASCommonMonster::Death()
 
 void ARASCommonMonster::ExecuteDeath(int32 InDeathNumber)
 {
-	ARASAICommonController* MyController = Cast<ARASAICommonController>(GetController());
+	PreDeath();
 
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DeathCollision"));
+	FString MontageSectionName = FString::Printf(TEXT("ExecuteDeath%d"), InDeathNumber);
 
-	MyController->StopAI();
-	IndicatorWideget->SetVisibility(false);
-	auto Widget = Cast<URASStatusBarWidget>(StatusBarWidgetComponent->GetUserWidgetObject());
-	if (Widget == nullptr) return;
-	Widget->SetVisibilityBar(false);
-	bIsDeath = true;
-
-	Super::ExecuteDeath(InDeathNumber);
-
-
+	MonsterAnimComponent->PlayMontageWithSection(
+		MonsterAnimComponent->GetMontageByName(TEXT("Death")), FName(*MontageSectionName), 1.f);
+	
 	FTimerHandle DeathHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
 		{

@@ -8,43 +8,24 @@
 #include "InputActionValue.h"
 #include "RASCombatComponent.generated.h"
 
-
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+/**
+ * URASCombatComponent
+ * - 플레이어의 전투 관련 로직을 관리하는 컴포넌트입니다.
+ */
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTRAS_API URASCombatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
+public:
 	URASCombatComponent();
 
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
-	EPlayerCombatState CombatState;
-
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-	void FindAllEnemyInRange();
-	void SetClosestLockedOnTarget();
-	TSet<TObjectPtr<class ARASCharacterBase>> TargetEnemys;
-	TObjectPtr<class ARASCharacterBase> LockOnTarget;
-
-	float ParryingTime = 0.f;
-
-	TObjectPtr<class ARASPlayer> OwnerPlayer;
-
-public:	
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	// 전투 모드 On/Off 설정, 애니메이션에 영향
 	void SetInBattle(bool InBattle) { bInBattle = InBattle; }
 	bool GetInBattle() const { return bInBattle; }
 	void SetInBattleTimer();
-
-	bool bIsPressShift = false;
-	FTimerHandle BattleTimer;
-	bool bInBattle = false;
 
 	void Roll(const FInputActionValue& Value);
 	void PressTab();
@@ -57,12 +38,54 @@ public:
 	void PressRightClick();
 	void PressRightClickEnd();
 
-	void SetLockedOnTarget(ARASCharacterBase* Target);
+	
+	// 특정 대상으로 락온 설정
+	void SetLockedOnTarget(class ARASCharacterBase* Target);
+	// 락온 대상 순환 변경
 	void CycleLockOnTarget();
+	// 현재 락온 대상을 반환
 	class ARASCharacterBase* GetLockedOnTarget() const { return LockOnTarget; }
-	void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage);
-	void KillTarget(ARASCharacterBase* Target);
 
+	// 공격 등으로 피해를 입었을 때 호출
+	void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage);
+	// 타겟을 처형할 때 호출
+	void KillTarget(class ARASCharacterBase* Target);
+
+	// 전투 상태를 설정 및 확인합니다.
 	void SetCombatState(EPlayerCombatState NewState) { CombatState = NewState; }
 	EPlayerCombatState GetCombatState() const { return CombatState; }
+
+	// 전투 종료(죽음) 처리
+	void Death();
+	
+protected:
+	virtual void BeginPlay() override;
+
+	// 범위 내의 모든 적을 탐색합니다.
+	void FindAllEnemyInRange();
+
+	// 가장 가까운 적을 락온 대상으로 설정합니다.
+	void SetClosestLockedOnTarget();
+
+protected:
+	// 현재 전투 상태 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	EPlayerCombatState CombatState;
+
+	// 범위 내의 적들을 저장하는 집합
+	TSet<TObjectPtr<class ARASCharacterBase>> TargetEnemys;
+
+	// 현재 락온 대상
+	TObjectPtr<class ARASCharacterBase> LockOnTarget;
+
+	// 패링 확인 변수
+	float ParryingTime = 0.f;
+
+	// 이 컴포넌트를 소유한 플레이어 참조
+	TObjectPtr<class ARASPlayer> OwnerPlayer;
+
+	// 전투 모드 관련 타이머와 상태 변수
+	FTimerHandle BattleTimer;
+	bool bInBattle = false;
+	bool bIsPressShift = false;
 };

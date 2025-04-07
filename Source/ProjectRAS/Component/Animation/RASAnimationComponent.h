@@ -24,11 +24,18 @@ public:
 	
 	virtual TObjectPtr<class UAnimMontage> GetMontageByName(FName MontageName) const;
 
+	void ClearAllDelegate();
+
+	void ChangeRootMotionMode(bool bEnable);
+
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Battle)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Anim)
 	TObjectPtr<class UAnimMontage> HitMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Anim)
+	TObjectPtr<class UAnimMontage> DeathMontage;
 
 public:	
 	// Called every frame
