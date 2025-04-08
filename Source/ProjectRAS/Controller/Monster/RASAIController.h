@@ -24,9 +24,9 @@ protected:
 
 	virtual void SetupBlackBoard();
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = AI)
 	TObjectPtr<class UBlackboardData> BBAsset;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = AI)
 	TObjectPtr<class UBehaviorTree> BTAsset;
 };

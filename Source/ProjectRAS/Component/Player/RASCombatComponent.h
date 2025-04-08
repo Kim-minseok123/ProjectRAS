@@ -36,6 +36,7 @@ public:
 	void PressQ();
 	void PressE();
 	void PressRightClick();
+	void PressRightClickHold();
 	void PressRightClickEnd();
 
 	

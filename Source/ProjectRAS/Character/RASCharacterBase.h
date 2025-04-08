@@ -47,6 +47,8 @@ public:
 		return AcutalStaminaDamage;
 	}
 
+	virtual int GetMaxAttackNumber() override;
+
 	FName& GetCreatureName() { return CreatureName; }
 
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;

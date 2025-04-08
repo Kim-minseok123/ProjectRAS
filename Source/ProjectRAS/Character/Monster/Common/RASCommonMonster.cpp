@@ -95,9 +95,11 @@ void ARASCommonMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
-		float PlayRate = FMath::FRandRange(1.0f, 1.5f);
+		float PlayRate = FMath::FRandRange(1.15f, 1.2f);
+
+		FString AttackSectionName = FString::Printf(TEXT("Attack%d"), InAttackNumber);
 		
-		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), TEXT("Attack"), PlayRate);
+		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), *AttackSectionName, PlayRate);
 
 		bUnflinching = true;
 	}

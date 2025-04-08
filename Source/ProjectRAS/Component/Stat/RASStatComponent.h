@@ -37,10 +37,11 @@ public:
 	void SetStamina(float InStamina);
 	FORCEINLINE const float	GetHp() const						{ return BaseStats.HP; }
 	FORCEINLINE const float	GetStamina() const					{ return BaseStats.Stamina; }
-	FORCEINLINE const float GetMaxHp() const						{ return BaseStats.MaxHP; }
-	FORCEINLINE const float GetMaxStamina() const					{ return BaseStats.MaxStamina; }
+	FORCEINLINE const float GetMaxHp() const					{ return BaseStats.MaxHP; }
+	FORCEINLINE const float GetMaxStamina() const				{ return BaseStats.MaxStamina; }
 	FORCEINLINE void		SetAttackPower(float InAttackPower) { BaseStats.AttackPower = InAttackPower; }
 	FORCEINLINE const float	GetAttackPower() const				{ return BaseStats.AttackPower; }
+	FORCEINLINE const int GetMaxAttackNumber() const			{ return BaseStats.MaxAttackNumber; }
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

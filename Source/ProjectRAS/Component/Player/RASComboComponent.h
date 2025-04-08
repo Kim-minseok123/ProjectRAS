@@ -34,7 +34,7 @@ public:
 	void PressComboAction(EAttackType InAttackType);
 
 	// 현재 콤보를 종료하고 상태를 초기화할 때 호출하는 함수
-	void EndCombo(bool InbSetTimer = true, float InSeconds = 0.7f);
+	void EndCombo(bool InbSetTimer = true, float InSeconds = 0.56f);
 
 protected:
 	virtual void BeginPlay() override;

@@ -40,4 +40,6 @@ public:
 	virtual float GetDamageOfAttackNumber(int InAttackNumber) = 0;
 
 	virtual float GetStaminaDamageOfAttackNumber(int InAttackNumber) = 0;
+
+	virtual int GetMaxAttackNumber() = 0;
 };

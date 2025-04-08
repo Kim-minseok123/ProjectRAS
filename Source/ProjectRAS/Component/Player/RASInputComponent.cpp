@@ -89,6 +89,7 @@ void URASInputComponent::InitPlayerInputComponent(class UInputComponent* PlayerI
 	EnhancedInput->BindAction(QAttackAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressQ);
 	EnhancedInput->BindAction(EAttackAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressE);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Started, this, &URASInputComponent::HandlePressRightClick);
+	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressRightClickHold);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Completed, this, &URASInputComponent::HandlePressRightClickEnd);
 }
 
@@ -215,6 +216,16 @@ void URASInputComponent::HandlePressRightClick()
 	if (URASCombatComponent* CombatComponent = OwnerPlayer->GetCombatComponent())
 	{
 		CombatComponent->PressRightClick();
+	}
+}
+
+void URASInputComponent::HandlePressRightClickHold()
+{
+	ARASPlayer* OwnerPlayer = Cast<ARASPlayer>(GetOwner());
+
+	if (URASCombatComponent* CombatComponent = OwnerPlayer->GetCombatComponent())
+	{
+		CombatComponent->PressRightClickHold();
 	}
 }
 

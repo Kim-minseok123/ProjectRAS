@@ -53,7 +53,14 @@ EBTNodeResult::Type UBTTask_CommonMonsterAttack::ExecuteTask(UBehaviorTreeCompon
 	ControllingPawn->SetActorRotation(FMath::RInterpTo(ControllingPawn->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 200.f));
 
 	BattleInterface->SetAttackFinishedDelegate(OnAttackFinished);
-	BattleInterface->StartAttackMontage();
+	int AttackNumber = CommonMonster->GetMaxAttackNumber();
+	if (AttackNumber > 0)
+	{
+		int RandomAttackNumber = FMath::RandRange(1, AttackNumber);
+		BattleInterface->StartAttackMontage(RandomAttackNumber);
+	}
+	else
+		BattleInterface->StartAttackMontage();
 
 
 

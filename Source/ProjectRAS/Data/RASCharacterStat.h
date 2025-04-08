@@ -23,5 +23,6 @@ public:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
     float AttackPower = 10.f;
-    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stats")
+    int32 MaxAttackNumber;
 };

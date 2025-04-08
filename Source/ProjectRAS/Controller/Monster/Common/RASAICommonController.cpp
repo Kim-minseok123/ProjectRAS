@@ -9,16 +9,7 @@
 
 ARASAICommonController::ARASAICommonController()
 {
-	static ConstructorHelpers::FObjectFinder<UBlackboardData> BlackBoardDataRef(TEXT("/Script/AIModule.BlackboardData'/Game/1_ProjectRAS/AI/Common/BB_RASCommonMonster.BB_RASCommonMonster'"));
-	if (BlackBoardDataRef.Object)
-	{
-		BBAsset = BlackBoardDataRef.Object;
-	}
-	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BehaviorTreeRef(TEXT("/Script/AIModule.BehaviorTree'/Game/1_ProjectRAS/AI/Common/BT_RASCommonMonster.BT_RASCommonMonster'"));
-	if (BehaviorTreeRef.Object)
-	{
-		BTAsset = BehaviorTreeRef.Object;
-	}
+	
 }
 
 void ARASAICommonController::RunAI()

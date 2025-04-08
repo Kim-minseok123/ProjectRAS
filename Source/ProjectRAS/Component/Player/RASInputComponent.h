@@ -57,5 +57,6 @@ protected:
 	void HandlePressQ();
 	void HandlePressE();
 	void HandlePressRightClick();
+	void HandlePressRightClickHold();
 	void HandlePressRightClickEnd();
 };

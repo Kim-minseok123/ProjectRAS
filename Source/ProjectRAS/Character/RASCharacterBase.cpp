@@ -54,6 +54,11 @@ void ARASCharacterBase::EndAttack()
 
 }
 
+int ARASCharacterBase::GetMaxAttackNumber()
+{
+	return Stat->GetMaxAttackNumber();
+}
+
 void ARASCharacterBase::KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower)
 {
     

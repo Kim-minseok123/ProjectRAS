@@ -121,7 +121,7 @@ void URASComboComponent::SetComboTimer()
 		else
 		{
 			FTimerDelegate TimerDel;
-			TimerDel.BindUObject(this, &URASComboComponent::EndCombo, true, 0.7f);
+			TimerDel.BindUObject(this, &URASComboComponent::EndCombo, true, 0.56f);
 			GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, TimerDel, EffectiveTime, false);
 		}
 	}
@@ -190,7 +190,7 @@ bool URASComboComponent::GetNextState(EAttackType InAttackType, FName& OutNextSt
 	return false;
 }
 
-void URASComboComponent::EndCombo(bool InbSetTimer /*= true*/, float InSeconds /*= 0.7f*/)
+void URASComboComponent::EndCombo(bool InbSetTimer /*= true*/, float InSeconds /*= 0.56f*/)
 {
 	// 타이머 초기화 및 콤보 상태 리셋
 	GetWorld()->GetTimerManager().ClearTimer(ComboTimerHandle);

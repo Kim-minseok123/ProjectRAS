@@ -25,6 +25,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Attack)
 	int32 AttackNum;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Attack)
+	FName StartSocketName = "WeaponStart";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Attack)
+	FName EndSocketName = "WeaponEnd";
+
 protected:
 	virtual void MakeLineTrace(USkeletalMeshComponent* Attacker);
 

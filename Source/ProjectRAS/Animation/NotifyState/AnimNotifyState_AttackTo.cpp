@@ -50,9 +50,6 @@ void UAnimNotifyState_AttackTo::MakeLineTrace(USkeletalMeshComponent* Attacker)
 {
 	if (Attacker == nullptr) return;
 
-	const FName StartSocketName(TEXT("WeaponStart"));
-	const FName EndSocketName(TEXT("WeaponEnd"));
-
 	if (Attacker->DoesSocketExist(StartSocketName) && Attacker->DoesSocketExist(EndSocketName))
 	{
 		FVector StartLocation = Attacker->GetSocketLocation(StartSocketName);

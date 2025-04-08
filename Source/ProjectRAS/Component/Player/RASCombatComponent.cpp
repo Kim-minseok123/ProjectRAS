@@ -213,7 +213,7 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 
 	OwnerPlayer->GetStat()->ApplyStaminaDamage(30.f);
 
-	AnimComponent->PlayMontageWithSection(AnimComponent->GetMontageByName(TEXT("Roll")), RollSection, 1.0f,
+	AnimComponent->PlayMontageWithSection(AnimComponent->GetMontageByName(TEXT("Roll")), RollSection, 1.2f,
 		[this](UAnimMontage* Montage, bool bInterrupted)
 		{
 			CombatState = EPlayerCombatState::Idle;
@@ -304,13 +304,13 @@ void URASCombatComponent::PressQ()
 	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
 	if (MyAnimInstance == nullptr) return;
 
-	MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Skill")), TEXT("Skill1"), 1.0f,
+	MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Skill")), TEXT("Skill1"), 1.2f,
 		[this](UAnimMontage* Montage, bool bInterrupted)
 		{
 			CombatState = EPlayerCombatState::Idle;
 			if (OwnerPlayer && OwnerPlayer->GetComboComponent())
 			{
-				OwnerPlayer->GetComboComponent()->EndCombo(true, 0.9f);
+				OwnerPlayer->GetComboComponent()->EndCombo(true, 0.7f);
 			}
 		});
 }
@@ -326,13 +326,13 @@ void URASCombatComponent::PressE()
 	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
 	if (MyAnimInstance == nullptr) return;
 
-	MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Skill")), TEXT("Skill2"), 1.0f,
+	MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Skill")), TEXT("Skill2"), 1.2f,
 		[this](UAnimMontage* Montage, bool bInterrupted)
 		{
 			CombatState = EPlayerCombatState::Idle;
 			if (OwnerPlayer && OwnerPlayer->GetComboComponent())
 			{
-				OwnerPlayer->GetComboComponent()->EndCombo(true, 0.9f);
+				OwnerPlayer->GetComboComponent()->EndCombo(true, 0.7f);
 			}
 		});
 }
@@ -353,6 +353,11 @@ void URASCombatComponent::PressRightClick()
 
 	ParryingTime = RASUtils::GetCurrentPlatformTime();
 	MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Parrying")), TEXT("Parrying"), 1.0f);
+}
+
+void URASCombatComponent::PressRightClickHold()
+{
+	PressRightClick();
 }
 
 void URASCombatComponent::PressRightClickEnd()
@@ -428,6 +433,7 @@ void URASCombatComponent::HitFromActor(class ARASCharacterBase* InFrom, float In
 			CombatState = EPlayerCombatState::Armoring;
 
 			OwnerPlayer->GetWorldSettings()->SetTimeDilation(0.6f);
+			Stat->ApplyStaminaDamage(30.f);
 			FTimerHandle TimeDilationTimer;
 			OwnerPlayer->GetWorld()->GetTimerManager().SetTimer(TimeDilationTimer, [this]()
 				{
@@ -469,7 +475,7 @@ void URASCombatComponent::HitFromActor(class ARASCharacterBase* InFrom, float In
 				MyAnimInstance->StopMontage(nullptr, 0.1f);
 
 				URASComboComponent* ComboAttack = OwnerPlayer->GetComboComponent();
-				ComboAttack->EndCombo(true, 1.f);
+				ComboAttack->EndCombo(true, 0.8f);
 
 				CombatState = EPlayerCombatState::Breaking;
 
@@ -505,7 +511,7 @@ void URASCombatComponent::KillTarget(ARASCharacterBase* Target)
 			if (OwnerPlayer->GetComboComponent())
 			{
 				PressTab();
-				OwnerPlayer->GetComboComponent()->EndCombo(true, 1.f);
+				OwnerPlayer->GetComboComponent()->EndCombo(true, .8f);
 			}
 		});
 
