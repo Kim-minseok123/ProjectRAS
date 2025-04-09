@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "BTService_FindTarget.generated.h"
+#include "BTService_IsCanDash.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTRAS_API UBTService_FindTarget : public UBTService
+class PROJECTRAS_API UBTService_IsCanDash : public UBTService
 {
 	GENERATED_BODY()
 public:
-	UBTService_FindTarget();
+	UBTService_IsCanDash();
 
 	UPROPERTY(EditAnywhere)
-	float DetectRadius = 500.f;
+	float DashDistance = 300.f;
 protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };

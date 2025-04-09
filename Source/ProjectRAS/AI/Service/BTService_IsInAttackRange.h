@@ -15,6 +15,9 @@ class PROJECTRAS_API UBTService_IsInAttackRange : public UBTService
 	GENERATED_BODY()
 public:
 	UBTService_IsInAttackRange();
+
+	UPROPERTY(EditAnywhere)
+	float AttackDistance = 175.f;
 protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 

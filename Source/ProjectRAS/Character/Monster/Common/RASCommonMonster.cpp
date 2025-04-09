@@ -56,7 +56,19 @@ ARASCommonMonster::ARASCommonMonster()
 void ARASCommonMonster::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (Target && bUnflinching && bIsDeath == false)
+	if (bIsDeath) return;
+	if (Target && bUnflinching)
+	{
+		FVector MyLocation = GetActorLocation();
+		FVector TargetLocation = Target->GetActorLocation();
+
+		FRotator CurrentRotation = GetActorRotation();
+		FRotator DesiredRotation = UKismetMathLibrary::FindLookAtRotation(MyLocation, TargetLocation);
+		FRotator NewRotation = FMath::RInterpTo(CurrentRotation, FRotator(CurrentRotation.Pitch, DesiredRotation.Yaw, CurrentRotation.Roll), DeltaSeconds, 100.f);
+
+		SetActorRotation(NewRotation);
+	}
+	if (Target && bIsDashing)
 	{
 		FVector MyLocation = GetActorLocation();
 		FVector TargetLocation = Target->GetActorLocation();
@@ -98,7 +110,7 @@ void ARASCommonMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 		float PlayRate = FMath::FRandRange(1.15f, 1.2f);
 
 		FString AttackSectionName = FString::Printf(TEXT("Attack%d"), InAttackNumber);
-		
+		UE_LOG(LogTemp, Log, TEXT("%s"), *AttackSectionName);
 		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), *AttackSectionName, PlayRate);
 
 		bUnflinching = true;
@@ -234,4 +246,25 @@ void ARASCommonMonster::ExecuteDeath(int32 InDeathNumber)
 			Destroy();
 		},
 		5.f, false);
+}
+
+void ARASCommonMonster::Dash(FVector InDireciton, float InDashSpeed)
+{
+	InDireciton.Normalize();
+
+	bIsDashing = true;
+
+	FVector DashVelocity = InDireciton * InDashSpeed;  
+
+	float ArcHeight = 300.0f; 
+	DashVelocity.Z += ArcHeight;  
+
+	LaunchCharacter(DashVelocity, true, true); 
+
+	FTimerHandle Handler;
+	GetWorld()->GetTimerManager().SetTimer(Handler, [this]()
+		{
+			bIsDashing = false;
+		}, 1.f, false);
+	
 }

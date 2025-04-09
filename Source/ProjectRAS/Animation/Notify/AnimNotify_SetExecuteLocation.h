@@ -17,4 +17,7 @@ public:
 	UAnimNotify_SetExecuteLocation();
 
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Offset = 200.f;
 };

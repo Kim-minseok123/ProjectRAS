@@ -59,6 +59,11 @@ int ARASCharacterBase::GetMaxAttackNumber()
 	return Stat->GetMaxAttackNumber();
 }
 
+void ARASCharacterBase::Dash(FVector InDireciton, float InDashSpeed)
+{
+
+}
+
 void ARASCharacterBase::KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower)
 {
     

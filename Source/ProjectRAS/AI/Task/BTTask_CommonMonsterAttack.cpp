@@ -41,6 +41,7 @@ EBTNodeResult::Type UBTTask_CommonMonsterAttack::ExecuteTask(UBehaviorTreeCompon
 	OnAttackFinished.BindLambda(
 		[&]()
 		{
+			OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBCooldown, false);
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
 	);
@@ -69,6 +70,7 @@ EBTNodeResult::Type UBTTask_CommonMonsterAttack::ExecuteTask(UBehaviorTreeCompon
 
 void UBTTask_CommonMonsterAttack::EndTask()
 {
+	CachedOwnerComp->GetBlackboardComponent()->SetValueAsBool(BBCooldown, false);
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
 }
 

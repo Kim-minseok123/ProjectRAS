@@ -42,4 +42,6 @@ public:
 	virtual float GetStaminaDamageOfAttackNumber(int InAttackNumber) = 0;
 
 	virtual int GetMaxAttackNumber() = 0;
+
+	virtual void Dash(FVector InDireciton, float InDashSpeed) = 0;
 };

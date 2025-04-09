@@ -1,18 +1,19 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/Service/BTService_IsInAttackRange.h"
-#include "AIController.h"
-#include "Utils/RASBlackBoardKey.h"
-#include "Character/RASCharacterBase.h"
-#include "BehaviorTree/BlackboardComponent.h"
+#include "AI/Service/BTService_IsCanDash.h"
 #include "Interface/Monster/RASMonsterInfoInterface.h"
-UBTService_IsInAttackRange::UBTService_IsInAttackRange()
+#include "AIController.h"
+#include "Character/RASCharacterBase.h"
+#include "Utils/RASBlackBoardKey.h"
+#include "BehaviorTree/BlackboardComponent.h"
+
+UBTService_IsCanDash::UBTService_IsCanDash()
 {
 
 }
 
-void UBTService_IsInAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UBTService_IsCanDash::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
@@ -33,13 +34,13 @@ void UBTService_IsInAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 		return;
 	}
 	float Distance = ControllingPawn->GetDistanceTo(Target);
-	if (Distance <= AttackDistance)
+	if (Distance <= DashDistance)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBCanAttack, true);
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBCanDash, true);
 	}
 	else
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBCanAttack, false);
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBCanDash, false);
 	}
 	return;
 }

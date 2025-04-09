@@ -29,7 +29,7 @@ void UAnimNotify_SetExecuteLocation::Notify(USkeletalMeshComponent* MeshComp, UA
     ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(World, 0);
     if (MyActor && PlayerCharacter)
     {
-        FVector NewLocation = PlayerCharacter->GetActorLocation() + PlayerCharacter->GetActorForwardVector() * 200.f;
+        FVector NewLocation = PlayerCharacter->GetActorLocation() + PlayerCharacter->GetActorForwardVector() * Offset;
         MyActor->SetActorLocation(NewLocation);
     }
 }

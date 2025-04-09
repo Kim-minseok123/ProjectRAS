@@ -357,6 +357,9 @@ void URASCombatComponent::PressRightClick()
 
 void URASCombatComponent::PressRightClickHold()
 {
+	if (CombatState != EPlayerCombatState::Idle)
+		return;
+
 	PressRightClick();
 }
 
@@ -411,6 +414,9 @@ void URASCombatComponent::CycleLockOnTarget()
 
 void URASCombatComponent::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
+	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing)
+		return;
+
 	if (LockOnTarget == nullptr)
 		SetLockedOnTarget(InFrom);
 
@@ -470,7 +476,7 @@ void URASCombatComponent::HitFromActor(class ARASCharacterBase* InFrom, float In
 		float ActualDamage = Stat->ApplyDamage(InDamage);
 		if (ActualDamage > 0)
 		{
-			if (Stat->GetHp() > 0 && CombatState != EPlayerCombatState::Executing)
+			if (Stat->GetHp() > 0 && CombatState != EPlayerCombatState::Executing && CombatState != EPlayerCombatState::Breaking)
 			{
 				MyAnimInstance->StopMontage(nullptr, 0.1f);
 
@@ -538,6 +544,8 @@ void URASCombatComponent::Death()
 	{
 		PlayerAnimComponent->PlayMontageWithSection(PlayerAnimComponent->GetMontageByName(TEXT("Death")), TEXT("BackDeath"), 1.f);
 	}
+
+	LockOnTarget = nullptr;
 
 	FTimerHandle DeathHandle;
 	OwnerPlayer->GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()

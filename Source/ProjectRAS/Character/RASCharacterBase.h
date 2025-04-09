@@ -49,6 +49,8 @@ public:
 
 	virtual int GetMaxAttackNumber() override;
 
+	virtual void Dash(FVector InDireciton, float InDashSpeed) override;
+
 	FName& GetCreatureName() { return CreatureName; }
 
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;

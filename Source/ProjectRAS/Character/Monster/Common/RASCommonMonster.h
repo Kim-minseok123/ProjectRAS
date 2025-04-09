@@ -26,6 +26,7 @@ public:
 	virtual void KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower) override;
 	virtual void Death() override;
 	virtual void ExecuteDeath(int32 InDeathNumber) override;
+	virtual void Dash(FVector InDireciton, float InDashSpeed) override;
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -34,4 +35,6 @@ protected:
 	bool bIsDeath = false;
 
 	void PreDeath();
+
+	bool bIsDashing = false;              
 };
