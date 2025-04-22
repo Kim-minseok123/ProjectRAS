@@ -27,6 +27,28 @@ public:
         }
         return nullptr;
     }
+    template<typename T>
+    FORCEINLINE static T& RandomArrayItemFromStream(TArray<T>& Array, FRandomStream& Stream)
+    {
+        check(Array.Num() > 0);
+        const int32 Index = Stream.RandRange(0, Array.Num() - 1);
+        return Array[Index];
+    }
+    template<typename T>
+    static void ShuffleTArray(TArray<T>& Array, FRandomStream& Stream)
+    {
+
+        const int32 NumElements = Array.Num();
+        for (int32 i = NumElements - 1; i > 0; --i)
+        {
+            int32 RandomIndex = Stream.RandRange(0, i);
+
+            if (i != RandomIndex)
+            {
+                Array.Swap(i, RandomIndex);
+            }
+        }
+    }
 
     static const float GetCurrentPlatformTime()
     {
