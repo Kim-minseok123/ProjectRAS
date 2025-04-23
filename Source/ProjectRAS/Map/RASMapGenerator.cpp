@@ -92,16 +92,6 @@ void ARASMapGenerator::SpawnMainRoom()
 	UE_LOG(LogTemp, Log, TEXT("메인 탈출구 %d개"), ExitsList.Num());
 }
 
-void ARASMapGenerator::StartGeneratorTimer()
-{
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().SetTimer(GenerateMapTimerHandle,
-			this, &ARASMapGenerator::CheckToMapGenerateComplete,
-			1.f, true);
-	}
-}
-
 void ARASMapGenerator::GenerateMap()
 {
 	int32 ConsecutiveFailures = 0;
@@ -331,18 +321,7 @@ bool ARASMapGenerator::CheckForOverlap(class ARASChunk* InChunk)
 	return true;
 }
 
-void ARASMapGenerator::CheckToMapGenerateComplete()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Making Map"));
 
-	float TimeSeconds = GetWorld()->GetTimeSeconds();
-	if (TimeSeconds > MapGenerateData->MaxDungeonTime)
-	{
-		FString CurrentLevelName = GetWorld()->GetMapName();
-		CurrentLevelName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
-		UGameplayStatics::OpenLevel(GetWorld(), FName(*CurrentLevelName));
-	}
-}
 // 시간 복잡도 O(N+E)
 void ARASMapGenerator::RemoveNonConnectedChunks()
 {

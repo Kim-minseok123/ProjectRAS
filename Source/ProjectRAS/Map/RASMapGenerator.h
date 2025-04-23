@@ -34,7 +34,6 @@ protected:
 
 	void SetSeed();												// 시드 설정
 	void SpawnMainRoom();										// 메인 룸 스폰
-	void StartGeneratorTimer();									// 청크 스폰 타이머 시작	
 	void GenerateMap();											// 맵 루프 시작
 	bool SpawnNextChunk();										// 다음 청크(룸 or 복도) 스폰
 	bool SpawnAtExit(UWorld* World, const FExitInfo& ExitInfo);	// 스폰할 룸 or 복도 선택
@@ -44,7 +43,6 @@ protected:
 	bool SpawnRoom(UWorld* World, const FExitInfo& ExitInfo, const FActorSpawnParameters& Params);
 	// 충돌 검사 후 재시도 or 확정
 	bool CheckForOverlap(class ARASChunk* InChunk);
-	void CheckToMapGenerateComplete();							// 맵 생성 완료 체크
 
 	void RemoveNonConnectedChunks();							// 연결되지 않은 청크 삭제
 	void FinishMapGenerate();									// 맵 생성 완료
