@@ -17,7 +17,6 @@
 #include "UI/RASAimWidget.h"
 #include "Component/Player/RASCombatComponent.h"
 #include "Component/Monster/RASMonsterAnimComponent.h"
-#include "Components/CapsuleComponent.h"
 
 ARASCommonMonster::ARASCommonMonster()
 {

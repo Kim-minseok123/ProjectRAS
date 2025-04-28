@@ -60,7 +60,7 @@ void UAnimNotify_PushBody::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
             {
                 BattleInterface->HitFromActor(Cast<ARASCharacterBase>(MyActor), 15.f, 20.f);
                 FVector Direction = HitActor->GetActorLocation() - Center;
-                BattleInterface->KnockbackToDirection(MyActor, Direction, 1300.f);
+                //BattleInterface->KnockbackToDirection(MyActor, Direction, 1300.f);
             }
         }
     }
