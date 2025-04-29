@@ -19,5 +19,9 @@ TObjectPtr<class UAnimMontage> URASMonsterAnimComponent::GetMontageByName(FName 
 	{
 		return AttackMontage;
 	}
+	else if (MontageName == "Combo")
+	{
+		return ComboMontage;
+	}
 	return nullptr;
 }

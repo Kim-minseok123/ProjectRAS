@@ -27,7 +27,7 @@ void UAnimNotifyState_AttackTo::NotifyTick(USkeletalMeshComponent* MeshComp, UAn
 	{
 		if (ARASCharacterBase* Attacker = Cast<ARASCharacterBase>(Owner))
 		{
-			MakeLineTrace(MeshComp);
+			MakeSweepTrace(MeshComp);
 		}
 	}
 }
@@ -46,51 +46,57 @@ void UAnimNotifyState_AttackTo::NotifyEnd(USkeletalMeshComponent* MeshComp, UAni
 	}
 }
 
-void UAnimNotifyState_AttackTo::MakeLineTrace(USkeletalMeshComponent* Attacker)
+void UAnimNotifyState_AttackTo::MakeSweepTrace(USkeletalMeshComponent* Attacker)
 {
-	if (Attacker == nullptr) return;
+	if (!Attacker || !Attacker->DoesSocketExist(StartSocketName) || !Attacker->DoesSocketExist(EndSocketName))
+		return;
 
-	if (Attacker->DoesSocketExist(StartSocketName) && Attacker->DoesSocketExist(EndSocketName))
+	const FVector Start = Attacker->GetSocketLocation(StartSocketName);
+	const FVector End = Attacker->GetSocketLocation(EndSocketName);
+
+	AActor* Owner = Attacker->GetOwner();
+	if (!Owner) return;
+
+	UWorld* World = Owner->GetWorld();
+	if (!World) return;
+
+	// ───────────── Sphere Sweep ─────────────
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(AttackSweep), false, Owner);
+	Params.bReturnPhysicalMaterial = false;
+
+	const FCollisionShape Shape = FCollisionShape::MakeSphere(TraceRadius);
+	TArray<FHitResult> HitResults;
+
+	const bool bHit = World->SweepMultiByChannel(
+		HitResults, Start, End, FQuat::Identity, ECC_RASChannel, Shape, Params);
+
+#if !(UE_BUILD_SHIPPING)
+	// 디버그 시각화
+	const FVector Mid = (Start + End) * 0.5f;
+	const FQuat Rot = FRotationMatrix::MakeFromZ(End - Start).ToQuat();
+	DrawDebugCapsule(World, Mid, (End - Start).Size() * 0.5f, TraceRadius, Rot,
+		bHit ? FColor::Red : FColor::Blue, false, 0.15f);
+#endif
+
+	if (!bHit) return;
+
+	// ───────────── 데미지 처리 ─────────────
+	for (const FHitResult& Hit : HitResults)
 	{
-		FVector StartLocation = Attacker->GetSocketLocation(StartSocketName);
-		FVector EndLocation = Attacker->GetSocketLocation(EndSocketName);
-
-		AActor* Owner = Attacker->GetOwner();
-		if (Owner == nullptr) return;
-
-		FHitResult HitResult;
-		FCollisionQueryParams CollisionParams;
-		CollisionParams.AddIgnoredActor(Owner);
-
-		UWorld* World = Owner->GetWorld();
-		if (World == nullptr) return;
-		
-		bool bHit = World->LineTraceSingleByChannel(
-			HitResult,
-			StartLocation,
-			EndLocation,
-			ECC_RASChannel,
-			CollisionParams
-		);
-		AActor* HitActor = HitResult.GetActor();
-
-		if (bHit == false || HitActor == nullptr || HitActors.Contains(HitResult.GetActor()))
+		if (AActor* HitActor = Hit.GetActor())
 		{
-			DrawDebugLine(World, StartLocation, EndLocation, FColor::Blue, false, 0.1f, 0, 1.0f);
-			return;
+			if (HitActors.Contains(HitActor) || HitActor == Owner) continue;
+			HitActors.Add(HitActor);
+
+			if (IRASBattleInterface* BattleInterface = Cast<IRASBattleInterface>(HitActor))
+			{
+				auto* From = Cast<ARASCharacterBase>(Owner);
+				if (!From) continue;
+
+				const float Damage = From->GetDamageOfAttackNumber(AttackNum);
+				const float StaminaDamage = From->GetStaminaDamageOfAttackNumber(AttackNum);
+				BattleInterface->HitFromActor(From, Damage, StaminaDamage);
+			}
 		}
-		HitActors.Add(HitActor);
-
-		DrawDebugLine(World, StartLocation, EndLocation, FColor::Red, false, 1.0f);
-		DrawDebugSphere(World, HitResult.ImpactPoint, 10.0f, 12, FColor::Yellow, false, 1.0f);
-
-		IRASBattleInterface* BattleInterface = Cast<IRASBattleInterface>(HitActor);
-		ARASCharacterBase* From = Cast<ARASCharacterBase>(Owner);
-		if (BattleInterface == nullptr)
-			return;
-
-		float AcutalDamage = From->GetDamageOfAttackNumber(AttackNum);
-		float AcutalStaminaDamage = From->GetStaminaDamageOfAttackNumber(AttackNum);
-		BattleInterface->HitFromActor(From, AcutalDamage, AcutalStaminaDamage);
 	}
 }

@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "AnimNotifyState_AttackTo.generated.h"
+#include "AnimNotifyState_BossAttackTo.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTRAS_API UAnimNotifyState_AttackTo : public UAnimNotifyState
+class PROJECTRAS_API UAnimNotifyState_BossAttackTo : public UAnimNotifyState
 {
 	GENERATED_BODY()
 public:
-	UAnimNotifyState_AttackTo();
+	UAnimNotifyState_BossAttackTo();
 
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
 	
@@ -25,17 +25,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Attack)
 	int32 AttackNum;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Attack)
-	FName StartSocketName = "WeaponStart";
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Attack)
-	FName EndSocketName = "WeaponEnd";
-
 protected:
-	virtual void MakeSweepTrace(USkeletalMeshComponent* Attacker);
+	virtual void MakeSweepTrace(class ARASBossMonster* Boss);
 
 	UPROPERTY(EditAnywhere, Category="AttackTrace")
-	float TraceRadius = 5.f;
+	float TraceRadius = 8.f;
 	UPROPERTY()
 	TSet<TObjectPtr<AActor>> HitActors;
 };

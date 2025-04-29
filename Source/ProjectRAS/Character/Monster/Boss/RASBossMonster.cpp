@@ -24,6 +24,20 @@ ARASBossMonster::ARASBossMonster()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	CreatureName = TEXT("Ashur");
+
+	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
+	WeaponMesh->SetupAttachment(GetMesh(), FName(TEXT("hand_l")));
+	WeaponMesh->SetCollisionProfileName(TEXT("NoCollision"));
+
+
+	WeaponStart = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponStart"));
+	WeaponStart->SetupAttachment(WeaponMesh, TEXT("WeaponStart"));
+
+	WeaponEnd = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponEnd"));
+	WeaponEnd->SetupAttachment(WeaponMesh, TEXT("WeaponEnd"));
+
+	WeaponCircleAttack = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponCircleAttack"));
+	WeaponCircleAttack->SetupAttachment(WeaponMesh, TEXT("WeaponCircleAttack"));
 }
 
 void ARASBossMonster::Tick(float DeltaSeconds)
@@ -32,9 +46,14 @@ void ARASBossMonster::Tick(float DeltaSeconds)
 	if (bIsDeath) return;
 	if (Target && bUnflinching)
 	{
-		FVector Direction = Target->GetActorLocation() - GetActorLocation();
-		Direction.Normalize();
-		SetActorRotation(FQuat::FindBetweenVectors(GetActorForwardVector(), Direction));
+		FVector MyLocation = GetActorLocation();
+		FVector TargetLocation = Target->GetActorLocation();
+
+		FRotator CurrentRotation = GetActorRotation();
+		FRotator DesiredRotation = UKismetMathLibrary::FindLookAtRotation(MyLocation, TargetLocation);
+		FRotator NewRotation = FMath::RInterpTo(CurrentRotation, FRotator(CurrentRotation.Pitch, DesiredRotation.Yaw, CurrentRotation.Roll), DeltaSeconds, 100.f);
+
+		SetActorRotation(NewRotation);
 	}
 }
 
@@ -55,8 +74,15 @@ void ARASBossMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 	{
 		FString AttackSectionName = FString::Printf(TEXT("Attack%d"), InAttackNumber);
 		UE_LOG(LogTemp, Log, TEXT("%s"), *AttackSectionName);
-		MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), *AttackSectionName, 1.f);
-
+		if (InAttackNumber <= 3)
+		{
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), *AttackSectionName, 1.f);
+		}
+		else
+		{
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Combo")), *AttackSectionName, 1.f);
+		}
+		
 		bUnflinching = true;
 	}
 }
@@ -140,6 +166,20 @@ void ARASBossMonster::ExecuteDeath(int32 InDeathNumber)
 void ARASBossMonster::Dash(FVector InDireciton, float InDashSpeed)
 {
 
+}
+
+TArray<FVector> ARASBossMonster::GetWeaponPosition()
+{
+	TArray<FVector> WeaponPositions;
+	WeaponPositions.Add(WeaponStart->GetComponentLocation());
+	WeaponPositions.Add(WeaponEnd->GetComponentLocation());
+
+	return WeaponPositions;
+}
+
+void ARASBossMonster::SetWeaponOn(bool bWeaponOn)
+{
+	WeaponMesh->SetVisibility(bWeaponOn);
 }
 
 void ARASBossMonster::PreDeath()

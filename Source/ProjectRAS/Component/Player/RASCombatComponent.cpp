@@ -219,7 +219,7 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 			CombatState = EPlayerCombatState::Idle;
 			if (OwnerPlayer && OwnerPlayer->GetComboComponent())
 			{
-				OwnerPlayer->GetComboComponent()->EndCombo(true, 0.5f);
+				OwnerPlayer->GetComboComponent()->EndCombo(true, 0.1f);
 			}
 		});
 }
@@ -414,7 +414,7 @@ void URASCombatComponent::CycleLockOnTarget()
 
 void URASCombatComponent::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
-	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing)
+	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing)
 		return;
 
 	if (LockOnTarget == nullptr)
@@ -476,8 +476,9 @@ void URASCombatComponent::HitFromActor(class ARASCharacterBase* InFrom, float In
 		float ActualDamage = Stat->ApplyDamage(InDamage);
 		if (ActualDamage > 0)
 		{
-			if (Stat->GetHp() > 0 && CombatState != EPlayerCombatState::Executing && CombatState != EPlayerCombatState::Breaking)
+			if (Stat->GetHp() > 0)
 			{
+				//if (CombatState == EPlayerCombatState::Breaking) return;
 				MyAnimInstance->StopMontage(nullptr, 0.1f);
 
 				URASComboComponent* ComboAttack = OwnerPlayer->GetComboComponent();

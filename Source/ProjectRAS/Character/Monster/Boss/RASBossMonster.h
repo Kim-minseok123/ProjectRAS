@@ -30,6 +30,15 @@ public:
 	virtual void ExecuteDeath(int32 InDeathNumber) override;
 	virtual void Dash(FVector InDireciton, float InDashSpeed) override;
 
+	UFUNCTION(BlueprintCallable)
+	void Test(int InAttackNumber = 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Test"));
+		StartAttackMontage(InAttackNumber);
+	}
+	TArray<FVector> GetWeaponPosition();
+	FVector GetCircleAttackPosition(){ return WeaponCircleAttack->GetComponentLocation(); }
+	void SetWeaponOn(bool bWeaponOn);
 protected:
 
 	bool bIsDeath = false;
@@ -37,4 +46,14 @@ protected:
 	void PreDeath();
 
 	bool bIsDashing = false;  
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UStaticMeshComponent> WeaponMesh;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USceneComponent> WeaponStart;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USceneComponent> WeaponEnd;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USceneComponent> WeaponCircleAttack;
 };
