@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Character/Monster/RASMonster.h"
+#include "Interface/Monster/Boss/RASBossInfoInterface.h"
+#include "Data/RASBossScoreData.h"
 #include "RASBossMonster.generated.h"
 DECLARE_MULTICAST_DELEGATE(FOnStopAttackDelegate);
 /**
  * 
  */
 UCLASS()
-class PROJECTRAS_API ARASBossMonster : public ARASMonster
+class PROJECTRAS_API ARASBossMonster : public ARASMonster, public IRASBossInfoInterface
 {
 	GENERATED_BODY()
 	
@@ -20,6 +22,7 @@ public:
 
 	FOnStopAttackDelegate OnStopAttack;
 
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void PostInitializeComponents() override;
 	virtual void StartAttackMontage(int InAttackNumber = 0) override;
@@ -39,6 +42,14 @@ public:
 	TArray<FVector> GetWeaponPosition();
 	FVector GetCircleAttackPosition(){ return WeaponCircleAttack->GetComponentLocation(); }
 	void SetWeaponOn(bool bWeaponOn);
+
+	virtual FSkillScoreData& GetSkillScoreData(int32 InIdx) override;
+	virtual int32 GetSkillScoreDataCount() override
+	{
+		return BossScoreData->SkillScoreDataMap.Num(); 
+	}
+	virtual float GetHealthPercent() override;
+	virtual float GetStaminaPercent() override;
 protected:
 
 	bool bIsDeath = false;
@@ -56,4 +67,10 @@ protected:
 	TObjectPtr<class USceneComponent> WeaponEnd;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class USceneComponent> WeaponCircleAttack;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class URASBossScoreData> BossScoreData;
+
+	UPROPERTY(EditAnywhere)
+	TMap<int, FSkillScoreData> SkillScoreDataMap;
 };

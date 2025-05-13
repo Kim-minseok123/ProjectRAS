@@ -18,6 +18,7 @@ public:
 
 	virtual void RunAI() override;
 	virtual void StopAI() override;
+	void SetTargetBlackboard();
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void SetupBlackBoard() override;

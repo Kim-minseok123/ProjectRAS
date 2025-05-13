@@ -17,6 +17,7 @@
 #include "Component/Player/RASCombatComponent.h"
 #include "Component/Monster/RASMonsterAnimComponent.h"
 #include "Controller/Monster/Boss/RASAIBossController.h"
+#include "Data/RASBossScoreData.h"
 
 ARASBossMonster::ARASBossMonster()
 {
@@ -40,11 +41,32 @@ ARASBossMonster::ARASBossMonster()
 	WeaponCircleAttack->SetupAttachment(WeaponMesh, TEXT("WeaponCircleAttack"));
 }
 
+void ARASBossMonster::BeginPlay()
+{
+	Super::BeginPlay();
+	Target = Cast<ARASCharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (Target)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Target : %s"), *Target->GetName());
+		ARASAIBossController* MyController = Cast<ARASAIBossController>(GetController());
+		if (MyController)
+		{
+			MyController->SetTargetBlackboard();
+		}
+	}
+	SkillScoreDataMap = BossScoreData->SkillScoreDataMap;
+
+	for (auto& Skill : SkillScoreDataMap)
+	{
+		Skill.Value.LastUsedTime = -Skill.Value.Cooldown;
+	}
+}
+
 void ARASBossMonster::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (bIsDeath) return;
-	if (Target && bUnflinching)
+	if (Target)
 	{
 		FVector MyLocation = GetActorLocation();
 		FVector TargetLocation = Target->GetActorLocation();
@@ -63,7 +85,7 @@ void ARASBossMonster::PostInitializeComponents()
 
 	Stat->BaseStats = URASGameSingleton::Get().GetStatForName(CreatureName);
 	CreatureDamageInfo = URASGameSingleton::Get().GetDamageInfoForName(CreatureName);
-
+	
 	// Boss ui 연동
 }
 
@@ -74,6 +96,9 @@ void ARASBossMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 	{
 		FString AttackSectionName = FString::Printf(TEXT("Attack%d"), InAttackNumber);
 		UE_LOG(LogTemp, Log, TEXT("%s"), *AttackSectionName);
+
+		BossScoreData->SkillScoreDataMap[InAttackNumber].LastUsedTime = GetWorld()->GetTimeSeconds();
+
 		if (InAttackNumber <= 3)
 		{
 			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), *AttackSectionName, 1.f);
@@ -120,7 +145,7 @@ void ARASBossMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDama
 void ARASBossMonster::KnockbackToDirection(class AActor* InFrom, FVector Direction, float InPower)
 {
 	Super::KnockbackToDirection(InFrom, Direction, InPower);
-
+	InPower /= 5.f;
 	if (!Direction.IsNearlyZero())
 	{
 		Direction.Normalize();
@@ -128,7 +153,7 @@ void ARASBossMonster::KnockbackToDirection(class AActor* InFrom, FVector Directi
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance)
 		{
-			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Hit")), TEXT("Knockback"), 1.0f);
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Death")), TEXT("Knockback"), 1.0f);
 			AnimInstance->SetRootMotionMode(ERootMotionMode::IgnoreRootMotion);
 		}
 
@@ -180,6 +205,22 @@ TArray<FVector> ARASBossMonster::GetWeaponPosition()
 void ARASBossMonster::SetWeaponOn(bool bWeaponOn)
 {
 	WeaponMesh->SetVisibility(bWeaponOn);
+}
+
+FSkillScoreData& ARASBossMonster::GetSkillScoreData(int32 InIdx)
+{
+	check(SkillScoreDataMap.Contains(InIdx)); 
+	return SkillScoreDataMap[InIdx];
+}
+
+float ARASBossMonster::GetHealthPercent()
+{
+	return Stat->GetHp() / Stat->GetMaxHp();
+}
+
+float ARASBossMonster::GetStaminaPercent()
+{
+	return Stat->GetStamina() / Stat->GetMaxStamina();
 }
 
 void ARASBossMonster::PreDeath()

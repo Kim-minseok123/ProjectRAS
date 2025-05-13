@@ -40,7 +40,7 @@ void UAnimNotifyState_BossAttackTo::NotifyEnd(USkeletalMeshComponent* MeshComp, 
 		IRASBattleInterface* BattleInterface = Cast<IRASBattleInterface>(MeshComp->GetOwner());
 		if (BattleInterface)
 		{
-			BattleInterface->EndAttack();
+			//BattleInterface->EndAttack();
 		}
 	}
 
@@ -50,7 +50,7 @@ void UAnimNotifyState_BossAttackTo::MakeSweepTrace(ARASBossMonster* Boss)
 {
 	if (!Boss) return;
 
-	const TArray<FVector> WeaponLocs = Boss->GetWeaponPosition(); // [0]-시작, [1]-끝
+	const TArray<FVector> WeaponLocs = Boss->GetWeaponPosition();
 	if (WeaponLocs.Num() != 2) return;
 
 	const FVector Start = WeaponLocs[0];

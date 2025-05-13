@@ -6,6 +6,7 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Utils/RASBlackBoardKey.h"
+#include "Character/Monster/Boss/RASBossMonster.h"
 
 ARASAIBossController::ARASAIBossController()
 {
@@ -22,6 +23,14 @@ void ARASAIBossController::StopAI()
 	Super::StopAI();
 }
 
+void ARASAIBossController::SetTargetBlackboard()
+{
+	ARASBossMonster* Boss = Cast<ARASBossMonster>(GetPawn());
+	if (!Boss) return;
+	Blackboard->SetValueAsObject(BBTarget, Boss->GetTarget());
+	Blackboard->SetValueAsInt(BBBestSkillIndex, -1);
+}
+
 void ARASAIBossController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -30,5 +39,5 @@ void ARASAIBossController::OnPossess(APawn* InPawn)
 
 void ARASAIBossController::SetupBlackBoard()
 {
-
+	
 }

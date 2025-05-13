@@ -8,3 +8,5 @@
 #define BBCanDash TEXT("CAN_DASH")
 
 //--------Boss--------
+#define BBBestSkillIndex TEXT("BEST_SKILL_INDEX")
+#define BBWaitTime TEXT("WAIT_TIME")

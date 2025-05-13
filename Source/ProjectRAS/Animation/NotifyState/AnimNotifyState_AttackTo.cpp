@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "Character/RASCharacterBase.h"
 #include "Utils/RASCollisionChannels.h"
+#include "Character/Monster/Boss/RASBossMonster.h"
 
 UAnimNotifyState_AttackTo::UAnimNotifyState_AttackTo()
 {
@@ -38,6 +39,8 @@ void UAnimNotifyState_AttackTo::NotifyEnd(USkeletalMeshComponent* MeshComp, UAni
 
 	if (MeshComp)
 	{
+		ARASBossMonster* Boss = Cast<ARASBossMonster>(MeshComp->GetOwner());
+		if (Boss) return;
 		IRASBattleInterface* BattleInterface = Cast<IRASBattleInterface>(MeshComp->GetOwner());
 		if (BattleInterface)
 		{
