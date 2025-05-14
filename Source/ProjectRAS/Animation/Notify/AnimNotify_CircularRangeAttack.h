@@ -23,4 +23,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	float Radius;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	uint8 bPlayParticle : 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+	TObjectPtr<class UParticleSystem> Particle;
 };

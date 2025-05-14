@@ -8,10 +8,12 @@
 #include "DrawDebugHelpers.h"
 #include "Character/RASCharacterBase.h"
 #include "Utils/RASCollisionChannels.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 UAnimNotify_CircularRangeAttack::UAnimNotify_CircularRangeAttack()
 {
-
+	bPlayParticle = true;
 }
 
 void UAnimNotify_CircularRangeAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
@@ -28,6 +30,16 @@ void UAnimNotify_CircularRangeAttack::Notify(USkeletalMeshComponent* MeshComp, U
 		FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, Boss);
 		Params.bReturnPhysicalMaterial = false;
 
+		if (bPlayParticle && Particle)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(
+				Boss->GetWorld(),
+				Particle,
+				Center,
+				FRotator::ZeroRotator,
+				true
+			);
+		}
 		bool bHit = Boss->GetWorld()->SweepMultiByChannel(
 			HitResults,
 			Center,

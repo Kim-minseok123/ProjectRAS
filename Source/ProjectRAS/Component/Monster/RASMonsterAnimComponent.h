@@ -23,5 +23,8 @@ protected:
 	TObjectPtr<class UAnimMontage> AttackMontage; 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> NormalAttackMontage; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> ComboMontage;
 };

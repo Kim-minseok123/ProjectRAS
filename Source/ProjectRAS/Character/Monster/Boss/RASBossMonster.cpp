@@ -99,7 +99,11 @@ void ARASBossMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 
 		BossScoreData->SkillScoreDataMap[InAttackNumber].LastUsedTime = GetWorld()->GetTimeSeconds();
 
-		if (InAttackNumber <= 3)
+		if (InAttackNumber == 1)
+		{
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Normal")), *AttackSectionName, 1.f);
+		}
+		else if (InAttackNumber <= 3)
 		{
 			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), *AttackSectionName, 1.f);
 		}
