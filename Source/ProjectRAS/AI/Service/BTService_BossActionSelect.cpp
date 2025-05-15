@@ -31,8 +31,6 @@ void UBTService_BossActionSelect::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	IRASBossInfoInterface* BossInfo = Cast<IRASBossInfoInterface>(Boss);
 	if (!BossInfo) return;
 
-	
-
 	int32 MaxIndex = BossInfo->GetSkillScoreDataCount();
 
 	const float Now = Boss->GetWorld()->GetTimeSeconds();
@@ -53,11 +51,16 @@ void UBTService_BossActionSelect::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 		const float DistScore = 1.f - FMath::Clamp(FMath::Abs(Distance - Skill.IdealRange) / Skill.IdealRange, 0.f, 1.f);
 		const float HPScore = 1.f - BossHpPct;
 		const float StaminaScore = 1.f - BossStaminaPct;
-		const float RandomNoise = FMath::FRandRange(0.f, 0.15f);
+		const float RandomNoise = FMath::FRandRange(0.f, 0.7f);
 
-		const float Score = Skill.BaseWeight + Skill.DistanceWeight * DistScore+
+		float Score = Skill.BaseWeight + Skill.DistanceWeight * DistScore+
 			Skill.HpWeight * HPScore + Skill.StaminaWeight * StaminaScore + RandomNoise;
-		UE_LOG(LogTemp, Log, TEXT("%d의 Score : %f"), i, Score);
+		
+		if (LastSkillIndex == i)
+		{
+			Score -= RepeatPenalty;
+		}
+			
 
 		if (Score > MaxScore)
 		{
@@ -67,6 +70,7 @@ void UBTService_BossActionSelect::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 	}
 	BlackboardComp->SetValueAsInt(BBBestSkillIndex, BestIdx);
 
+	LastSkillIndex = BestIdx;
 	UE_LOG(LogTemp, Log, TEXT("%d 선택"), BestIdx);
 }
 

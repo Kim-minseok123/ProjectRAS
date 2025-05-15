@@ -18,6 +18,7 @@
 #include "Component/Monster/RASMonsterAnimComponent.h"
 #include "Controller/Monster/Boss/RASAIBossController.h"
 #include "Data/RASBossScoreData.h"
+#include "Utils/RASBlackBoardKey.h"
 
 ARASBossMonster::ARASBossMonster()
 {
@@ -94,22 +95,39 @@ void ARASBossMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
+		AnimInstance->StopAllMontages(0.f);
 		FString AttackSectionName = FString::Printf(TEXT("Attack%d"), InAttackNumber);
 		UE_LOG(LogTemp, Log, TEXT("%s"), *AttackSectionName);
 
-		BossScoreData->SkillScoreDataMap[InAttackNumber].LastUsedTime = GetWorld()->GetTimeSeconds();
-
 		if (InAttackNumber == 1)
 		{
-			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Normal")), *AttackSectionName, 1.f);
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Normal")), *AttackSectionName, 1.f,
+				[this, InAttackNumber](UAnimMontage* Montage, bool bInterrupted)
+				{
+					SkillScoreDataMap[InAttackNumber].LastUsedTime = GetWorld()->GetTimeSeconds();
+					Cast<ARASAIBossController>(GetController())->GetBlackboardComponent()->SetValueAsInt(BBBestSkillIndex, -1);
+					UE_LOG(LogTemp, Log, TEXT("쿨타임 기록됨q"));
+				});
 		}
 		else if (InAttackNumber <= 3)
 		{
-			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), *AttackSectionName, 1.f);
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Attack")), *AttackSectionName, 1.f,
+				[this, InAttackNumber](UAnimMontage* Montage, bool bInterrupted)
+				{
+					SkillScoreDataMap[InAttackNumber].LastUsedTime = GetWorld()->GetTimeSeconds();
+					Cast<ARASAIBossController>(GetController())->GetBlackboardComponent()->SetValueAsInt(BBBestSkillIndex, -1);
+					UE_LOG(LogTemp, Log, TEXT("쿨타임 기록됨w"));
+				});
 		}
 		else
 		{
-			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Combo")), *AttackSectionName, 1.f);
+			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Combo")), *AttackSectionName, 1.f,
+				[this, InAttackNumber](UAnimMontage* Montage, bool bInterrupted)
+				{
+					SkillScoreDataMap[InAttackNumber].LastUsedTime = GetWorld()->GetTimeSeconds();
+					Cast<ARASAIBossController>(GetController())->GetBlackboardComponent()->SetValueAsInt(BBBestSkillIndex, -1);
+					UE_LOG(LogTemp, Log, TEXT("쿨타임 기록됨e"));
+				});
 		}
 		
 		bUnflinching = true;

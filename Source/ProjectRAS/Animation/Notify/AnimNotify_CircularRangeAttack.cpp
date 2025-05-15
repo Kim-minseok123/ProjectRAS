@@ -72,12 +72,5 @@ void UAnimNotify_CircularRangeAttack::Notify(USkeletalMeshComponent* MeshComp, U
 				}
 			}
 		}
-
-		IRASBattleInterface* BattleInterface = Cast<IRASBattleInterface>(MeshComp->GetOwner());
-		if (BattleInterface)
-		{
-			BattleInterface->EndAttack();
-		}
-
 	}
 }

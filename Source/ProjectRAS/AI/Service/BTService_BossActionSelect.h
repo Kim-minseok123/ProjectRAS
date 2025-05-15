@@ -18,5 +18,6 @@ public:
 protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
-    
+    int32 LastSkillIndex = -1;
+	static constexpr float RepeatPenalty = 2.0f;
 };
