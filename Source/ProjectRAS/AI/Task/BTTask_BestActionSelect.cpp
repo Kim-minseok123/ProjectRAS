@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "AI/Service/BTService_BossActionSelect.h"
+#include "AI/Task/BTTask_BestActionSelect.h"
 #include "Interface/Monster/Boss/RASBossInfoInterface.h"
 #include "Character/RASCharacterBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -9,27 +9,27 @@
 #include "Data/RASBossScoreData.h"
 #include "AIController.h"
 
-UBTService_BossActionSelect::UBTService_BossActionSelect()
+
+UBTTask_BestActionSelect::UBTTask_BestActionSelect()
 {
-	NodeName = TEXT("Calc Skill Utility");
-	Interval = 0.25f; 
+
 }
 
-void UBTService_BossActionSelect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+EBTNodeResult::Type UBTTask_BestActionSelect::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
 
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
-	if (!BlackboardComp) return;
+	if (!BlackboardComp) return EBTNodeResult::Failed;
 
 	ARASCharacterBase* Boss = Cast<ARASCharacterBase>(OwnerComp.GetAIOwner()->GetPawn());
-	if (!Boss) return;
+	if (!Boss) return EBTNodeResult::Failed;
 
 	ARASCharacterBase* Target = Cast<ARASCharacterBase>(BlackboardComp->GetValueAsObject(BBTarget));
-	if (!Target) return;
+	if (!Target)  return EBTNodeResult::Failed;
 
 	IRASBossInfoInterface* BossInfo = Cast<IRASBossInfoInterface>(Boss);
-	if (!BossInfo) return;
+	if (!BossInfo)  return EBTNodeResult::Failed;
 
 	int32 MaxIndex = BossInfo->GetSkillScoreDataCount();
 
@@ -40,7 +40,7 @@ void UBTService_BossActionSelect::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 
 	float MaxScore = -1.f;
 	int32 BestIdx = BlackboardComp->GetValueAsInt(BBBestSkillIndex);
-	if (BestIdx != -1) return;
+	if (BestIdx != -1)  return EBTNodeResult::Failed;
 
 	for (int32 i = 1; i <= MaxIndex; i++)
 	{
@@ -53,14 +53,14 @@ void UBTService_BossActionSelect::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 		const float StaminaScore = 1.f - BossStaminaPct;
 		const float RandomNoise = FMath::FRandRange(0.f, 0.7f);
 
-		float Score = Skill.BaseWeight + Skill.DistanceWeight * DistScore+
+		float Score = Skill.BaseWeight + Skill.DistanceWeight * DistScore +
 			Skill.HpWeight * HPScore + Skill.StaminaWeight * StaminaScore + RandomNoise;
-		
+
 		if (LastSkillIndex == i)
 		{
 			Score -= RepeatPenalty;
 		}
-			
+
 
 		if (Score > MaxScore)
 		{
@@ -72,5 +72,6 @@ void UBTService_BossActionSelect::TickNode(UBehaviorTreeComponent& OwnerComp, ui
 
 	LastSkillIndex = BestIdx;
 	UE_LOG(LogTemp, Log, TEXT("%d 선택"), BestIdx);
-}
 
+	return Result;
+}
