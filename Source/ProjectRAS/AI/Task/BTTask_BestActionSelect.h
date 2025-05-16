@@ -5,7 +5,11 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_BestActionSelect.generated.h"
-
+struct FCandidate
+{
+	int32  Index;
+	float  Score;
+};
 /**
  * 
  */
@@ -19,5 +23,5 @@ public:
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 	int32 LastSkillIndex = -1;
-	static constexpr float RepeatPenalty = 2.0f;
+	static constexpr float RepeatPenalty = 4.0f;
 };

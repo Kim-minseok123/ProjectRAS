@@ -38,34 +38,59 @@ EBTNodeResult::Type UBTTask_BestActionSelect::ExecuteTask(UBehaviorTreeComponent
 	const float BossStaminaPct = BossInfo->GetStaminaPercent();
 	const float Distance = FVector::Distance(Boss->GetActorLocation(), Target->GetActorLocation());
 
-	float MaxScore = -1.f;
 	int32 BestIdx = BlackboardComp->GetValueAsInt(BBBestSkillIndex);
 	if (BestIdx != -1)  return EBTNodeResult::Failed;
 
-	for (int32 i = 1; i <= MaxIndex; i++)
+	TArray<FCandidate> Candidates;    
+	float MaxScore = -FLT_MAX;
+
+	for (int32 i = 1; i <= MaxIndex; ++i)
 	{
 		FSkillScoreData& Skill = BossInfo->GetSkillScoreData(i);
-		const bool bOnCD = Now - Skill.LastUsedTime < Skill.Cooldown;
-		if (bOnCD) continue;
+		if (Now - Skill.LastUsedTime < Skill.Cooldown) continue;
 
-		const float DistScore = 1.f - FMath::Clamp(FMath::Abs(Distance - Skill.IdealRange) / Skill.IdealRange, 0.f, 1.f);
+		const float DistScore = 1.f - FMath::Abs(Distance - Skill.IdealRange) / Skill.IdealRange;
 		const float HPScore = 1.f - BossHpPct;
 		const float StaminaScore = 1.f - BossStaminaPct;
-		const float RandomNoise = FMath::FRandRange(0.f, 0.7f);
+		const float Noise = FMath::FRandRange(0.f, 0.7f);
 
-		float Score = Skill.BaseWeight + Skill.DistanceWeight * DistScore +
-			Skill.HpWeight * HPScore + Skill.StaminaWeight * StaminaScore + RandomNoise;
+		float Score = Skill.BaseWeight
+			+ Skill.DistanceWeight * DistScore
+			+ Skill.HpWeight * HPScore
+			+ Skill.StaminaWeight * StaminaScore
+			+ Noise;
 
-		if (LastSkillIndex == i)
+		if (LastSkillIndex == i) Score -= RepeatPenalty;
+
+		MaxScore = FMath::Max(MaxScore, Score);
+		Candidates.Add({ i, Score });
+	}
+
+	// 상위 25퍼 필터링
+	const float Threshold = MaxScore * 0.75f;
+	float TotalWeight = 0.f;
+
+	for (const FCandidate& C : Candidates)
+	{
+		if (C.Score >= Threshold)
 		{
-			Score -= RepeatPenalty;
+			TotalWeight += C.Score;
+			UE_LOG(LogTemp, Log, TEXT("상위 25퍼에 든 스킬 %d"), C.Index);
 		}
+	}
 
-
-		if (Score > MaxScore)
+	// Pick
+	float Pick = FMath::FRandRange(0.f, TotalWeight);
+	for (const FCandidate& C : Candidates)
+	{
+		if (C.Score >= Threshold)
 		{
-			MaxScore = Score;
-			BestIdx = i;
+			Pick -= C.Score;
+			if (Pick <= 0.f)
+			{
+				BestIdx = C.Index;
+				break;
+			}
 		}
 	}
 	BlackboardComp->SetValueAsInt(BBBestSkillIndex, BestIdx);
