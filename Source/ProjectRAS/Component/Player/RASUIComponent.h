@@ -23,6 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="UI")
 	bool HideHUD();
 
+
 protected:
 
 
@@ -31,5 +32,4 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class URASPlayerHUDWidget> PlayerHUDWidget;
 
-public:	
 };

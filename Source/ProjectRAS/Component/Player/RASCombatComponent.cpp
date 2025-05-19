@@ -85,7 +85,6 @@ void URASCombatComponent::SetClosestLockedOnTarget()
 void URASCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 }
 
 void URASCombatComponent::SetInBattleTimer()
@@ -297,7 +296,7 @@ void URASCombatComponent::PressQ()
 {
 	if (CombatState != EPlayerCombatState::Idle)
 		return;
-
+	
 	CombatState = EPlayerCombatState::Skilling;
 	SetInBattleTimer();
 

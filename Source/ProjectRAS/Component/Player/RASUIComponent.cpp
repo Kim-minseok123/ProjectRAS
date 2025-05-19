@@ -5,6 +5,7 @@
 #include "UI/RASPlayerHUDWidget.h"
 #include "Component/Stat/RASStatComponent.h"
 #include "Character/Player/RASPlayer.h"
+#include "UI/RASBossHUDWidget.h"
 
 // Sets default values for this component's properties
 URASUIComponent::URASUIComponent()
@@ -14,12 +15,11 @@ URASUIComponent::URASUIComponent()
 	{
 		PlayerHUDWidgetClass = PlayerHUDWidgetRef.Class;
 	}
-}
 
+}
 
 void URASUIComponent::InitUI()
 {
-	
 	if (ShowHUD() == false)
 	{
 		ensure(false);
@@ -37,11 +37,6 @@ void URASUIComponent::InitUI()
 
 	PlayerHUDWidget->BindHP(Stat);
 	PlayerHUDWidget->BindStamina(Stat);
-
-	Stat->SetHp(10000);
-	Stat->SetStamina(10000);
-
-	Stat->OnHpZero.AddUObject(Player, &ARASPlayer::Death);
 }
 
 bool URASUIComponent::ShowHUD()
@@ -67,3 +62,4 @@ bool URASUIComponent::HideHUD()
 	}
 	return false;
 }
+

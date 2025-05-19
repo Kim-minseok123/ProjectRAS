@@ -46,7 +46,8 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
 	float RecoveryDelayDuration = 2.f;
 	float RecoveryDelayRemaining = 0.f;
 

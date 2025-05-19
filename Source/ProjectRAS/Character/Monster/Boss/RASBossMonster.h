@@ -34,22 +34,23 @@ public:
 	virtual void Dash(FVector InDireciton, float InDashSpeed) override;
 
 	UFUNCTION(BlueprintCallable)
-	void Test(int InAttackNumber = 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Test"));
-		StartAttackMontage(InAttackNumber);
-	}
+	void Test(int InAttackNumber = 0);
 	TArray<FVector> GetWeaponPosition();
-	FVector GetCircleAttackPosition(){ return WeaponCircleAttack->GetComponentLocation(); }
+	FVector GetCircleAttackPosition();
 	void SetWeaponOn(bool bWeaponOn);
 
 	virtual FSkillScoreData& GetSkillScoreData(int32 InIdx) override;
-	virtual int32 GetSkillScoreDataCount() override
-	{
-		return BossScoreData->SkillScoreDataMap.Num(); 
-	}
+	virtual int32 GetSkillScoreDataCount() override;
 	virtual float GetHealthPercent() override;
 	virtual float GetStaminaPercent() override;
+
+	void InitUI();
+
+	UFUNCTION(BlueprintCallable, Category="UI")
+	bool ShowBossHUD();
+
+	UFUNCTION(BlueprintCallable, Category="UI")
+	bool HideBossHUD();
 protected:
 
 	bool bIsDeath = false;
@@ -73,4 +74,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TMap<int, FSkillScoreData> SkillScoreDataMap;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class URASBossHUDWidget> BossHUDWidgetClass;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class URASBossHUDWidget> BossHUDWidget;
 };

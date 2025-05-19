@@ -81,6 +81,7 @@ void URASStatComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
 		return;
 	}
 	float CurStamina = GetStamina();
+	if(CurStamina >= BaseStats.MaxStamina) return;
 	SetStamina(CurStamina + RecoveryRate);
 }
 

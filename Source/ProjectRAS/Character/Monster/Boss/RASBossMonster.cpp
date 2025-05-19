@@ -19,6 +19,7 @@
 #include "Controller/Monster/Boss/RASAIBossController.h"
 #include "Data/RASBossScoreData.h"
 #include "Utils/RASBlackBoardKey.h"
+#include "UI/RASBossHUDWidget.h"
 
 ARASBossMonster::ARASBossMonster()
 {
@@ -40,6 +41,12 @@ ARASBossMonster::ARASBossMonster()
 
 	WeaponCircleAttack = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponCircleAttack"));
 	WeaponCircleAttack->SetupAttachment(WeaponMesh, TEXT("WeaponCircleAttack"));
+
+	static ConstructorHelpers::FClassFinder<URASBossHUDWidget> BossHUDWidgetRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/1_ProjectRAS/UI/WBP_BossHUD.WBP_BossHUD_C'"));
+	if (BossHUDWidgetRef.Class)
+	{
+		BossHUDWidgetClass = BossHUDWidgetRef.Class;
+	}
 }
 
 void ARASBossMonster::BeginPlay()
@@ -86,7 +93,13 @@ void ARASBossMonster::PostInitializeComponents()
 
 	Stat->BaseStats = URASGameSingleton::Get().GetStatForName(CreatureName);
 	CreatureDamageInfo = URASGameSingleton::Get().GetDamageInfoForName(CreatureName);
-	
+
+	InitUI();
+
+	Stat->SetHp(100000);
+	Stat->SetStamina(100000);
+
+	Stat->OnHpZero.AddUObject(this, &ARASBossMonster::Death);
 	// Boss ui 연동
 }
 
@@ -215,6 +228,12 @@ void ARASBossMonster::Dash(FVector InDireciton, float InDashSpeed)
 
 }
 
+void ARASBossMonster::Test(int InAttackNumber /*= 0*/)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Test"));
+	StartAttackMontage(InAttackNumber);
+}
+
 TArray<FVector> ARASBossMonster::GetWeaponPosition()
 {
 	TArray<FVector> WeaponPositions;
@@ -222,6 +241,11 @@ TArray<FVector> ARASBossMonster::GetWeaponPosition()
 	WeaponPositions.Add(WeaponEnd->GetComponentLocation());
 
 	return WeaponPositions;
+}
+
+FVector ARASBossMonster::GetCircleAttackPosition()
+{
+	return WeaponCircleAttack->GetComponentLocation();
 }
 
 void ARASBossMonster::SetWeaponOn(bool bWeaponOn)
@@ -235,6 +259,11 @@ FSkillScoreData& ARASBossMonster::GetSkillScoreData(int32 InIdx)
 	return SkillScoreDataMap[InIdx];
 }
 
+int32 ARASBossMonster::GetSkillScoreDataCount()
+{
+	return BossScoreData->SkillScoreDataMap.Num();
+}
+
 float ARASBossMonster::GetHealthPercent()
 {
 	return Stat->GetHp() / Stat->GetMaxHp();
@@ -243,6 +272,47 @@ float ARASBossMonster::GetHealthPercent()
 float ARASBossMonster::GetStaminaPercent()
 {
 	return Stat->GetStamina() / Stat->GetMaxStamina();
+}
+
+void ARASBossMonster::InitUI()
+{
+	if (ShowBossHUD() == false)
+	{
+		ensure(false);
+		return;
+	}
+
+	if (!Stat)
+	{
+		ensure(false);
+		return;
+	}
+
+	BossHUDWidget->BindHP(Stat);
+	BossHUDWidget->BindStamina(Stat);
+}
+
+bool ARASBossMonster::ShowBossHUD()
+{
+	if (!BossHUDWidget && BossHUDWidgetClass)
+		BossHUDWidget = CreateWidget<URASBossHUDWidget>(GetWorld(), BossHUDWidgetClass);
+
+	if (BossHUDWidget && !BossHUDWidget->IsInViewport())
+	{
+		BossHUDWidget->AddToViewport(10);
+		return true;
+	}
+	return false;
+}
+
+bool ARASBossMonster::HideBossHUD()
+{
+	if (BossHUDWidget && BossHUDWidget->IsInViewport())
+	{
+		BossHUDWidget->RemoveFromParent();
+		return true;
+	}
+	return false;
 }
 
 void ARASBossMonster::PreDeath()
