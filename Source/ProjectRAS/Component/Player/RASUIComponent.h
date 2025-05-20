@@ -23,7 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="UI")
 	bool HideHUD();
 
-
+	void SetIconProgressBar(int InIdx, float InDuration);
 protected:
 
 

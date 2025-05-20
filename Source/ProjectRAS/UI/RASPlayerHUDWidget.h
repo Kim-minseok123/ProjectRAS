@@ -20,6 +20,8 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	void BindHP(class URASStatComponent* InStatComponent);
 	void BindStamina(class URASStatComponent* InStatComponent);
+
+	void SetIconProgressBar(int InIdx, float InDuration);
 protected:
 
 	UFUNCTION()
@@ -37,4 +39,17 @@ protected:
 	TObjectPtr<class UImage> StaminaOrb;
 	UPROPERTY(Meta = (BindWidgetAnim), Transient)
 	TObjectPtr<class UWidgetAnimation> UI_Start;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UProgressBar> SkillBar1;
+	FTimerHandle SkillBar1Handle;
+	float ElapsedTime1 = 0.0f;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UProgressBar> SkillBar2;
+	FTimerHandle SkillBar2Handle;
+	float ElapsedTime2 = 0.0f;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UProgressBar> ItemBar1;
+	FTimerHandle ItemBar1Handle;
+	float ElapsedTime3 = 0.0f;
 };

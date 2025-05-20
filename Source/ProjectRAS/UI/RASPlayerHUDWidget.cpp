@@ -66,6 +66,93 @@ void URASPlayerHUDWidget::BindStamina(class URASStatComponent* InStatComponent)
 	}
 }
 
+void URASPlayerHUDWidget::SetIconProgressBar(int InIdx, float InDuration)
+{
+	const float LocalDuration = InDuration;
+	switch (InIdx)
+	{
+	case 1:
+		ElapsedTime1 = 0.f;
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				SkillBar1Handle,
+				[this, LocalDuration]()
+				{
+					ElapsedTime1 += 0.01f;
+
+					float Percent = 1.0f - FMath::Clamp(ElapsedTime1 / LocalDuration, 0.0f, 1.0f);
+					if (SkillBar1)
+					{
+						SkillBar1->SetPercent(Percent);
+					}
+
+					if (ElapsedTime1 >= LocalDuration)
+					{
+						GetWorld()->GetTimerManager().ClearTimer(SkillBar1Handle);
+					}
+				},
+				0.01f,
+				true
+			);
+		}
+		break;
+	case 2:
+		ElapsedTime2 = 0.f;
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				SkillBar2Handle,
+				[this, LocalDuration]()
+				{
+					ElapsedTime2 += 0.01f;
+
+					float Percent = 1.0f - FMath::Clamp(ElapsedTime2 / LocalDuration, 0.0f, 1.0f);
+					if (SkillBar2)
+					{
+						SkillBar2->SetPercent(Percent);
+					}
+
+					if (ElapsedTime2 >= LocalDuration)
+					{
+						GetWorld()->GetTimerManager().ClearTimer(SkillBar2Handle);
+					}
+				},
+				0.01f,
+				true
+			);
+		}
+		break;
+	case 3:
+		ElapsedTime3 = 0.f;
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				ItemBar1Handle,
+				[this, LocalDuration]()
+				{
+					ElapsedTime3 += 0.01f;
+
+					float Percent = 1.0f - FMath::Clamp(ElapsedTime3 / LocalDuration, 0.0f, 1.0f);
+					if (ItemBar1)
+					{
+						ItemBar1->SetPercent(Percent);
+					}
+
+					if (ElapsedTime3 >= LocalDuration)
+					{
+						GetWorld()->GetTimerManager().ClearTimer(ItemBar1Handle);
+					}
+				},
+				0.01f,
+				true
+			);
+		}
+		break;
+	}
+
+}
+
 void URASPlayerHUDWidget::UpdateHp(float InHp)
 {
 	if (StatComponent->IsValidLowLevel())

@@ -9,6 +9,7 @@
 #include "Utils/RASCollisionChannels.h"
 #include "Engine/OverlapResult.h"
 #include "Utils/RASUtils.h"
+#include "Component/Player/RASUIComponent.h"
 
 // Sets default values for this component's properties
 URASCombatComponent::URASCombatComponent()
@@ -296,10 +297,23 @@ void URASCombatComponent::PressQ()
 {
 	if (CombatState != EPlayerCombatState::Idle)
 		return;
-	
+
+	if(GetWorld()->GetTimerManager().IsTimerActive(SkillQTimer))
+		return;
+
 	CombatState = EPlayerCombatState::Skilling;
 	SetInBattleTimer();
 
+	GetWorld()->GetTimerManager().SetTimer(
+		SkillQTimer,
+		[this]()
+		{
+			
+		},
+		9.f,
+		false);
+
+	OwnerPlayer->GetUIComponent()->SetIconProgressBar(1, 9.f);
 	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
 	if (MyAnimInstance == nullptr) return;
 
@@ -319,8 +333,21 @@ void URASCombatComponent::PressE()
 	if (CombatState != EPlayerCombatState::Idle)
 		return;
 
+	if (GetWorld()->GetTimerManager().IsTimerActive(SkillETimer))
+		return;
+
 	CombatState = EPlayerCombatState::Skilling;
 	SetInBattleTimer();
+
+	GetWorld()->GetTimerManager().SetTimer(
+		SkillETimer,
+		[this]()
+		{
+
+		},
+		10.f,
+		false);
+	OwnerPlayer->GetUIComponent()->SetIconProgressBar(2, 10.f);
 
 	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
 	if (MyAnimInstance == nullptr) return;

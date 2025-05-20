@@ -89,4 +89,7 @@ protected:
 	FTimerHandle BattleTimer;
 	bool bInBattle = false;
 	bool bIsPressShift = false;
+
+	FTimerHandle SkillETimer;
+	FTimerHandle SkillQTimer;
 };
