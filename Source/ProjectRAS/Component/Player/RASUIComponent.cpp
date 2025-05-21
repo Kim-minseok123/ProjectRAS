@@ -63,11 +63,11 @@ bool URASUIComponent::HideHUD()
 	return false;
 }
 
-void URASUIComponent::SetIconProgressBar(int InIdx, float InDuration)
+void URASUIComponent::SetIconProgressBar(int InIdx, float InDuration, int Count /*= 5*/)
 {
 	if (PlayerHUDWidget)
 	{
-		PlayerHUDWidget->SetIconProgressBar(InIdx, InDuration);
+		PlayerHUDWidget->SetIconProgressBar(InIdx, InDuration, Count);
 	}
 }
 

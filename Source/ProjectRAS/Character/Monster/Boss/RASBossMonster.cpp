@@ -172,6 +172,7 @@ void ARASBossMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDama
 		
 		if (bUnflinching == false)
 		{
+			if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(MonsterAnimComponent->GetMontageByName(TEXT("Hit")))) return;
 			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Hit")), TEXT("Hit"), 1.0f);
 		}
 	}

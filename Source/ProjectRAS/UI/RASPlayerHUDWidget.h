@@ -21,7 +21,7 @@ public:
 	void BindHP(class URASStatComponent* InStatComponent);
 	void BindStamina(class URASStatComponent* InStatComponent);
 
-	void SetIconProgressBar(int InIdx, float InDuration);
+	void SetIconProgressBar(int InIdx, float InDuration, int Count = 5);
 protected:
 
 	UFUNCTION()
@@ -50,6 +50,8 @@ protected:
 	float ElapsedTime2 = 0.0f;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UProgressBar> ItemBar1;
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UTextBlock> PotionCountTxt;
 	FTimerHandle ItemBar1Handle;
 	float ElapsedTime3 = 0.0f;
 };

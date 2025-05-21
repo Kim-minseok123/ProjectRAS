@@ -39,7 +39,7 @@ public:
 	void PressRightClickHold();
 	void PressRightClickEnd();
 
-	
+
 	// 특정 대상으로 락온 설정
 	void SetLockedOnTarget(class ARASCharacterBase* Target);
 	// 락온 대상 순환 변경
@@ -58,6 +58,12 @@ public:
 
 	// 전투 종료(죽음) 처리
 	void Death();
+
+	// 포션 개수 회복
+	void RecoverPotion() { PotionCount = 5; }
+
+	// 포션 사용
+	void UsePotion();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -92,4 +98,9 @@ protected:
 
 	FTimerHandle SkillETimer;
 	FTimerHandle SkillQTimer;
+
+	// 회복
+	int32 PotionCount = 5;
+	FTimerHandle PotionTimer;
+
 };

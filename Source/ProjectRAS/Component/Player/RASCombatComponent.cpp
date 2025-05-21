@@ -582,3 +582,34 @@ void URASCombatComponent::Death()
 		4.f, false);
 }
 
+void URASCombatComponent::UsePotion()
+{
+	if (CombatState != EPlayerCombatState::Idle) return;
+	if (PotionCount <= 0) return;
+	if (GetWorld()->GetTimerManager().IsTimerActive(PotionTimer)) return;
+	URASStatComponent* Stat = OwnerPlayer->GetStat();
+	if (Stat == nullptr) return;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		PotionTimer,
+		[this]()
+		{
+
+		},
+		3.f,
+		false);
+	PotionCount--;
+	OwnerPlayer->GetUIComponent()->SetIconProgressBar(3, 3.f, PotionCount);
+	
+	Stat->SetHp(Stat->GetHp() + Stat->GetMaxHp() * 0.6f);
+	CombatState = EPlayerCombatState::UsingItem;
+
+	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
+	if (MyAnimInstance == nullptr) return;
+	MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Potion")), TEXT("Potion"), 1.f,
+		[this](UAnimMontage* Montage, bool bInterrupted)
+		{
+			CombatState = EPlayerCombatState::Idle;
+		});
+}
+

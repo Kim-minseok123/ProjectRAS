@@ -114,8 +114,8 @@ void ARASPlayer::Move(const FInputActionValue& Value)
 {
 	FVector2D CurrentMovementInput = Value.Get<FVector2D>();
 	LastMoveInput = CurrentMovementInput;
-
-	if (PlayerCombatComponent->GetCombatState() != EPlayerCombatState::Idle) return;
+	if(PlayerCombatComponent->GetCombatState() != EPlayerCombatState::UsingItem)
+		if (PlayerCombatComponent->GetCombatState() != EPlayerCombatState::Idle) return;
 
 	const FRotator Rotation = GetController()->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);

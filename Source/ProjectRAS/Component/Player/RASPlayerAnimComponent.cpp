@@ -32,6 +32,10 @@ TObjectPtr<class UAnimMontage> URASPlayerAnimComponent::GetMontageByName(FName M
 	{
 		return RollMontage;
 	}
+	else if (MontageName == "Potion")
+	{
+		return PotionMontage;
+	}
 	return nullptr;
 }
 

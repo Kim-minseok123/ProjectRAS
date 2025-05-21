@@ -66,7 +66,9 @@ void URASPlayerHUDWidget::BindStamina(class URASStatComponent* InStatComponent)
 	}
 }
 
-void URASPlayerHUDWidget::SetIconProgressBar(int InIdx, float InDuration)
+
+
+void URASPlayerHUDWidget::SetIconProgressBar(int InIdx, float InDuration, int Count /*= 5*/)
 {
 	const float LocalDuration = InDuration;
 	switch (InIdx)
@@ -124,6 +126,7 @@ void URASPlayerHUDWidget::SetIconProgressBar(int InIdx, float InDuration)
 		}
 		break;
 	case 3:
+		PotionCountTxt->SetText(FText::AsNumber(Count));
 		ElapsedTime3 = 0.f;
 		if (GetWorld())
 		{

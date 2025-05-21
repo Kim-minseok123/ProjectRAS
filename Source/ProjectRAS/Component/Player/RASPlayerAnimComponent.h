@@ -29,5 +29,7 @@ protected:
 	TObjectPtr<class UAnimMontage> ExecuteMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> RollMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta=(AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> PotionMontage;
 
 };

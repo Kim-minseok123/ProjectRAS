@@ -15,7 +15,7 @@ URASInputComponent::URASInputComponent()
 {
 	// Input Action
 	{
-		static ConstructorHelpers::FObjectFinder<UInputMappingContext> MappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/1_ProjectRAS/Input/IMC_NonBattle.IMC_NonBattle'"));
+		static ConstructorHelpers::FObjectFinder<UInputMappingContext> MappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/1_ProjectRAS/Input/IMC_PlayerInput.IMC_PlayerInput'"));
 		if (MappingContextRef.Object)
 		{
 			MappingContext = MappingContextRef.Object;
@@ -66,6 +66,11 @@ URASInputComponent::URASInputComponent()
 		{
 			EAttackAction = EAttackActionRef.Object;
 		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> PotionActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_1.IA_1'"));
+		if (PotionActionRef.Object)
+		{
+			PotionAction = PotionActionRef.Object;
+		}
 		static ConstructorHelpers::FObjectFinder<UInputAction> ParyyingActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_RightClick.IA_RightClick'"));
 		if (ParyyingActionRef.Object)
 		{
@@ -88,6 +93,7 @@ void URASInputComponent::InitPlayerInputComponent(class UInputComponent* PlayerI
 	EnhancedInput->BindAction(ShiftAttackAction, ETriggerEvent::Completed, this, &URASInputComponent::HandlePressShiftEnd);
 	EnhancedInput->BindAction(QAttackAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressQ);
 	EnhancedInput->BindAction(EAttackAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressE);
+	EnhancedInput->BindAction(PotionAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePress1);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Started, this, &URASInputComponent::HandlePressRightClick);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressRightClickHold);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Completed, this, &URASInputComponent::HandlePressRightClickEnd);
@@ -236,5 +242,15 @@ void URASInputComponent::HandlePressRightClickEnd()
 	if (URASCombatComponent* CombatComponent = OwnerPlayer->GetCombatComponent())
 	{
 		CombatComponent->PressRightClickEnd();
+	}
+}
+
+void URASInputComponent::HandlePress1()
+{
+	ARASPlayer* OwnerPlayer = Cast<ARASPlayer>(GetOwner());
+
+	if (URASCombatComponent* CombatComponent = OwnerPlayer->GetCombatComponent())
+	{
+		CombatComponent->UsePotion();
 	}
 }
