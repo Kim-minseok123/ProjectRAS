@@ -6,6 +6,8 @@
 #include "Utils/RASUtils.h"
 #include "Map/RASChunk.h"
 #include "Map/RASDoor.h"
+#include "Map/RASRoom.h"
+#include "Map/RASCorridor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 

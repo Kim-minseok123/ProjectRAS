@@ -6,6 +6,7 @@
 #include "Character/RASCharacterBase.h"
 #include "Interface/Monster/RASMonsterInfoInterface.h"
 #include "RASMonster.generated.h"
+DECLARE_DELEGATE(FOnRoomClear)
 
 /**
  * 
@@ -34,6 +35,8 @@ public:
 	virtual void HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage) override;
 
 	virtual void SetVisibleIndicator(bool InbIsVisible) override;
+
+	FOnRoomClear OnRoomClear;
 
 protected:
 

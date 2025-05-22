@@ -15,8 +15,18 @@ class PROJECTRAS_API ARASRoom : public ARASChunk
 	GENERATED_BODY()
 public:
 	ARASRoom();
-	
+
+	void CloseDoors();
+	void OpenDoors();
+
 	void SetupMoveableDoor();
 protected:
-	
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category = "Spawn")
+	TSubclassOf<class ARASMonsterSpawner> SpanwerClass;  
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category = "Spawn")
+	TObjectPtr<class ARASMonsterSpawner> Spawner;
+
 };

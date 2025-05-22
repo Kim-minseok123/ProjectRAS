@@ -5,9 +5,9 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Data/RASMapType.h"
-#include "Map/RASRoom.h"
-#include "Map/RASCorridor.h"
 #include "RASMapGenerateData.generated.h"
+
+class ARASCorridor;
 /**
  * 
  */
@@ -28,13 +28,13 @@ public:
 	float MaxDungeonTime;
 
 	UPROPERTY(EditAnywhere, Category = Generate)
-	TSubclassOf<ARASRoom> StartRoomClass;
+	TSubclassOf<class ARASRoom> StartRoomClass;
 
 	UPROPERTY(EditAnywhere, Category = Generate)
-	TMap<ERASRoomType, TSubclassOf<ARASRoom>> RoomList;
+	TMap<ERASRoomType, TSubclassOf<class ARASRoom>> RoomList;
 
 	UPROPERTY(EditAnywhere, Category = Generate)
-	TMap<ERASCorridorType, TSubclassOf<ARASCorridor>> CorridorList;
+	TMap<ERASCorridorType, TSubclassOf<class ARASCorridor>> CorridorList;
 
 	UPROPERTY(EditAnywhere, Category = Generate)
 	int32 MaxNpcRoomAmount;

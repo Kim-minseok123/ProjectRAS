@@ -30,7 +30,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> ChunkRootComponent = nullptr;
+	TObjectPtr<USceneComponent> ChunkRootComponent;
 
 	UPROPERTY(EditAnywhere, Category = Type)
 	ERASMapType MapType = ERASMapType::None;
@@ -38,13 +38,12 @@ protected:
 
 public:
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> ExitsParent = nullptr;
+	TObjectPtr<USceneComponent> ExitsParent;
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> StartsParent = nullptr;
+	TObjectPtr<USceneComponent> StartsParent;
 	UPROPERTY(EditAnywhere, Category = Box)
-	TObjectPtr<class UBoxComponent> CollisionBox = nullptr;
-
+	TObjectPtr<class UBoxComponent> CollisionBox;
 	TArray<TObjectPtr<class ARASDoor>> Doors;
 
-	TObjectPtr<class ARASDoor> StartDoor = nullptr;
+	TObjectPtr<class ARASDoor> StartDoor;
 };

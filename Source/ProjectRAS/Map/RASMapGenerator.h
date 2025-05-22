@@ -19,7 +19,8 @@ struct FExitInfo
     UPROPERTY(EditAnywhere, Category="Generate")
 	TObjectPtr<class ARASDoor> Door;
 };
-
+class ARASCorridor;
+class ARASRoom;
 UCLASS()
 class PROJECTRAS_API ARASMapGenerator : public AActor
 {

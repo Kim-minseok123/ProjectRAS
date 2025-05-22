@@ -2,7 +2,7 @@
 
 
 #include "Map/RASDoor.h"
-
+#include "Kismet/KismetMathLibrary.h"
 // Sets default values
 ARASDoor::ARASDoor()
 {
@@ -39,33 +39,51 @@ void ARASDoor::BeginPlay()
 	
 }
 
-// Called every frame
 void ARASDoor::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
-}
-void ARASDoor::CloseDoor()
-{
-	DoorLeft->SetRelativeRotation(FRotator(0,0,0));
-	DoorRight->SetRelativeRotation(FRotator(0,0,0));
+    if (!bMoving) return;
+
+    Elapsed += DeltaTime;
+    float Alpha = FMath::Clamp(Elapsed / Duration, 0.f, 1.f);
+
+    // 보간
+    const FRotator TargetRot = bOpening ? OpenRot : ClosedRot;
+    const FRotator StartRot = bOpening ? ClosedRot : OpenRot;
+    const FRotator NewRot = UKismetMathLibrary::RLerp(StartRot, TargetRot, Alpha, true);
+
+    DoorLeft->SetRelativeRotation(NewRot);
+    DoorRight->SetRelativeRotation(NewRot);
+
+    if (Alpha >= 1.f)
+    {
+        bMoving = false;            
+    }
 }
 
 void ARASDoor::OpenDoor()
 {
-	DoorLeft->SetRelativeRotation(FRotator(0, 90, 0));
-	DoorRight->SetRelativeRotation(FRotator(0, 90, 0));
+    StartMove(true);
+}
+
+void ARASDoor::CloseDoor()
+{
+    StartMove(false);
+}
+
+void ARASDoor::StartMove(bool bOpen)
+{
+    if (bMoving && bOpening == bOpen) return; 
+
+    bOpening = bOpen;
+    bMoving = true;
+    Elapsed = 0.f;
 }
 
 void ARASDoor::SetupMoveable()
 {
-	if (ConnectedChunk != nullptr)
-	{
-		// Open Door 게임 플레이 델리게이트에 설정하기
-
-		// Close Door 게임 플레이 델리게이트에 설정하기
-	}
-	else
+	if (ConnectedChunk == nullptr)
 	{
 		CloseDoor();
 	}

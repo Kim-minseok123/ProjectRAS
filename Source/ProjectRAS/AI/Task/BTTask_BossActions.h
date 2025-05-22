@@ -25,13 +25,13 @@ protected:
     UFUNCTION()
     void OnAttackFinished();
 
-    TObjectPtr<class UBlackboardComponent> BB = nullptr;
-    TObjectPtr<class UBehaviorTreeComponent> CachedOwnerComp = nullptr;
-    TObjectPtr<class AAIController> AI = nullptr;
-    TObjectPtr<class ARASBossMonster> Boss = nullptr;
-    TObjectPtr<class IRASBattleInterface> Battle = nullptr;
-    TObjectPtr<class IRASBossInfoInterface> BossInfo = nullptr;
-    TObjectPtr<class ARASCharacterBase> Target = nullptr;
+    TObjectPtr<class UBlackboardComponent> BB;
+    TObjectPtr<class UBehaviorTreeComponent> CachedOwnerComp;
+    TObjectPtr<class AAIController> AI;
+    TObjectPtr<class ARASBossMonster> Boss;
+    TObjectPtr<class IRASBattleInterface> Battle;
+    TObjectPtr<class IRASBossInfoInterface> BossInfo;
+    TObjectPtr<class ARASCharacterBase> Target;
     int32           Idx = INDEX_NONE;
 
 

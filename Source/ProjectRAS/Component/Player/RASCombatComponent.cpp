@@ -107,7 +107,7 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 	URASPlayerAnimComponent* AnimComponent = OwnerPlayer->GetAnimComponent();
 	if(AnimComponent == nullptr) return;
 
-	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Deathing) return;
+	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::UsingItem) return;
 	if (OwnerPlayer->GetStat()->GetStamina() < 30) return;
 
 	CombatState = EPlayerCombatState::Rolling;
