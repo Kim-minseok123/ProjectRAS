@@ -22,11 +22,15 @@ public:
 	void SetupMoveableDoor();
 protected:
 	virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category = "Spawn")
 	TSubclassOf<class ARASMonsterSpawner> SpanwerClass;  
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category = "Spawn")
 	TObjectPtr<class ARASMonsterSpawner> Spawner;
+
+	UPROPERTY(EditAnywhere)
+	uint8 bMonsterSpawn : 1;
 
 };

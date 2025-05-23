@@ -12,15 +12,14 @@ ARASMonsterSpawner::ARASMonsterSpawner()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MaxMonsterCount = 3;
-	MinMonsterCount = 1;
+	MinMonsterCount = 2;
 	SpawnCount = 0;
 	bIsSpawned = false;
 }
 
 void ARASMonsterSpawner::SpawnCreature()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SpawnCreature! %s"), *(GetActorLocation().ToString()));
-	if (bIsSpawned)
+	if (bIsSpawned || bIsMonsterSpawn == false)
 	{
 		return;
 	}
@@ -47,8 +46,8 @@ void ARASMonsterSpawner::SpawnCreature()
 		TSubclassOf<ARASMonster> MonsterClass = MonsterClasses[Idx];
 		if (!MonsterClass) { continue; }
 
-		const float OffX = FMath::RandRange(-700.f, 700.f);
-		const float OffY = FMath::RandRange(-700.f, 700.f);
+		const float OffX = FMath::RandRange(-600.f, 600.f);
+		const float OffY = FMath::RandRange(-600.f, 600.f);
 		FVector Pos = Center + FVector(OffX, OffY, 0.f);
 
 		FHitResult Hit;

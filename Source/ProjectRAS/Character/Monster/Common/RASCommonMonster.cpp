@@ -220,12 +220,12 @@ void ARASCommonMonster::Death()
 	ARASPlayer* Player = Cast<ARASPlayer>(Target);
 	if (Player != nullptr) 
 		Player->GetCombatComponent()->PressTab();
+	OnRoomClear.ExecuteIfBound();
 
 
 	FTimerHandle DeathHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
 		{
-			OnRoomClear.ExecuteIfBound();
 			Destroy();
 		},
 		5.f, false);
@@ -239,11 +239,11 @@ void ARASCommonMonster::ExecuteDeath(int32 InDeathNumber)
 
 	MonsterAnimComponent->PlayMontageWithSection(
 		MonsterAnimComponent->GetMontageByName(TEXT("Death")), FName(*MontageSectionName), 1.f);
-	
+	OnRoomClear.ExecuteIfBound();
+
 	FTimerHandle DeathHandle;
 	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
 		{
-			OnRoomClear.ExecuteIfBound();
 			Destroy();
 		},
 		5.f, false);

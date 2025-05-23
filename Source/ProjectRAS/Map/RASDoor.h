@@ -58,7 +58,7 @@ public:
 	bool  bMoving = false;   // 열리거나 닫히는 중인가
 	bool  bOpening = false;   // true: 열리는 중, false: 닫히는 중
 	float Elapsed = 0.f;     // 경과 시간
-	float Duration = 1.f;     // 애니메이션 길이(초)
+	float Duration = .5f;     // 애니메이션 길이(초)
 
 	void StartMove(bool bOpen);
 

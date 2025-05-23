@@ -64,11 +64,13 @@ void ARASDoor::Tick(float DeltaTime)
 
 void ARASDoor::OpenDoor()
 {
+    if (ConnectedChunk == nullptr) return;
     StartMove(true);
 }
 
 void ARASDoor::CloseDoor()
 {
+    if (ConnectedChunk == nullptr) return;
     StartMove(false);
 }
 
@@ -85,7 +87,8 @@ void ARASDoor::SetupMoveable()
 {
 	if (ConnectedChunk == nullptr)
 	{
-		CloseDoor();
+		DoorLeft->SetRelativeRotation(ClosedRot);
+        DoorRight->SetRelativeRotation(ClosedRot);
 	}
 }
 

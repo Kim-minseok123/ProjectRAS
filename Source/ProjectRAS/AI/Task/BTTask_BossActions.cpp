@@ -28,8 +28,8 @@ EBTNodeResult::Type UBTTask_BossActions::ExecuteTask(UBehaviorTreeComponent& Own
 	CachedOwnerComp = &OwnerComp;
 	AI = OwnerComp.GetAIOwner();
 	Boss = Cast<ARASBossMonster>(AI ? AI->GetPawn() : nullptr);
-	Battle = Cast<IRASBattleInterface>(Boss);
-	BossInfo = Cast<IRASBossInfoInterface>(Boss);
+	IRASBattleInterface* Battle = Cast<IRASBattleInterface>(Boss);
+	IRASBossInfoInterface* BossInfo = Cast<IRASBossInfoInterface>(Boss);
 	Target = Cast<ARASCharacterBase>(BB->GetValueAsObject(BBTarget));
 
 	if (!Boss || !Battle || !BossInfo || !Target) return EBTNodeResult::Failed;
@@ -61,6 +61,8 @@ EBTNodeResult::Type UBTTask_BossActions::StartAttack()
 	LookVector.Z = 0.0f;
 	FRotator TargetRot = FRotationMatrix::MakeFromX(LookVector).Rotator();
 	Boss->SetActorRotation(FMath::RInterpTo(Boss->GetActorRotation(), TargetRot, GetWorld()->GetDeltaSeconds(), 200.f));
+
+	IRASBattleInterface* Battle = Cast<IRASBattleInterface>(Boss);
 
 	Battle->SetAttackFinishedDelegate(OnAttackFinished);
 

@@ -76,7 +76,7 @@ void ARASMapGenerator::SpawnMainRoom()
 		GetActorLocation(), GetActorRotation(), Params));
 	if (!Main)
 		return;
-	
+
 	Main->SetupDoor();
 
 	TArray<TObjectPtr<ARASDoor>> Doors = Main->GetDoors();
@@ -86,7 +86,7 @@ void ARASMapGenerator::SpawnMainRoom()
 
 	for (int32 i = 0; i < CorridorCount; ++i)
 	{
-		ExitsList.Add({ Main->GetMapType(), Doors[i]});
+		ExitsList.Add({ Main->GetMapType(), Doors[i] });
 	}
 
 	SpawnedChunks.Add(Main);
@@ -100,7 +100,7 @@ void ARASMapGenerator::GenerateMap()
 
 	const int32 MaxFailuresBeforeRestart = MapGenerateData->MaxRestartFailures;
 
-	while(SpawnRoomTypeList.Num() > 0 && ExitsList.Num() > 0)
+	while (SpawnRoomTypeList.Num() > 0 && ExitsList.Num() > 0)
 	{
 		if (!SpawnNextChunk())
 		{
@@ -110,7 +110,7 @@ void ARASMapGenerator::GenerateMap()
 			if (ConsecutiveFailures >= MaxFailuresBeforeRestart)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("GenerateMap: Too many consecutive failures, restarting generation"));
-				
+
 				for (ARASChunk* Chunk : SpawnedChunks)
 				{
 					if (Chunk)
@@ -123,7 +123,7 @@ void ARASMapGenerator::GenerateMap()
 				SpawnMainRoom();
 
 				ConsecutiveFailures = 0;
-				continue; 
+				continue;
 			}
 
 			RASUtils::ShuffleTArray(SpawnRoomTypeList, Stream);
@@ -132,12 +132,12 @@ void ARASMapGenerator::GenerateMap()
 
 		ConsecutiveFailures = 0;
 	}
-	
+
 	bCompleteMapGenerate = true;
 
 	RemoveNonConnectedChunks();
 	FinishMapGenerate();
-	
+
 }
 
 bool ARASMapGenerator::SpawnNextChunk()
@@ -155,14 +155,14 @@ bool ARASMapGenerator::SpawnNextChunk()
 
 		if (SpawnAtExit(World, ExitInfo))
 		{
-			ExitsList.RemoveAt(ExitIndex); 
+			ExitsList.RemoveAt(ExitIndex);
 			UE_LOG(LogTemp, Log, TEXT("스폰된 후 남은 탈출구 %d개"), ExitsList.Num());
 
 			return true;
 		}
 
 		RASUtils::ShuffleTArray(SpawnRoomTypeList, Stream);
-		
+
 		if (ExitsList.Num() == 0)
 			break;
 	}
@@ -232,16 +232,16 @@ bool ARASMapGenerator::SpawnCorridor(UWorld* World, const FExitInfo& ExitInfo, c
 
 		ARASChunk* Chunk = Cast<ARASChunk>(
 			World->SpawnActor<AActor>(CorridorClass, SpawnLocation, SpawnRotation, Params));
-		if (!Chunk)
-			continue;
+		if (!Chunk) return false;
 
-		if (!CheckForOverlap(Chunk))
+		Chunk->SetupDoor();                      
+		Chunk->CollisionBox->UpdateBounds();      
+		
+		if (!CheckForOverlap(Chunk))              
 		{
 			Chunk->Destroy();
-			continue;
+			return false;
 		}
-
-		Chunk->SetupDoor();
 		Chunk->GetStartDoor()->SetConnectedChunk(ExitInfo.Door->GetOwnerChunk());
 		ExitInfo.Door->SetConnectedChunk(Chunk);
 
@@ -260,7 +260,7 @@ bool ARASMapGenerator::SpawnRoom(UWorld* World, const FExitInfo& ExitInfo, const
 {
 	if (SpawnRoomTypeList.Num() == 0)
 		return false;
-	
+
 	ERASRoomType Type = SpawnRoomTypeList[0];
 	if (Type == ERASRoomType::None)
 		return false;
@@ -271,13 +271,16 @@ bool ARASMapGenerator::SpawnRoom(UWorld* World, const FExitInfo& ExitInfo, const
 
 	ARASChunk* Chunk = Cast<ARASChunk>(
 		World->SpawnActor<AActor>(MapGenerateData->RoomList[Type], SpawnLocation, SpawnRotation, Params));
-	if (!Chunk || !CheckForOverlap(Chunk))
+	if (!Chunk) return false;
+
+	Chunk->SetupDoor();                      
+	Chunk->CollisionBox->UpdateBounds();     
+
+	if (!CheckForOverlap(Chunk))             
 	{
-		if (Chunk) Chunk->Destroy();
+		Chunk->Destroy();
 		return false;
 	}
-
-	Chunk->SetupDoor();
 
 	Chunk->GetStartDoor()->SetConnectedChunk(ExitInfo.Door->GetOwnerChunk());
 
@@ -286,7 +289,7 @@ bool ARASMapGenerator::SpawnRoom(UWorld* World, const FExitInfo& ExitInfo, const
 	UE_LOG(LogTemp, Log, TEXT("%d 룸 스폰 완료"), Type);
 
 	SpawnRoomTypeList.RemoveAt(0);
-	
+
 	TArray<TObjectPtr<ARASDoor>> Doors = Chunk->GetDoors();
 	RASUtils::ShuffleTArray(Doors, Stream);
 
@@ -295,7 +298,7 @@ bool ARASMapGenerator::SpawnRoom(UWorld* World, const FExitInfo& ExitInfo, const
 
 	for (int32 i = 0; i < CorridorCount; ++i)
 	{
-		ExitsList.Add({ Chunk->GetMapType(), Doors[i]});
+		ExitsList.Add({ Chunk->GetMapType(), Doors[i] });
 	}
 	return true;
 }
@@ -322,8 +325,6 @@ bool ARASMapGenerator::CheckForOverlap(class ARASChunk* InChunk)
 	SpawnedChunks.Add(InChunk);
 	return true;
 }
-
-
 // 시간 복잡도 O(N+E)
 void ARASMapGenerator::RemoveNonConnectedChunks()
 {

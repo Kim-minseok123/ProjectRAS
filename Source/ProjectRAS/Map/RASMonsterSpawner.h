@@ -18,7 +18,7 @@ public:
 	UFUNCTION()
 	void CheckClearRoom();
 
-	void SetRoom(class ARASRoom* InRoom) { OwnRoom = InRoom; }
+	void SetRoom(class ARASRoom* InRoom, bool bMonsterSpawn) { OwnRoom = InRoom; bIsMonsterSpawn = bMonsterSpawn; }
 protected:
 	virtual void BeginPlay() override;
 
@@ -41,4 +41,6 @@ protected:
 	int SpawnCount;
 
 	TObjectPtr<class ARASRoom> OwnRoom;
+
+	bool bIsMonsterSpawn = false;
 };

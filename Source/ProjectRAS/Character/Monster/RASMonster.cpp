@@ -45,6 +45,14 @@ void ARASMonster::PostInitializeComponents()
 	MonsterAnimComponent->SetAnimInstance(GetMesh()->GetAnimInstance());
 }
 
+void ARASMonster::BeginPlay()
+{
+	Super::BeginPlay();
+
+	MonsterAnimComponent->PlayMontageWithSection(
+		MonsterAnimComponent->GetMontageByName(TEXT("Normal")), TEXT("Ready"), 1.f);
+}
+
 void ARASMonster::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);

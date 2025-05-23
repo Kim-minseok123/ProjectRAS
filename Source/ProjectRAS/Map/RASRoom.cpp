@@ -9,6 +9,7 @@
 ARASRoom::ARASRoom()
 {
 	MapType = ERASMapType::Room;
+	bMonsterSpawn = true;
 }
 
 void ARASRoom::CloseDoors()
@@ -21,7 +22,10 @@ void ARASRoom::CloseDoors()
 		}
 		Door->CloseDoor();
 	}
-	StartDoor->CloseDoor();
+	if (StartDoor != nullptr) 
+	{
+		StartDoor->CloseDoor();
+	}
 }
 
 void ARASRoom::OpenDoors()
@@ -34,7 +38,10 @@ void ARASRoom::OpenDoors()
 		}
 		Door->OpenDoor();
 	}
-	StartDoor->OpenDoor();
+	if (StartDoor != nullptr) 
+	{
+		StartDoor->OpenDoor();
+	}
 }
 
 void ARASRoom::SetupMoveableDoor()
@@ -58,6 +65,7 @@ void ARASRoom::SetupMoveableDoor()
 
 void ARASRoom::BeginPlay()
 {
+	Super::BeginPlay();
 	if (SpanwerClass)
 	{
 		const FVector ForwardCenter = GetActorLocation() +
@@ -70,6 +78,15 @@ void ARASRoom::BeginPlay()
 		Spawner = GetWorld()->SpawnActor<ARASMonsterSpawner>(
 			SpanwerClass, ForwardCenter, SpawnRot, Params);
 
-		Spawner->SetRoom(this);
+		Spawner->SetRoom(this, bMonsterSpawn);
+	}
+}
+
+void ARASRoom::BeginDestroy()
+{
+	Super::BeginDestroy();
+	if (Spawner)
+	{
+		Spawner->Destroy();
 	}
 }
