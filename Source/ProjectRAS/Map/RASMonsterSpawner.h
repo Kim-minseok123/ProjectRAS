@@ -18,6 +18,8 @@ public:
 	UFUNCTION()
 	void CheckClearRoom();
 
+	
+
 	void SetRoom(class ARASRoom* InRoom, bool bMonsterSpawn) { OwnRoom = InRoom; bIsMonsterSpawn = bMonsterSpawn; }
 protected:
 	virtual void BeginPlay() override;
@@ -36,6 +38,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
 	int32 MinMonsterCount;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
 	bool bIsSpawned;
 
 	int SpawnCount;

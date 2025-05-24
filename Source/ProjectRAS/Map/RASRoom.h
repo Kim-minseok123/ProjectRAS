@@ -19,10 +19,12 @@ public:
 	void CloseDoors();
 	void OpenDoors();
 
+	void SetSpawner();
+	void DestroySpawner();
+
 	void SetupMoveableDoor();
 protected:
 	virtual void BeginPlay() override;
-	virtual void BeginDestroy() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category = "Spawn")
 	TSubclassOf<class ARASMonsterSpawner> SpanwerClass;  

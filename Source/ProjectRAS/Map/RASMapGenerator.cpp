@@ -114,7 +114,14 @@ void ARASMapGenerator::GenerateMap()
 				for (ARASChunk* Chunk : SpawnedChunks)
 				{
 					if (Chunk)
+					{
+						ARASRoom* Room = Cast<ARASRoom>(Chunk);
+						if (Room)
+						{
+							Room->DestroySpawner();
+						}
 						Chunk->Destroy();
+					}
 				}
 				SpawnedChunks.Empty();
 				ExitsList.Empty();
@@ -256,6 +263,7 @@ bool ARASMapGenerator::SpawnCorridor(UWorld* World, const FExitInfo& ExitInfo, c
 	UE_LOG(LogTemp, Warning, TEXT("SpawnCorridor: 모든 복도 타입 실패"));
 	return false;
 }
+
 bool ARASMapGenerator::SpawnRoom(UWorld* World, const FExitInfo& ExitInfo, const FActorSpawnParameters& Params)
 {
 	if (SpawnRoomTypeList.Num() == 0)
@@ -281,7 +289,7 @@ bool ARASMapGenerator::SpawnRoom(UWorld* World, const FExitInfo& ExitInfo, const
 		Chunk->Destroy();
 		return false;
 	}
-
+	
 	Chunk->GetStartDoor()->SetConnectedChunk(ExitInfo.Door->GetOwnerChunk());
 
 	ExitInfo.Door->SetConnectedChunk(Chunk);
@@ -521,6 +529,7 @@ void ARASMapGenerator::FinishMapGenerate()
 		ARASRoom* Room = Cast<ARASRoom>(Chunk);
 		if (Room)
 		{
+			Room->SetSpawner();
 			Room->SetupMoveableDoor();
 		}
 	}

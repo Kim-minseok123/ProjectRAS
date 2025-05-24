@@ -44,6 +44,33 @@ void ARASRoom::OpenDoors()
 	}
 }
 
+void ARASRoom::SetSpawner()
+{
+	if (SpanwerClass)
+	{
+		const FVector ForwardCenter = GetActorLocation() +
+			GetActorForwardVector() * 900.f + FVector(0.f, 0, 500.f);
+		const FRotator SpawnRot = GetActorRotation();
+
+		FActorSpawnParameters Params;
+		Params.Owner = this;
+
+		Spawner = GetWorld()->SpawnActor<ARASMonsterSpawner>(
+			SpanwerClass, ForwardCenter, SpawnRot, Params);
+
+		Spawner->SetRoom(this, bMonsterSpawn);
+	}
+}
+
+void ARASRoom::DestroySpawner()
+{
+	if (Spawner)
+	{
+		Spawner->Destroy();
+		Spawner = nullptr;
+	}
+}
+
 void ARASRoom::SetupMoveableDoor()
 {
 	for (auto& Door : Doors)
@@ -66,27 +93,4 @@ void ARASRoom::SetupMoveableDoor()
 void ARASRoom::BeginPlay()
 {
 	Super::BeginPlay();
-	if (SpanwerClass)
-	{
-		const FVector ForwardCenter = GetActorLocation() +
-			GetActorForwardVector() * 900.f + FVector(0.f, 0, 500.f);
-		const FRotator SpawnRot = GetActorRotation();
-
-		FActorSpawnParameters Params;
-		Params.Owner = this;
-
-		Spawner = GetWorld()->SpawnActor<ARASMonsterSpawner>(
-			SpanwerClass, ForwardCenter, SpawnRot, Params);
-
-		Spawner->SetRoom(this, bMonsterSpawn);
-	}
-}
-
-void ARASRoom::BeginDestroy()
-{
-	Super::BeginDestroy();
-	if (Spawner)
-	{
-		Spawner->Destroy();
-	}
 }
