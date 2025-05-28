@@ -79,7 +79,6 @@ void ARASPlayer::BeginPlay()
 
 	Stat->BaseStats = URASGameSingleton::Get().GetStatForName(CreatureName);
 	CreatureDamageInfo = URASGameSingleton::Get().GetDamageInfoForName(CreatureName);
-	
 	PlayerUIComponent->InitUI();
 
 	Stat->SetHp(10000);
