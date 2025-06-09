@@ -9,6 +9,17 @@ ARASTitlePlayerController::ARASTitlePlayerController()
 
 }
 
+void ARASTitlePlayerController::SetTitleUI()
+{
+	if (TitleWidget)
+	{
+		FInputModeUIOnly Mode;
+		Mode.SetWidgetToFocus(TitleWidget->GetCachedWidget());
+		SetInputMode(Mode);
+		bShowMouseCursor = true;
+	}
+}
+
 void ARASTitlePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -19,10 +30,7 @@ void ARASTitlePlayerController::BeginPlay()
 		if (TitleWidget)
 		{
 			TitleWidget->AddToViewport();
-			FInputModeUIOnly Mode;
-			Mode.SetWidgetToFocus(TitleWidget->GetCachedWidget());
-			SetInputMode(Mode);
-			bShowMouseCursor = true;
+			SetTitleUI();
 		}
 	}
 	else

@@ -16,6 +16,7 @@ class PROJECTRAS_API ARASTitlePlayerController : public APlayerController
 public:
 	ARASTitlePlayerController();
 
+	void SetTitleUI();
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<class URASTitleWidget> TitleWidgetClass;

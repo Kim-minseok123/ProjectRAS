@@ -15,4 +15,6 @@ class PROJECTRAS_API ARASPlayerController : public APlayerController
 	GENERATED_BODY()
 public:
 	ARASPlayerController();
+
+	virtual void BeginPlay() override;
 };

@@ -25,14 +25,14 @@ public:
 	void OnStartGameEnd();
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
-	void ExitGame();
+	void OnMenuWidget();
 
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> StartButton;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UButton> ExitButton;
+	TObjectPtr<class UButton> MenuButton;
 
 	UPROPERTY(Meta = (BindWidgetAnim), Transient)
 	TObjectPtr<class UWidgetAnimation> UI_StartGame;
