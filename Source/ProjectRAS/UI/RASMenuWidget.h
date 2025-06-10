@@ -40,4 +40,12 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class USlider> SFXSlider;
 
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USoundMix> SoundMix;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USoundClass> BGMClass;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USoundClass> SFXClass;
+
 };	
