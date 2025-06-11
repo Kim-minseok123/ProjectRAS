@@ -3,6 +3,7 @@
 
 #include "Controller/Player/RASTitlePlayerController.h"
 #include "UI/RASTitleWidget.h"
+#include "Audio/RASAudioSubsystem.h"
 
 ARASTitlePlayerController::ARASTitlePlayerController()
 {
@@ -37,4 +38,6 @@ void ARASTitlePlayerController::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("TitleWidgetClass is not set in ARASTitlePlayerController!"));
 	}
+
+	GetGameInstance()->GetSubsystem<URASAudioSubsystem>()->PlayBGM(TEXT("Title"), 0.5f, 0.5f);
 }
