@@ -27,6 +27,14 @@ public:
 		return StartDoor;
 	}
 
+	UFUNCTION(BlueprintCallable)
+	void PlayerInChunk(class ARASPlayer* Player);
+
+	UFUNCTION(BlueprintCallable)
+	void PlayerOutChunk(class ARASPlayer* Player);
+
+	bool IsArrive() const { return bArrive; }
+
 protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(VisibleAnywhere)
@@ -46,4 +54,8 @@ public:
 	TArray<TObjectPtr<class ARASDoor>> Doors;
 
 	TObjectPtr<class ARASDoor> StartDoor;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arrive")
+	uint8 bArrive : 1;
 };

@@ -156,6 +156,23 @@ void URASPlayerHUDWidget::SetIconProgressBar(int InIdx, float InDuration, int Co
 
 }
 
+void URASPlayerHUDWidget::HideMiniMap()
+{
+	if (MiniMap)
+	{
+		MiniMap->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+}
+
+void URASPlayerHUDWidget::ShowMiniMap()
+{
+	if (MiniMap)
+	{
+		MiniMap->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
 void URASPlayerHUDWidget::UpdateHp(float InHp)
 {
 	if (StatComponent->IsValidLowLevel())

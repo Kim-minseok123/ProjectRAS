@@ -23,9 +23,18 @@ public:
 	void ShowMenu();
 	UFUNCTION(BlueprintCallable)
 	void HideMenu();
+
+	void SetVolume();
+
+	bool IsMenuVisible() const;
+
+	float BGMVolume = 0.5f;
+	float SFXVolume = 0.5f;
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class URASMenuWidget> MenuWidgetClass;
 	UPROPERTY()
 	TObjectPtr<class URASMenuWidget> MenuWidget;
+
+	
 };

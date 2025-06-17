@@ -71,3 +71,20 @@ void URASUIComponent::SetIconProgressBar(int InIdx, float InDuration, int Count 
 	}
 }
 
+void URASUIComponent::EnterBattle()
+{
+	if (PlayerHUDWidget)
+	{
+		PlayerHUDWidget->HideMiniMap();
+	}
+
+}
+
+void URASUIComponent::ExitBattle()
+{
+	if (PlayerHUDWidget)
+	{
+		PlayerHUDWidget->ShowMiniMap();
+	}
+}
+

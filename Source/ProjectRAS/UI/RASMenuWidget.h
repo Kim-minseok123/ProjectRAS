@@ -18,7 +18,7 @@ public:
 
 	virtual void NativeConstruct() override;
 
-protected:
+public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void OffMenuWidget();
 
@@ -30,7 +30,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void SetSFXVolume(float Value);
-
+protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> ExitButton;
 	UPROPERTY(meta = (BindWidget))

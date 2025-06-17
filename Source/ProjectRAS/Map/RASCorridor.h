@@ -15,6 +15,9 @@ class PROJECTRAS_API ARASCorridor : public ARASChunk
 	GENERATED_BODY()
 public:
 	ARASCorridor();
+	
+	virtual void BeginPlay() override;
 
+	void SetDoorCollision();
 protected:
 };

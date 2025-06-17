@@ -92,3 +92,10 @@ void ARASDoor::SetupMoveable()
 	}
 }
 
+void ARASDoor::SetNoCollision()
+{
+    DoorLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    DoorRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    DoorWall->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+

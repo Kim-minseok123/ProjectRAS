@@ -43,6 +43,10 @@ protected:
 	TObjectPtr<class UInputAction> ParryingAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> PotionAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> MenuAction;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> MappingContext;
@@ -62,4 +66,5 @@ protected:
 	void HandlePressRightClickHold();
 	void HandlePressRightClickEnd();
 	void HandlePress1();
+	void HandlePressO();
 };

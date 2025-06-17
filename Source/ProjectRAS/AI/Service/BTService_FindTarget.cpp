@@ -10,6 +10,8 @@
 #include "Utils/RASCollisionChannels.h"
 #include "Utils/RASBlackBoardKey.h"
 #include "Character/RASCharacterBase.h"
+#include "Character/Player/RASPlayer.h"
+#include "Component/Player/RASCombatComponent.h"
 
 UBTService_FindTarget::UBTService_FindTarget()
 {
@@ -41,6 +43,14 @@ void UBTService_FindTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* N
 	ARASCharacterBase* Target = MonsterInfo->GetTarget();
 	if (Target != nullptr)
 	{
+		if (ARASPlayer* Player = Cast<ARASPlayer>(Target))
+		{
+			if (Player->GetCombatComponent()->GetCombatState() == EPlayerCombatState::Deathing)
+			{
+				OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBTarget, nullptr);
+				return;
+			}
+		}
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBTarget, Target);
 		return;
 	}

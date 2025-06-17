@@ -4,6 +4,7 @@
 #include "Map/RASChunk.h"
 #include "Map/RASDoor.h"
 #include "Components/BoxComponent.h"
+#include "Character/Player/RASPlayer.h"
 
 ARASChunk::ARASChunk()
 {
@@ -64,6 +65,18 @@ void ARASChunk::SetupDoor()
 		}
 	}
 	
+}
+
+void ARASChunk::PlayerInChunk(ARASPlayer* Player)
+{
+	if (Player == nullptr) return;
+	Player->SetCurrentChunk(this);
+	bArrive = true;
+}
+
+void ARASChunk::PlayerOutChunk(ARASPlayer* Player)
+{
+	//Player->SetCurrentChunk(nullptr);
 }
 
 void ARASChunk::BeginPlay()

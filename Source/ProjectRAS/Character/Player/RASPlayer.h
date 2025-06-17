@@ -46,6 +46,10 @@ public:
 	void SwitchToExecutionCamera(float BlendTime);
 	void SwitchBackToOriginalCamera(float BlendTime);
 
+	// 플레이어의 현재 맵 위치를 반환
+	class ARASChunk* GetCurrentChunk() const { return CurrentChunk; }
+	// 플레이어의 현재 맵 위치를 설정
+	void SetCurrentChunk(class ARASChunk* InChunk) { CurrentChunk = InChunk; }
 protected:
 	// 입력 벡터를 저장 (최근 이동 입력)
 	FVector2D LastMoveInput;
@@ -84,4 +88,16 @@ protected:
 	// - HeadPoint: 머리 위치 등 카메라 정렬에 사용될 씬 컴포넌트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USceneComponent> HeadPoint;
+
+	// - MiniMapCamera: 미니맵 카메라
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USceneCaptureComponent2D> MiniMapCamera;
+	
+	// - MiniMapCameraBoom: 미니맵 카메라를 위한 스프링암
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class USpringArmComponent> MiniMapCameraBoom;
+
+
+	// 현재 맵 위치
+	TObjectPtr<class ARASChunk> CurrentChunk;
 };

@@ -8,7 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Component/Player/RASCombatComponent.h"
-
+#include "UI/RASUISubsystem.h"
 
 // Sets default values for this component's properties
 URASInputComponent::URASInputComponent()
@@ -76,6 +76,11 @@ URASInputComponent::URASInputComponent()
 		{
 			ParryingAction = ParyyingActionRef.Object;
 		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> MenuActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_O.IA_O'"));
+		if (MenuActionRef.Object)
+		{
+			MenuAction = MenuActionRef.Object;
+		}
 	}
 }
 
@@ -97,6 +102,7 @@ void URASInputComponent::InitPlayerInputComponent(class UInputComponent* PlayerI
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Started, this, &URASInputComponent::HandlePressRightClick);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressRightClickHold);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Completed, this, &URASInputComponent::HandlePressRightClickEnd);
+	EnhancedInput->BindAction(MenuAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressO);
 }
 
 void URASInputComponent::BeginPlay()
@@ -252,5 +258,14 @@ void URASInputComponent::HandlePress1()
 	if (URASCombatComponent* CombatComponent = OwnerPlayer->GetCombatComponent())
 	{
 		CombatComponent->UsePotion();
+	}
+}
+
+void URASInputComponent::HandlePressO()
+{
+	URASUISubsystem* UISubsystem = GetWorld()->GetGameInstance()->GetSubsystem<URASUISubsystem>();
+	if (UISubsystem)
+	{
+		UISubsystem->ShowMenu();
 	}
 }

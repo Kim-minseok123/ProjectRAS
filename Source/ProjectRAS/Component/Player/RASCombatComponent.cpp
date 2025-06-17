@@ -10,6 +10,7 @@
 #include "Engine/OverlapResult.h"
 #include "Utils/RASUtils.h"
 #include "Component/Player/RASUIComponent.h"
+#include "Controller/Player/RASPlayerController.h"
 
 // Sets default values for this component's properties
 URASCombatComponent::URASCombatComponent()
@@ -107,7 +108,7 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 	URASPlayerAnimComponent* AnimComponent = OwnerPlayer->GetAnimComponent();
 	if(AnimComponent == nullptr) return;
 
-	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::UsingItem) return;
+	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::UsingItem || CombatState == EPlayerCombatState::Executing) return;
 	if (OwnerPlayer->GetStat()->GetStamina() < 30) return;
 
 	CombatState = EPlayerCombatState::Rolling;
@@ -374,7 +375,8 @@ void URASCombatComponent::PressRightClick()
 	SetInBattleTimer();
 
 	OwnerPlayer->GetComboComponent()->EndCombo(false, 0.f);
-
+	if (CombatState != EPlayerCombatState::Idle)
+		return;
 	CombatState = EPlayerCombatState::Parrying;
 
 	ParryingTime = RASUtils::GetCurrentPlatformTime();
@@ -553,7 +555,14 @@ void URASCombatComponent::KillTarget(ARASCharacterBase* Target)
 
 void URASCombatComponent::Death()
 {
+	if (CombatState == EPlayerCombatState::Deathing) return;
 	SetCombatState(EPlayerCombatState::Deathing);
+
+	ARASPlayerController* PlayerController = Cast<ARASPlayerController>(OwnerPlayer->GetController());
+	if (PlayerController)
+	{
+		PlayerController->DisableInput(PlayerController);
+	}
 
 	URASPlayerAnimComponent* PlayerAnimComponent = OwnerPlayer->GetAnimComponent();
 

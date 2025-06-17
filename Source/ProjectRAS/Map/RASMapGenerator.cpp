@@ -532,5 +532,11 @@ void ARASMapGenerator::FinishMapGenerate()
 			Room->SetSpawner();
 			Room->SetupMoveableDoor();
 		}
+
+		ARASCorridor* Corridor = Cast<ARASCorridor>(Chunk);
+		if (Corridor)
+		{
+			Corridor->SetDoorCollision();
+		}
 	}
 }

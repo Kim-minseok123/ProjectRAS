@@ -61,6 +61,7 @@ void URASMenuWidget::ExitGame()
 void URASMenuWidget::SetBGMVolume(float Value)
 {
 	Value = FMath::Clamp(Value, 0.0f, 1.0f);
+	BGMSlider->Value = Value;
 	UGameplayStatics::SetSoundMixClassOverride(
 		GetWorld(),
 		SoundMix,
@@ -70,11 +71,14 @@ void URASMenuWidget::SetBGMVolume(float Value)
 		0.5f
 	);
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), SoundMix);
+	URASUISubsystem* UISubsystem = GetGameInstance()->GetSubsystem<URASUISubsystem>();
+	UISubsystem->BGMVolume = Value;
 }
 
 void URASMenuWidget::SetSFXVolume(float Value)
 {
 	Value = FMath::Clamp(Value, 0.0f, 1.0f);
+	SFXSlider->Value = Value;
 	UGameplayStatics::SetSoundMixClassOverride(
 		GetWorld(),
 		SoundMix,
@@ -84,4 +88,6 @@ void URASMenuWidget::SetSFXVolume(float Value)
 		0.5f
 	);
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), SoundMix);
+	URASUISubsystem* UISubsystem = GetGameInstance()->GetSubsystem<URASUISubsystem>();
+	UISubsystem->SFXVolume = Value;
 }

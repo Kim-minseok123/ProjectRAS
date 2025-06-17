@@ -22,6 +22,10 @@ public:
 	void BindStamina(class URASStatComponent* InStatComponent);
 
 	void SetIconProgressBar(int InIdx, float InDuration, int Count = 5);
+
+	void HideMiniMap();
+	void ShowMiniMap();
+
 protected:
 
 	UFUNCTION()
@@ -52,6 +56,10 @@ protected:
 	TObjectPtr<class UProgressBar> ItemBar1;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UTextBlock> PotionCountTxt;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<class UImage> MiniMap;
+
 	FTimerHandle ItemBar1Handle;
 	float ElapsedTime3 = 0.0f;
 };

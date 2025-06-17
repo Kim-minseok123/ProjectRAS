@@ -4,6 +4,8 @@
 #include "Map/RASMonsterSpawner.h"
 #include "Character/Monster/RASMonster.h"
 #include "Map/RASRoom.h"
+#include "Character/Player/RASPlayer.h"
+#include "Component/Player/RASUIComponent.h"
 
 // Sets default values
 ARASMonsterSpawner::ARASMonsterSpawner()
@@ -66,6 +68,14 @@ void ARASMonsterSpawner::SpawnCreature()
 		Monster->OnRoomClear.BindUObject(this, &ARASMonsterSpawner::CheckClearRoom);
 	}
 	bIsSpawned = true;
+
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC == nullptr)
+		return;
+	if (ARASPlayer* Player = Cast<ARASPlayer>(PC->GetPawn()))
+	{
+		Player->GetUIComponent()->EnterBattle();
+	}
 }
 
 void ARASMonsterSpawner::CheckClearRoom()
@@ -80,6 +90,13 @@ void ARASMonsterSpawner::CheckClearRoom()
 		return;
 	}
 	OwnRoom->OpenDoors();
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC == nullptr)
+		return;
+	if (ARASPlayer* Player = Cast<ARASPlayer>(PC->GetPawn()))
+	{
+		Player->GetUIComponent()->ExitBattle();
+	}
 }
 
 

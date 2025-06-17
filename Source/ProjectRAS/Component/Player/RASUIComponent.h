@@ -24,6 +24,10 @@ public:
 	bool HideHUD();
 
 	void SetIconProgressBar(int InIdx, float InDuration, int Count = 5);
+
+	void EnterBattle();
+
+	void ExitBattle();
 protected:
 
 

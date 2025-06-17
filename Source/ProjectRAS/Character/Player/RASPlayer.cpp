@@ -23,6 +23,8 @@
 #include "Component/Player/RASPlayerAnimComponent.h"
 #include "Component/Player/RASUIComponent.h"
 #include "Component/Player/RASCameraComponent.h"
+#include "Engine/CanvasRenderTarget2D.h"
+#include "Components/SceneCaptureComponent2D.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -49,6 +51,24 @@ ARASPlayer::ARASPlayer()
 	FollowCamera->SetupAttachment(CameraBoom);
 	FollowCamera->bUsePawnControlRotation = false;
 
+	// MiniMap
+	MiniMapCameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("MiniMapSpringArm"));
+	MiniMapCameraBoom->SetupAttachment(RootComponent);
+	//위에서 아래로 내려다 보는 각도를 위해 회전
+	MiniMapCameraBoom->SetWorldRotation(FRotator::MakeFromEuler(FVector(0.f, -90.f, 0.f)));
+	MiniMapCameraBoom->bUsePawnControlRotation = true;
+	MiniMapCameraBoom->bInheritPitch = false;
+	MiniMapCameraBoom->bInheritRoll = false;
+	MiniMapCameraBoom->bInheritYaw = true;
+
+	MiniMapCamera = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MinimapCapture"));
+	//카메라 암에 어태치
+	MiniMapCamera->SetupAttachment(MiniMapCameraBoom);
+	//카메라 투영 타입을 직교로 전환하여 거리감이 없는 이미지로 구현
+	MiniMapCamera->ProjectionType = ECameraProjectionMode::Orthographic;
+	//카메라에서 캡처될 크기 ( 클수록 축소되 보이는 미니맵 )
+	MiniMapCamera->OrthoWidth = 2000;
+	
 	// Input Component
 	PlayerInput = CreateDefaultSubobject<URASInputComponent>(TEXT("InputComponent"));
 	

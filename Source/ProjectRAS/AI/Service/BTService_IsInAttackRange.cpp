@@ -7,6 +7,9 @@
 #include "Character/RASCharacterBase.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Interface/Monster/RASMonsterInfoInterface.h"
+#include "Character/Player/RASPlayer.h"
+#include "Component/Player/RASCombatComponent.h"
+
 UBTService_IsInAttackRange::UBTService_IsInAttackRange()
 {
 
@@ -23,6 +26,15 @@ void UBTService_IsInAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 	if (Target == nullptr)
 	{
 		return;
+	}
+
+	if (ARASPlayer* Player = Cast<ARASPlayer>(Target))
+	{
+		if (Player->GetCombatComponent()->GetCombatState() == EPlayerCombatState::Deathing)
+		{
+			OwnerComp.GetBlackboardComponent()->SetValueAsObject(BBTarget, nullptr);
+			return;
+		}
 	}
 	IRASMonsterInfoInterface* MonsterInfo = Cast<IRASMonsterInfoInterface>(ControllingPawn);
 	if (MonsterInfo == nullptr) return;

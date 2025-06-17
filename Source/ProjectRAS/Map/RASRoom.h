@@ -23,6 +23,7 @@ public:
 	void DestroySpawner();
 
 	void SetupMoveableDoor();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -32,6 +33,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category = "Spawn")
 	TObjectPtr<class ARASMonsterSpawner> Spawner;
 
+	// 스폰이 됐던 룸인지 확인
 	UPROPERTY(EditAnywhere)
 	uint8 bMonsterSpawn : 1;
 

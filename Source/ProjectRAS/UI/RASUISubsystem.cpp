@@ -35,10 +35,12 @@ void URASUISubsystem::ShowMenu()
 		MenuWidget = CreateWidget<URASMenuWidget>(
 			/*Outer=*/GetGameInstance(),   
 			MenuWidgetClass);
-
+	}
+	if (!MenuWidget) return; 
+	if (!MenuWidget->IsInViewport())
+	{
 		MenuWidget->AddToViewport(100);
 	}
-
 	if (MenuWidget)
 	{
 		MenuWidget->SetVisibility(ESlateVisibility::Visible);
@@ -76,4 +78,18 @@ void URASUISubsystem::HideMenu()
 		}
 
 	}
+}
+
+void URASUISubsystem::SetVolume()
+{
+	if (MenuWidget)
+	{
+		MenuWidget->SetBGMVolume(BGMVolume);
+		MenuWidget->SetSFXVolume(SFXVolume);
+	}
+}
+
+bool URASUISubsystem::IsMenuVisible() const
+{
+	return MenuWidget && MenuWidget->IsVisible();
 }
