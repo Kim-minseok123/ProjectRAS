@@ -6,6 +6,8 @@
 #include "Component/Stat/RASStatComponent.h"
 #include "Character/Player/RASPlayer.h"
 #include "UI/RASBossHUDWidget.h"
+#include "UI/RASMapUI.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 URASUIComponent::URASUIComponent()
@@ -86,5 +88,56 @@ void URASUIComponent::ExitBattle()
 	{
 		PlayerHUDWidget->ShowMiniMap();
 	}
+}
+
+bool URASUIComponent::ShowMapUI()
+{
+	if (!MapUI && MapUIClass)
+	{
+		MapUI = CreateWidget<URASMapUI>(GetWorld(), MapUIClass);
+	}
+	if (MapUI && !MapUI->IsInViewport())
+	{
+		MapUI->AddToViewport(10);
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		if (PC)
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(MapUI->GetCachedWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+		return true;
+	}
+	return false;
+}
+
+bool URASUIComponent::HideMapUI()
+{
+	if (MapUI && MapUI->IsInViewport())
+	{
+		MapUI->RemoveFromViewport();
+		UGameplayStatics::SetGamePaused(GetWorld(), false);
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+		return true;
+	}
+	return false;
+}
+
+
+
+void URASUIComponent::SetMapUI(FBox2D InBound, TArray<TObjectPtr<class ARASChunk>>& SpawnChunks)
+{
+	if (!MapUI && MapUIClass)
+	{
+		MapUI = CreateWidget<URASMapUI>(GetWorld(), MapUIClass);
+	}
+	MapUI->InitMap(InBound);
+	MapUI->BuildMapUI(SpawnChunks);
 }
 

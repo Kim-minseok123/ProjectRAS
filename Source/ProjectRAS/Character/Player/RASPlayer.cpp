@@ -195,6 +195,16 @@ void ARASPlayer::SwitchBackToOriginalCamera(float BlendTime)
 	PlayerCameraComponent->SwitchBackToOriginalCamera(BlendTime);
 }
 
+void ARASPlayer::EnterBattle()
+{
+	GetUIComponent()->EnterBattle();
+}
+
+void ARASPlayer::ExitBattle()
+{
+	GetUIComponent()->ExitBattle();
+}
+
 void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
 	if (PlayerCombatComponent->GetCombatState() == EPlayerCombatState::Rolling || PlayerCombatComponent->GetCombatState() == EPlayerCombatState::Armoring || PlayerCombatComponent->GetCombatState() == EPlayerCombatState::Deathing)

@@ -52,7 +52,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = Box)
 	TObjectPtr<class UBoxComponent> CollisionBox;
 	TArray<TObjectPtr<class ARASDoor>> Doors;
-
+	UPROPERTY(EditAnywhere)
+	FVector2D ChunkSize = FVector2D(600.0f, 600.f);
 	TObjectPtr<class ARASDoor> StartDoor;
 
 	

@@ -10,6 +10,8 @@
 #include "Map/RASCorridor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
+#include "Character/Player/RASPlayer.h"
+#include "Component/Player/RASUIComponent.h"
 
 ARASMapGenerator::ARASMapGenerator()
 {
@@ -524,8 +526,12 @@ void ARASMapGenerator::RemoveNonConnectedChunks()
 //}
 void ARASMapGenerator::FinishMapGenerate()
 {
+	FBox2D MapBounds;
 	for (ARASChunk* Chunk : SpawnedChunks)
 	{
+		const FBox B3 = Chunk->CollisionBox->Bounds.GetBox();
+		MapBounds+= FBox2D(FVector2D(B3.Min), FVector2D(B3.Max));
+
 		ARASRoom* Room = Cast<ARASRoom>(Chunk);
 		if (Room)
 		{
@@ -539,4 +545,6 @@ void ARASMapGenerator::FinishMapGenerate()
 			Corridor->SetDoorCollision();
 		}
 	}
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	Cast<ARASPlayer>(PC->GetPawn())->GetUIComponent()->SetMapUI(MapBounds, SpawnedChunks);
 }

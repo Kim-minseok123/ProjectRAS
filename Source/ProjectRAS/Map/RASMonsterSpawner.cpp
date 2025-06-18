@@ -74,7 +74,7 @@ void ARASMonsterSpawner::SpawnCreature()
 		return;
 	if (ARASPlayer* Player = Cast<ARASPlayer>(PC->GetPawn()))
 	{
-		Player->GetUIComponent()->EnterBattle();
+		Player->EnterBattle();
 	}
 }
 
@@ -95,7 +95,7 @@ void ARASMonsterSpawner::CheckClearRoom()
 		return;
 	if (ARASPlayer* Player = Cast<ARASPlayer>(PC->GetPawn()))
 	{
-		Player->GetUIComponent()->ExitBattle();
+		Player->ExitBattle();
 	}
 }
 

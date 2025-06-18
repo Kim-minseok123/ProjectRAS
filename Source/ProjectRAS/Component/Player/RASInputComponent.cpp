@@ -9,6 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Component/Player/RASCombatComponent.h"
 #include "UI/RASUISubsystem.h"
+#include "Component/Player/RASUIComponent.h"
 
 // Sets default values for this component's properties
 URASInputComponent::URASInputComponent()
@@ -81,6 +82,11 @@ URASInputComponent::URASInputComponent()
 		{
 			MenuAction = MenuActionRef.Object;
 		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> MapActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_M.IA_M'"));
+		if (MapActionRef.Object)
+		{
+			MapAction = MapActionRef.Object;
+		}
 	}
 }
 
@@ -103,6 +109,7 @@ void URASInputComponent::InitPlayerInputComponent(class UInputComponent* PlayerI
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressRightClickHold);
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Completed, this, &URASInputComponent::HandlePressRightClickEnd);
 	EnhancedInput->BindAction(MenuAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressO);
+	EnhancedInput->BindAction(MapAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressM);
 }
 
 void URASInputComponent::BeginPlay()
@@ -267,5 +274,14 @@ void URASInputComponent::HandlePressO()
 	if (UISubsystem)
 	{
 		UISubsystem->ShowMenu();
+	}
+}
+
+void URASInputComponent::HandlePressM()
+{
+	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
+	if (Player) 
+	{
+		Player->GetUIComponent()->ShowMapUI();
 	}
 }

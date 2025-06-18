@@ -50,6 +50,10 @@ public:
 	class ARASChunk* GetCurrentChunk() const { return CurrentChunk; }
 	// 플레이어의 현재 맵 위치를 설정
 	void SetCurrentChunk(class ARASChunk* InChunk) { CurrentChunk = InChunk; }
+
+	void EnterBattle();
+
+	void ExitBattle();
 protected:
 	// 입력 벡터를 저장 (최근 이동 입력)
 	FVector2D LastMoveInput;

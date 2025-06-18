@@ -28,6 +28,14 @@ public:
 	void EnterBattle();
 
 	void ExitBattle();
+
+	UFUNCTION(BlueprintCallable, Category="UI")
+	bool ShowMapUI();
+
+	UFUNCTION(BlueprintCallable, Category="UI")
+	bool HideMapUI();
+
+	void SetMapUI(FBox2D InBound, TArray<TObjectPtr<class ARASChunk>>& SpawnChunks);
 protected:
 
 
@@ -36,4 +44,8 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class URASPlayerHUDWidget> PlayerHUDWidget;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class URASMapUI> MapUIClass;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class URASMapUI> MapUI;
 };
