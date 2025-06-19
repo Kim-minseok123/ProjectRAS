@@ -9,101 +9,155 @@
 #include "Containers/Queue.h"
 #include "UI/RASMapButton.h"
 #include "Components/BoxComponent.h"
+#include "Components/ScrollBox.h"
+#include "Components/SizeBox.h"
+#include "Components/ScrollBoxSlot.h"
+#include "Character/Player/RASPlayer.h"
+#include "Component/Player/RASUIComponent.h"
+#include "Components/Button.h"
 
 URASMapUI::URASMapUI(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
-    MapSize = FVector2D(3840, 2160);
-
-}
-
-void URASMapUI::InitMap(FBox2D InBox)
-{
-    Bounds = InBox;
-    const FVector2D MapUU = Bounds.GetSize();
-
-    float Scale = FMath::Min(
-        MapSize.X / MapUU.X,
-        MapSize.Y / MapUU.Y
-    );
-    PixelPerUU = Scale;
-
-    const FVector2D CanvasSz = MapUU * PixelPerUU;
-    if (auto Root = Cast<UCanvasPanelSlot>(MapCanvas->Slot))
-    {
-        Root->SetSize(CanvasSz);
-    }
-
-}
-
-void URASMapUI::BuildMapUI(const TArray<TObjectPtr<class ARASChunk>>& Spawned)
-{
-    if (!MapCanvas || !MapButtonClass)
-        return;
-    if (Spawned.Num() == 0) return;
-
-    MapCanvas->ClearChildren();
-    TSet<ARASChunk*> Visited;
-    TQueue<ARASChunk*> Q;
     
-    Q.Enqueue(Spawned[0]);
-    Visited.Add(Spawned[0]);
 
-    while (Q.IsEmpty() == false)
-    {
-        ARASChunk* Cur; Q.Dequeue(Cur);
-        if (!Cur) continue;
-        // ① 타일 픽셀 크기
-        const FVector2D Size = SizeToCanvas(Cur->ChunkSize);
-
-        FVector2D PosCenter = WorldToCanvas(Cur->GetActorLocation());
-
-        const FVector2D PosBottom = PosCenter + FVector2D(0.f, Size.Y * 0.5f);
-        const FVector2D Pivot = { 0.5f, 1.0f };              // 하단-중앙
-
-        URASMapButton* MapButton = CreateWidget<URASMapButton>(GetWorld(), MapButtonClass);
-        MapButton->Init(Cur);
-
-        if (auto CanvasSlot = Cast<UCanvasPanelSlot>(MapCanvas->AddChild(MapButton)))
-        {
-            CanvasSlot->SetAutoSize(false);
-            CanvasSlot->SetSize(Size);
-            CanvasSlot->SetAlignment(Pivot);  
-            CanvasSlot->SetPosition(PosBottom);
-        }
-
-        MapButton->SetRenderTransformPivot(Pivot);
-        const float RawYaw = Cur->GetActorRotation().Yaw;
-        const float SnapYaw = 90.f * FMath::RoundToInt(RawYaw / 90.f);
-        MapButton->SetRenderTransformAngle(-SnapYaw);
-
-
-        for (auto& Door : Cur->GetDoors())
-        {
-            ARASChunk* NextChunk = Door->GetConnectedChunk();
-            if (NextChunk && !Visited.Contains(NextChunk))
-            {
-                Visited.Add(NextChunk);
-                Q.Enqueue(NextChunk);
-            }
-        }
-    }
 }
 
-FVector2D URASMapUI::WorldToCanvas(const FVector& P) const
+void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChunk* StartChunk, class ARASPlayer* InPlayer)
 {
-    FVector2D WorldPos(P.X, P.Y);
+	if (!MapCanvas || !MapButtonClass || !IsValid(StartChunk))
+		return;
+	if (InPlayer == nullptr) return;
 
-    FVector2D Center = Bounds.GetCenter();
-    FVector2D Delta = WorldPos - Center;
+	Player = InPlayer;
+	ExitButton->OnClicked.AddDynamic(this, &URASMapUI::ExitButtonClick);
 
-    return FVector2D(
-        Delta.X * PixelPerUU + MapSize.X * 0.5f,
-        -Delta.Y * PixelPerUU + MapSize.Y * 0.5f  
-    );
+	MapCanvas->ClearChildren();
+
+	/* 0. 월드 → 셀 좌표 변환 함수 ------------------------------------------------*/
+	const FVector  WorldOrigin = StartChunk->GetActorLocation();
+	auto WorldToCell = [&](const FVector& Anchor) -> FIntPoint
+		{
+			const FVector D = Anchor - WorldOrigin;
+			return FIntPoint(
+				FMath::RoundToInt(D.X / RAS_CellWorldUnit),
+				FMath::RoundToInt(D.Y / RAS_CellWorldUnit));
+		};
+
+	/* 1. BFS 로 모든 청크 조사 ---------------------------------------------------*/
+	struct FChunkInfo
+	{
+		ARASChunk* Chunk = nullptr;
+		FIntPoint  Cell;   // 셀 크기
+		FIntPoint  GPos;   // 원점 기준 셀 위치
+		float      YawSnap = 0.f;
+	};
+	TArray<FChunkInfo> ChunkInfos;
+
+	TQueue<ARASChunk*> Queue;
+	TSet  <ARASChunk*> Visited;
+	Visited.Add(StartChunk);
+	Queue.Enqueue(StartChunk);
+
+	FIntPoint MinXY(INT_MAX, INT_MAX);
+	FIntPoint MaxXY(INT_MIN, INT_MIN);
+
+	auto PushInfo = [&](ARASChunk* C)
+		{
+			const FIntPoint Cell = GetCellSize(C);
+			const FIntPoint GPos = WorldToCell(C->CollisionBox->Bounds.Origin);
+			const float     Yaw = 90.f * FMath::RoundToInt(C->GetActorRotation().Yaw / 90.f);
+
+			ChunkInfos.Add({ C, Cell, GPos, Yaw });
+
+			MinXY.X = FMath::Min(MinXY.X, GPos.X - Cell.X);
+			MinXY.Y = FMath::Min(MinXY.Y, GPos.Y - Cell.Y);
+			MaxXY.X = FMath::Max(MaxXY.X, GPos.X + Cell.X);
+			MaxXY.Y = FMath::Max(MaxXY.Y, GPos.Y + Cell.Y);
+		};
+
+	while (!Queue.IsEmpty())
+	{
+		ARASChunk* Cur = nullptr;
+		Queue.Dequeue(Cur);
+		if (!IsValid(Cur))
+			continue;
+
+		PushInfo(Cur);
+
+		for (ARASDoor* D : Cur->GetDoors())
+		{
+			if (!IsValid(D))             continue;
+			ARASChunk* N = D->GetConnectedChunk();
+			if (!IsValid(N) || Visited.Contains(N)) continue;
+			Visited.Add(N);
+			Queue.Enqueue(N);
+		}
+	}
+
+	/* 2. 좌표 보정량 (Offset) 계산 ----------------------------------------------*/
+	const FIntPoint Offset(-MinXY.X, -MinXY.Y);   // 셀 단위
+
+	/* 3. 위젯 생성 및 배치 -------------------------------------------------------*/
+	for (const FChunkInfo& Info : ChunkInfos)
+	{
+		if (!IsValid(Info.Chunk))
+			continue;
+
+		URASMapButton* Tile = CreateWidget<URASMapButton>(GetWorld(), MapButtonClass);
+		Tile->Init(Info.Chunk, Player);
+		MapButtons.Add(Tile);
+
+		const FVector2D SizePx(
+			Info.Cell.X * RAS_CellPixel,
+			Info.Cell.Y * RAS_CellPixel);
+
+		const FVector2D PosPx(
+			(Info.GPos.X + Offset.X) * RAS_CellPixel / 2,
+			(Info.GPos.Y + Offset.Y) * RAS_CellPixel / 2);
+
+		if (UCanvasPanelSlot* S = Cast<UCanvasPanelSlot>(MapCanvas->AddChild(Tile)))
+		{
+			S->SetAutoSize(false);
+			S->SetSize(SizePx);
+			S->SetAlignment(FVector2D(0.5f, 0.5f));
+			S->SetPosition(PosPx);
+			Tile->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+			Tile->SetRenderTransformAngle(-Info.YawSnap);
+		}
+	}
+
 }
 
-FVector2D URASMapUI::SizeToCanvas(const FVector2D& RoomSize) const
+void URASMapUI::FoundMapShow()
 {
-    return RoomSize * PixelPerUU;
+	for (URASMapButton* Button : MapButtons)
+	{
+		if (Button)
+		{
+			if (Button->CheckVisitChunk())
+			{
+				Button->SetVisibility(ESlateVisibility::Visible);
+			}
+			else
+			{
+				Button->SetVisibility(ESlateVisibility::Collapsed);
+			}
+			Button->SetCurrentChunk();
+		}
+	}
+}
+
+void URASMapUI::ExitButtonClick()
+{
+	Player->GetUIComponent()->HideMapUI();
+}
+
+
+FIntPoint URASMapUI::GetCellSize(const class ARASChunk* Chunk) const
+{
+    const FVector2D SizeCm = Chunk->ChunkSize;
+    const int32  W = FMath::Max(1, FMath::RoundToInt(SizeCm.X / RAS_CellWorldUnit));
+    const int32  H = FMath::Max(1, FMath::RoundToInt(SizeCm.Y / RAS_CellWorldUnit));
+    return FIntPoint(W, H);
 }
 

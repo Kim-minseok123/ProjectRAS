@@ -35,7 +35,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="UI")
 	bool HideMapUI();
 
-	void SetMapUI(FBox2D InBound, TArray<TObjectPtr<class ARASChunk>>& SpawnChunks);
+	void SetMapUI(TArray<TObjectPtr<class ARASChunk>>& SpawnChunks);
 protected:
 
 

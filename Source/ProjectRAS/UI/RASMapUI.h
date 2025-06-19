@@ -16,21 +16,34 @@ class PROJECTRAS_API URASMapUI : public UUserWidget
 public:
 	URASMapUI(const FObjectInitializer& ObjectInitializer);
 
-	void InitMap(FBox2D InBox);
+	void BuildMapUI(const TArray<TObjectPtr<class ARASChunk>>& Spawned, class ARASChunk* StartChunk, class ARASPlayer* InPlayer);
 
-	void BuildMapUI(const TArray<TObjectPtr<class ARASChunk>>& Spawned);
+	void FoundMapShow();
+
+	UFUNCTION(BlueprintCallable, Category = "Map")
+	void ExitButtonClick();
 
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UCanvasPanel> MapCanvas;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UScrollBox> VerScrollBox;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UScrollBox> HorScrollBox;
+	UPROPERTY(meta =(BindWidget))
+	TObjectPtr<class USizeBox> ScrollSizeBox;
+	UPROPERTY(meta =(BindWidget))
+	TObjectPtr<class UButton> ExitButton;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class URASMapButton> MapButtonClass;
 
-	FBox2D Bounds;
-	FVector2D MapSize;
-	float PixelPerUU;
+	TArray<TObjectPtr<class URASMapButton>> MapButtons;
 
-	FVector2D WorldToCanvas(const FVector& P) const;
-	FVector2D SizeToCanvas(const FVector2D& RoomSize) const;
+	TObjectPtr<class ARASPlayer> Player;
+
+	FIntPoint GetCellSize(const class  ARASChunk* Chunk) const;
+
+	float RAS_CellWorldUnit = 300.f;  
+	float RAS_CellPixel = 64.f;
 };

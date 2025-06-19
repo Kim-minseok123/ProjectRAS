@@ -97,7 +97,9 @@ bool URASUIComponent::ShowMapUI()
 		MapUI = CreateWidget<URASMapUI>(GetWorld(), MapUIClass);
 	}
 	if (MapUI && !MapUI->IsInViewport())
-	{
+	{	
+		MapUI->FoundMapShow();
+		PlayerHUDWidget->HideMiniMap();
 		MapUI->AddToViewport(10);
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
 		APlayerController* PC = GetWorld()->GetFirstPlayerController();
@@ -118,6 +120,7 @@ bool URASUIComponent::HideMapUI()
 	if (MapUI && MapUI->IsInViewport())
 	{
 		MapUI->RemoveFromViewport();
+		PlayerHUDWidget->ShowMiniMap();
 		UGameplayStatics::SetGamePaused(GetWorld(), false);
 		APlayerController* PC = GetWorld()->GetFirstPlayerController();
 
@@ -131,13 +134,13 @@ bool URASUIComponent::HideMapUI()
 
 
 
-void URASUIComponent::SetMapUI(FBox2D InBound, TArray<TObjectPtr<class ARASChunk>>& SpawnChunks)
+void URASUIComponent::SetMapUI(TArray<TObjectPtr<class ARASChunk>>& SpawnChunks)
 {
 	if (!MapUI && MapUIClass)
 	{
 		MapUI = CreateWidget<URASMapUI>(GetWorld(), MapUIClass);
 	}
-	MapUI->InitMap(InBound);
-	MapUI->BuildMapUI(SpawnChunks);
+	if (MapUI == nullptr) return;
+	MapUI->BuildMapUI(SpawnChunks, SpawnChunks[0], Cast<ARASPlayer>(GetOwner()));
 }
 

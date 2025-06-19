@@ -18,12 +18,23 @@ public:
 	URASMapButton(const FObjectInitializer& ObjectInitializer);
 
 
-	void Init(class ARASChunk* InChunk);
+	void Init(class ARASChunk* InChunk, class ARASPlayer* InPlayer);
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void OnButtonClicked();
 
+	bool CheckVisitChunk();
+
+	void SetCurrentChunk();
+
+	bool CheckCurrentChunk();
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> MapButton;
+
+	UPROPERTY()
+	TObjectPtr<class ARASChunk> Chunk;
+
+	UPROPERTY()
+	TObjectPtr<class ARASPlayer> Player;
 };
