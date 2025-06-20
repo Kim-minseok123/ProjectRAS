@@ -546,5 +546,6 @@ void ARASMapGenerator::FinishMapGenerate()
 		}
 	}
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	Cast<ARASPlayer>(PC->GetPawn())->SetCurrentChunk(SpawnedChunks[0]);
 	Cast<ARASPlayer>(PC->GetPawn())->GetUIComponent()->SetMapUI(SpawnedChunks);
 }

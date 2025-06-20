@@ -15,6 +15,9 @@
 #include "Character/Player/RASPlayer.h"
 #include "Component/Player/RASUIComponent.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
+#include "Data/RASMapType.h"
+
 
 URASMapUI::URASMapUI(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
@@ -66,7 +69,6 @@ void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChu
 			const FIntPoint Cell = GetCellSize(C);
 			const FIntPoint GPos = WorldToCell(C->CollisionBox->Bounds.Origin);
 			const float     Yaw = 90.f * FMath::RoundToInt(C->GetActorRotation().Yaw / 90.f);
-
 			ChunkInfos.Add({ C, Cell, GPos, Yaw });
 
 			MinXY.X = FMath::Min(MinXY.X, GPos.X - Cell.X);
@@ -106,7 +108,8 @@ void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChu
 		URASMapButton* Tile = CreateWidget<URASMapButton>(GetWorld(), MapButtonClass);
 		Tile->Init(Info.Chunk, Player);
 		MapButtons.Add(Tile);
-
+		if (Info.Chunk->GetMapType() == ERASMapType::Corridor)
+			UE_LOG(LogTemp, Log, TEXT("%f"), Info.YawSnap);
 		const FVector2D SizePx(
 			Info.Cell.X * RAS_CellPixel,
 			Info.Cell.Y * RAS_CellPixel);
@@ -125,7 +128,7 @@ void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChu
 			Tile->SetRenderTransformAngle(-Info.YawSnap);
 		}
 	}
-
+	
 }
 
 void URASMapUI::FoundMapShow()
@@ -140,7 +143,7 @@ void URASMapUI::FoundMapShow()
 			}
 			else
 			{
-				Button->SetVisibility(ESlateVisibility::Collapsed);
+				//Button->SetVisibility(ESlateVisibility::Hidden);
 			}
 			Button->SetCurrentChunk();
 		}

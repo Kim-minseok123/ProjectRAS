@@ -54,6 +54,8 @@ public:
 	void EnterBattle();
 
 	void ExitBattle();
+
+	void TeleportToChunk(class ARASChunk* InChunk);
 protected:
 	// 입력 벡터를 저장 (최근 이동 입력)
 	FVector2D LastMoveInput;
@@ -101,6 +103,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class USpringArmComponent> MiniMapCameraBoom;
 
+	// 맵 전투 중
+	bool bInBattle = false;
 
 	// 현재 맵 위치
 	TObjectPtr<class ARASChunk> CurrentChunk;

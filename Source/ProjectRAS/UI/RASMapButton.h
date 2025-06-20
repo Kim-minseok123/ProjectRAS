@@ -27,6 +27,8 @@ public:
 
 	void SetCurrentChunk();
 
+	void SetButtonImage(TObjectPtr<class UTexture2D> MyTexture);
+
 	bool CheckCurrentChunk();
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -37,4 +39,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class ARASPlayer> Player;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UTexture2D> LeftCorridorImage;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UTexture2D> RightCorridorImage;
 };

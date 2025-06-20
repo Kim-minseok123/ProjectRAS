@@ -38,6 +38,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class URASMapButton> MapButtonClass;
 
+
 	TArray<TObjectPtr<class URASMapButton>> MapButtons;
 
 	TObjectPtr<class ARASPlayer> Player;

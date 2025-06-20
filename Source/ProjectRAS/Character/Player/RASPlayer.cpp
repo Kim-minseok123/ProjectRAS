@@ -25,6 +25,7 @@
 #include "Component/Player/RASCameraComponent.h"
 #include "Engine/CanvasRenderTarget2D.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Map/RASChunk.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -197,12 +198,25 @@ void ARASPlayer::SwitchBackToOriginalCamera(float BlendTime)
 
 void ARASPlayer::EnterBattle()
 {
+	bInBattle = true;
 	GetUIComponent()->EnterBattle();
 }
 
 void ARASPlayer::ExitBattle()
 {
+	bInBattle = false;
 	GetUIComponent()->ExitBattle();
+}
+
+void ARASPlayer::TeleportToChunk(class ARASChunk* InChunk)
+{
+	if (CurrentChunk == InChunk) return;
+	if (bInBattle) return;
+	SetCurrentChunk(InChunk);
+	GetUIComponent()->HideMapUI();
+	FVector Pos = InChunk->GetActorLocation() + InChunk->GetActorForwardVector() * 100 + FVector(0, 0, 200.f);
+	FRotator Rot = InChunk->GetActorRotation();
+	SetActorLocationAndRotation(Pos, Rot, false, nullptr, ETeleportType::TeleportPhysics);
 }
 
 void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
