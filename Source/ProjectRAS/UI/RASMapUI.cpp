@@ -17,7 +17,7 @@
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Data/RASMapType.h"
-
+#include "Map/RASCorridor.h"
 
 URASMapUI::URASMapUI(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
@@ -68,7 +68,33 @@ void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChu
 		{
 			const FIntPoint Cell = GetCellSize(C);
 			const FIntPoint GPos = WorldToCell(C->CollisionBox->Bounds.Origin);
-			const float     Yaw = 90.f * FMath::RoundToInt(C->GetActorRotation().Yaw / 90.f);
+			float     Yaw = 90.f * FMath::RoundToInt(C->GetActorRotation().Yaw / 90.f);
+			if (C->GetMapType() == ERASMapType::Corridor)
+			{
+				ARASCorridor* Corridor = Cast<ARASCorridor>(C);
+				if (Corridor && Corridor->GetCorridorType() != ERASCorridorType::None)
+				{
+					FRotator Rot = C->GetActorRotation();
+					float CYaw = Rot.Yaw;
+					if (CYaw < 0.f) CYaw += 360.f; 
+					if (CYaw >= 0.f && CYaw < 80.f)
+					{
+						Yaw = 90.f;
+					}
+					else if (CYaw >= 80.f && CYaw < 170.f)
+					{
+						Yaw = 180.f;
+					}
+					else if (CYaw >= 170.f && CYaw < 260.f)
+					{
+						Yaw = 270.f;
+					}
+					else
+					{
+						Yaw = 0.f;
+					}
+				}
+			}
 			ChunkInfos.Add({ C, Cell, GPos, Yaw });
 
 			MinXY.X = FMath::Min(MinXY.X, GPos.X - Cell.X);
@@ -107,6 +133,7 @@ void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChu
 
 		URASMapButton* Tile = CreateWidget<URASMapButton>(GetWorld(), MapButtonClass);
 		Tile->Init(Info.Chunk, Player);
+		Tile->SetTemp(Info.YawSnap);
 		MapButtons.Add(Tile);
 		if (Info.Chunk->GetMapType() == ERASMapType::Corridor)
 			UE_LOG(LogTemp, Log, TEXT("%f"), Info.YawSnap);
@@ -125,7 +152,7 @@ void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChu
 			S->SetAlignment(FVector2D(0.5f, 0.5f));
 			S->SetPosition(PosPx);
 			Tile->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
-			Tile->SetRenderTransformAngle(-Info.YawSnap);
+			Tile->SetRenderTransformAngle(Info.YawSnap);
 		}
 	}
 	

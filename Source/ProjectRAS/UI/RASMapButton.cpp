@@ -50,7 +50,7 @@ void URASMapButton::OnButtonClicked()
 {
 	if (Chunk && Player)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Select Location : %s"), *(Chunk->GetActorLocation().ToString()));
+		UE_LOG(LogTemp, Log, TEXT("Yaw : %f"), temp);
 		if (Player->GetCurrentChunk() == Chunk) return;
 		// 맵 순간이동
 		Player->TeleportToChunk(Chunk);
