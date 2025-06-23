@@ -19,28 +19,51 @@ void URASCameraComponent::InitCamera()
 {
 	if (GetOwner()->GetWorld())
 	{
-		FVector OwnerLocation = GetOwner()->GetActorLocation();
-		FVector SpawnOffset(0.f, 218.7f, 56.3f);
-		FVector SpawnLocation = OwnerLocation + SpawnOffset;
-		FRotator SpawnRotation(-5.f, -50.f, 0.f);
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = GetOwner();
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		ExecuteCameraActor = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
-
-		if (ExecuteCameraActor)
 		{
-			ExecuteCameraActor->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
-			if (UCameraComponent* CameraComp = ExecuteCameraActor->FindComponentByClass<UCameraComponent>())
+			FVector OwnerLocation = GetOwner()->GetActorLocation();
+			FVector SpawnOffset(0.f, 218.7f, 56.3f);
+			FVector SpawnLocation = OwnerLocation + SpawnOffset;
+			FRotator SpawnRotation(-5.f, -50.f, 0.f);
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = GetOwner();
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			ExecuteCameraActor1 = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+
+			if (ExecuteCameraActor1)
 			{
-				CameraComp->bConstrainAspectRatio = false;
+				ExecuteCameraActor1->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
+				if (UCameraComponent* CameraComp = ExecuteCameraActor1->FindComponentByClass<UCameraComponent>())
+				{
+					CameraComp->bConstrainAspectRatio = false;
+				}
 			}
 		}
+		{
+			FVector OwnerLocation = GetOwner()->GetActorLocation();
+			FVector SpawnOffset(0.f, -218.7f, 56.3f);
+			FVector SpawnLocation = OwnerLocation + SpawnOffset;
+			FRotator SpawnRotation(-5.f, 50.f, 0.f);
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = GetOwner();
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			ExecuteCameraActor2 = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+
+			if (ExecuteCameraActor2)
+			{
+				ExecuteCameraActor2->AttachToActor(GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
+				if (UCameraComponent* CameraComp = ExecuteCameraActor2->FindComponentByClass<UCameraComponent>())
+				{
+					CameraComp->bConstrainAspectRatio = false;
+				}
+			}
+		}
+		
 	}
 }
-
 
 void URASCameraComponent::LockOnCamera(class ARASCharacterBase* InTarget, float DeltaTime)
 {
@@ -69,11 +92,50 @@ void URASCameraComponent::LockOnCamera(class ARASCharacterBase* InTarget, float 
 
 void URASCameraComponent::SwitchToExecutionCamera(float BlendTime)
 {
-	ARASPlayerController* PlayerController = Cast<ARASPlayerController>(GetOwner<ARASPlayer>()->GetController());
-	if (PlayerController)
+	ARASPlayer* OwnerPlayer = Cast<ARASPlayer>(GetOwner());
+	if (!OwnerPlayer)
 	{
-		OriginalCameraActor = PlayerController->GetViewTarget();
-		PlayerController->SetViewTargetWithBlend(ExecuteCameraActor, BlendTime);
+		return;
+	}
+
+	ARASPlayerController* PlayerController = Cast<ARASPlayerController>(OwnerPlayer->GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	OriginalCameraActor = PlayerController->GetViewTarget();
+
+	FVector StartLocation = OwnerPlayer->GetActorLocation();
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(OwnerPlayer);
+	CollisionParams.AddIgnoredActor(ExecuteCameraActor1);
+	CollisionParams.AddIgnoredActor(ExecuteCameraActor2);
+
+	auto IsLineOfSightClear = [&](AActor* TargetCamera) -> bool
+		{
+			FHitResult HitResult;
+			return !GetWorld()->LineTraceSingleByChannel(
+				HitResult,
+				StartLocation,
+				TargetCamera->GetActorLocation(),
+				ECollisionChannel::ECC_Visibility,
+				CollisionParams
+			);
+		};
+
+	// 시야가 트여 있는 카메라로 전환
+	if (IsLineOfSightClear(ExecuteCameraActor1))
+	{
+		PlayerController->SetViewTargetWithBlend(ExecuteCameraActor1, BlendTime);
+	}
+	else if (IsLineOfSightClear(ExecuteCameraActor2))
+	{
+		PlayerController->SetViewTargetWithBlend(ExecuteCameraActor2, BlendTime);
+	}
+	else
+	{
+		OriginalCameraActor = nullptr;
 	}
 }
 

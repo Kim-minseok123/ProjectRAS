@@ -133,7 +133,6 @@ void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChu
 
 		URASMapButton* Tile = CreateWidget<URASMapButton>(GetWorld(), MapButtonClass);
 		Tile->Init(Info.Chunk, Player);
-		Tile->SetTemp(Info.YawSnap);
 		MapButtons.Add(Tile);
 		if (Info.Chunk->GetMapType() == ERASMapType::Corridor)
 			UE_LOG(LogTemp, Log, TEXT("%f"), Info.YawSnap);

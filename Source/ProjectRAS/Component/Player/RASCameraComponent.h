@@ -27,7 +27,10 @@ public:
 protected:
 	// - ExecuteCameraActor: 특정 액션 시 사용하는 카메라 액터
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class ACameraActor> ExecuteCameraActor;
+	TObjectPtr<class ACameraActor> ExecuteCameraActor1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class ACameraActor> ExecuteCameraActor2;
 
 	// - OriginalCameraActor: 원래 사용하던 카메라 액터를 저장 (전환 후 복구용)
 	TObjectPtr<class AActor> OriginalCameraActor;

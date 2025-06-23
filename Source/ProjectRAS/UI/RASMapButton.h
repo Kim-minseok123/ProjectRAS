@@ -19,7 +19,6 @@ public:
 
 
 	void Init(class ARASChunk* InChunk, class ARASPlayer* InPlayer);
-	void SetTemp(float InTemp) { temp = InTemp; }
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void OnButtonClicked();
 
@@ -44,5 +43,4 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UTexture2D> RightCorridorImage;
 
-	float temp;
 };
