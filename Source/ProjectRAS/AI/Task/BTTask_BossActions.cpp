@@ -12,6 +12,7 @@
 #include "Interface/RASBattleInterface.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Animation/Monster/Boss/RASBossAnimInstance.h"
+#include "Character/Player/RASPlayer.h"
 
 UBTTask_BossActions::UBTTask_BossActions()
 {
@@ -52,6 +53,8 @@ EBTNodeResult::Type UBTTask_BossActions::StartAttack()
 	OnAttackFinished.BindLambda(
 		[&]()
 		{
+			if (ARASPlayer* Player = Cast<ARASPlayer>(Target))
+				Player->WarningEnd();
 			BB->SetValueAsInt(BBBestSkillIndex, -1);
 			FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
 		}
@@ -65,7 +68,11 @@ EBTNodeResult::Type UBTTask_BossActions::StartAttack()
 	IRASBattleInterface* Battle = Cast<IRASBattleInterface>(Boss);
 
 	Battle->SetAttackFinishedDelegate(OnAttackFinished);
-
+	if (Idx == 3)
+	{
+		if (ARASPlayer* Player = Cast<ARASPlayer>(Target))
+			Player->WarningTheBoss();
+	}
 	Battle->StartAttackMontage(Idx);
 
 	return EBTNodeResult::InProgress;
@@ -78,6 +85,8 @@ void UBTTask_BossActions::OnAttackFinished()
 		Anim->SetHideWeapon(false);
 		Boss->SetWeaponOn(false);
 	}
+	if (ARASPlayer* Player = Cast<ARASPlayer>(Target))
+		Player->WarningEnd();
 	BB->SetValueAsInt(BBBestSkillIndex, -1);
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
 }

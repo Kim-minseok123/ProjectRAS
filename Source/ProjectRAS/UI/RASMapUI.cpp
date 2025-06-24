@@ -169,7 +169,7 @@ void URASMapUI::FoundMapShow()
 			}
 			else
 			{
-				//Button->SetVisibility(ESlateVisibility::Hidden);
+				Button->SetVisibility(ESlateVisibility::Hidden);
 			}
 			Button->SetCurrentChunk();
 		}

@@ -26,6 +26,8 @@
 #include "Engine/CanvasRenderTarget2D.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Map/RASChunk.h"
+#include "Components/WidgetComponent.h"
+#include "Audio/RASAudioSubsystem.h"
 
 ARASPlayer::ARASPlayer()
 {
@@ -89,11 +91,20 @@ ARASPlayer::ARASPlayer()
 	PlayerCameraComponent = CreateDefaultSubobject<URASCameraComponent>(TEXT("CameraComponent"));
 
 	CreatureName = TEXT("Player");
+
+	WarningIcon = CreateDefaultSubobject<UWidgetComponent>(TEXT("WarningIcon"));
+	WarningIcon->SetupAttachment(RootComponent);
+
 }
 
 void ARASPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (WarningIcon)
+	{
+		WarningIcon->SetVisibility(false);
+	}
 
 	PlayerAnimComponent->SetAnimInstance(GetMesh()->GetAnimInstance());
 	PlayerCombatComponent->SetCombatState(EPlayerCombatState::Idle);
@@ -217,6 +228,28 @@ void ARASPlayer::TeleportToChunk(class ARASChunk* InChunk)
 	FVector Pos = InChunk->GetActorLocation() + InChunk->GetActorForwardVector() * 100 + FVector(0, 0, 200.f);
 	FRotator Rot = InChunk->GetActorRotation();
 	SetActorLocationAndRotation(Pos, Rot, false, nullptr, ETeleportType::TeleportPhysics);
+}
+
+void ARASPlayer::WarningTheBoss()
+{
+	if (WarningIcon)
+	{
+		WarningIcon->SetVisibility(true);
+	}
+	URASAudioSubsystem* AudioSubsystem = GetGameInstance()->GetSubsystem<URASAudioSubsystem>();
+	if (AudioSubsystem)
+	{
+		AudioSubsystem->PlaySFX(TEXT("Warning"),GetActorLocation());
+	}
+
+}
+
+void ARASPlayer::WarningEnd()
+{
+	if (WarningIcon)
+	{
+		WarningIcon->SetVisibility(false);
+	}
 }
 
 void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)

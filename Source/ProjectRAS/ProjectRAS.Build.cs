@@ -10,7 +10,7 @@ public class ProjectRAS : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] { "ProjectRAS" });
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "NavigationSystem", "AIModule", "GameplayTasks" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "NavigationSystem", "AIModule", "GameplayTasks", "Paper2D" });
 
         PrivateDependencyModuleNames.AddRange(new string[] {  });
 

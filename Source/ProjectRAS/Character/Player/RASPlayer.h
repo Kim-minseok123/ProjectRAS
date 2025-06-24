@@ -56,6 +56,10 @@ public:
 	void ExitBattle();
 
 	void TeleportToChunk(class ARASChunk* InChunk);
+	UFUNCTION(BlueprintCallable, Category = "Warning")
+	void WarningTheBoss();
+	UFUNCTION(BlueprintCallable, Category = "Warning")
+	void WarningEnd();
 protected:
 	// 입력 벡터를 저장 (최근 이동 입력)
 	FVector2D LastMoveInput;
@@ -108,4 +112,8 @@ protected:
 
 	// 현재 맵 위치
 	TObjectPtr<class ARASChunk> CurrentChunk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<class UWidgetComponent> WarningIcon;
+
 };
