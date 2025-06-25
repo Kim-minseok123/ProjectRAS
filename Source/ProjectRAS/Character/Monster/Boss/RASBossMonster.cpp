@@ -20,6 +20,7 @@
 #include "Data/RASBossScoreData.h"
 #include "Utils/RASBlackBoardKey.h"
 #include "UI/RASBossHUDWidget.h"
+#include "Audio/RASAudioSubsystem.h"
 
 ARASBossMonster::ARASBossMonster()
 {
@@ -68,6 +69,8 @@ void ARASBossMonster::BeginPlay()
 	{
 		Skill.Value.LastUsedTime = -Skill.Value.Cooldown;
 	}
+
+	GetGameInstance()->GetSubsystem<URASAudioSubsystem>()->PlayBGM(TEXT("Boss"));
 }
 
 void ARASBossMonster::Tick(float DeltaSeconds)

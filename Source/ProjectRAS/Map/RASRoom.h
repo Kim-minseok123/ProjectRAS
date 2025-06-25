@@ -16,13 +16,18 @@ class PROJECTRAS_API ARASRoom : public ARASChunk
 public:
 	ARASRoom();
 
+	UFUNCTION(BlueprintCallable)
 	void CloseDoors();
+	UFUNCTION(BlueprintCallable)
 	void OpenDoors();
 
 	void SetSpawner();
 	void DestroySpawner();
 
 	void SetupMoveableDoor();
+
+	UFUNCTION(BlueprintCallable)
+	void PlayerToBoss();
 
 protected:
 	virtual void BeginPlay() override;

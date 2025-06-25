@@ -22,8 +22,9 @@ public:
 	void BindStamina(class URASStatComponent* InStatComponent);
 
 	void SetIconProgressBar(int InIdx, float InDuration, int Count = 5);
-
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	void HideMiniMap();
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ShowMiniMap();
 
 protected:

@@ -35,6 +35,7 @@ public:
 	class URASComboComponent* GetComboComponent() const { return PlayerComboAttack; }
 	class URASPlayerAnimComponent* GetAnimComponent() { return PlayerAnimComponent; }
 	class URASInputComponent* GetInputComponent() { return PlayerInput; }
+	UFUNCTION(BlueprintCallable, Category = "UI")
 	class URASUIComponent* GetUIComponent() { return PlayerUIComponent; }
 	FVector2D GetLastMoveInput() const { return LastMoveInput; }
 

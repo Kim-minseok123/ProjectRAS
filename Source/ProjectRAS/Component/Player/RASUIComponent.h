@@ -41,7 +41,7 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class URASPlayerHUDWidget> PlayerHUDWidgetClass;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class URASPlayerHUDWidget> PlayerHUDWidget;
 
 	UPROPERTY(EditAnywhere)

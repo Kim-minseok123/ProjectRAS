@@ -4,6 +4,7 @@
 #include "Controller/Player/RASTitlePlayerController.h"
 #include "UI/RASTitleWidget.h"
 #include "Audio/RASAudioSubsystem.h"
+#include "GameFramework/GameUserSettings.h"
 
 ARASTitlePlayerController::ARASTitlePlayerController()
 {
@@ -24,6 +25,11 @@ void ARASTitlePlayerController::SetTitleUI()
 void ARASTitlePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	UGameUserSettings* S = GEngine->GetGameUserSettings();
+	S->SetScreenResolution({ 1920,1080 });
+	S->SetFullscreenMode(EWindowMode::Fullscreen);  
+	S->ApplySettings(false);
+
 
 	if (TitleWidgetClass)
 	{

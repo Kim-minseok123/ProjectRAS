@@ -76,3 +76,12 @@ void URASAudioSubsystem::PlaySFX(FName Key, const FVector& PlayPos, float Volume
 	}
 }
 
+void URASAudioSubsystem::StopBGM(float FadeOutSec /*= 1.0f*/)
+{
+	if (CurrentBGM && CurrentBGM->IsPlaying())
+	{
+		CurrentBGM->FadeOut(FadeOutSec, 0.f);
+		CurrentBGM = nullptr;
+	}
+}
+

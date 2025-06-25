@@ -5,6 +5,8 @@
 #include "Map/RASDoor.h"
 #include "Components/ChildActorComponent.h"
 #include "Map/RASMonsterSpawner.h"
+#include "Character/Player/RASPlayer.h"
+#include "Component/Player/RASCombatComponent.h"
 
 ARASRoom::ARASRoom()
 {
@@ -88,6 +90,12 @@ void ARASRoom::SetupMoveableDoor()
 		return;
 	}
 	StartDoor->SetupMoveable();
+}
+
+void ARASRoom::PlayerToBoss()
+{
+	Cast<ARASPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn())->GetCombatComponent()->PressTab();
+	CloseDoors();
 }
 
 void ARASRoom::BeginPlay()

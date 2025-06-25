@@ -18,9 +18,12 @@ public:
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+	UFUNCTION(BlueprintCallable, Category = "RAS|Audio")
 	void PlayBGM(FName Key, float FadeOutSec = 1.0f, float FadeInSec = 1.0f);
+	UFUNCTION(BlueprintCallable, Category = "RAS|Audio")
 	void PlaySFX(FName Key, const FVector& PlayPos, float Volume = 1.0f);
-
+	UFUNCTION(BlueprintCallable, Category = "RAS|Audio")
+	void StopBGM(float FadeOutSec = 1.0f);
 protected:
 	UPROPERTY()
 	TObjectPtr<class URASSoundData> SoundData;
