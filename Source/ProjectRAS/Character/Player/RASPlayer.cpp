@@ -117,7 +117,6 @@ void ARASPlayer::BeginPlay()
 	Stat->SetStamina(10000);
 
 	Stat->OnHpZero.AddUObject(this, &ARASPlayer::Death);
-
 	PlayerCameraComponent->InitCamera();
 }
 

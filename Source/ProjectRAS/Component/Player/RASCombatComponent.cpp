@@ -285,6 +285,7 @@ void URASCombatComponent::PressF()
 
 		if (LockOnTarget != nullptr && LockOnTarget->GetTotalStamina() <= 0.f && OwnerPlayer->GetDistanceTo(LockOnTarget) <= 200.f)
 		{
+			if (LockOnTarget->GetCreatureName().IsEqual(TEXT("Ashur"))) return; 
 			if (CombatState != EPlayerCombatState::Executing)
 			{
 				CombatState = EPlayerCombatState::Executing;
@@ -456,6 +457,31 @@ void URASCombatComponent::HitFromActor(class ARASCharacterBase* InFrom, float In
 	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
 	if (MyAnimInstance == nullptr) return;
 
+	if (InDamage == 999.f)
+	{
+		float ActualDamage = Stat->ApplyDamage(InDamage);
+		if (ActualDamage > 0)
+		{
+			if (Stat->GetHp() > 0)
+			{
+				//if (CombatState == EPlayerCombatState::Breaking) return;
+				MyAnimInstance->StopMontage(nullptr, 0.1f);
+
+				URASComboComponent* ComboAttack = OwnerPlayer->GetComboComponent();
+				ComboAttack->EndCombo(true, 0.8f);
+
+				CombatState = EPlayerCombatState::Breaking;
+
+				MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Hit")), TEXT("Hit"), 1.0f,
+					[this](UAnimMontage* Montage, bool bInterrupted)
+					{
+						CombatState = EPlayerCombatState::Idle;
+					});
+			}
+		}
+		return;
+	}
+	
 	if (CombatState == EPlayerCombatState::Parrying)
 	{
 		Stat->ApplyStaminaDamage(InStaminaDamage);

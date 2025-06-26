@@ -103,7 +103,7 @@ void ARASBossMonster::PostInitializeComponents()
 	Stat->SetStamina(100000);
 
 	Stat->OnHpZero.AddUObject(this, &ARASBossMonster::Death);
-	// Boss ui 연동
+	Stat->OnStaminaZero.AddUObject(this, &ARASBossMonster::ZeroStamina);
 }
 
 void ARASBossMonster::StartAttackMontage(int InAttackNumber /*= 0*/)
@@ -255,6 +255,11 @@ FVector ARASBossMonster::GetCircleAttackPosition()
 void ARASBossMonster::SetWeaponOn(bool bWeaponOn)
 {
 	WeaponMesh->SetVisibility(bWeaponOn);
+}
+
+void ARASBossMonster::ZeroStamina(bool InStamina)
+{
+	HitFromActor(Target, 200.f, 0.f);
 }
 
 FSkillScoreData& ARASBossMonster::GetSkillScoreData(int32 InIdx)

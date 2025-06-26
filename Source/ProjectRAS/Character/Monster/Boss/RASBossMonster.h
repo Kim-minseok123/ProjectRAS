@@ -38,6 +38,7 @@ public:
 	TArray<FVector> GetWeaponPosition();
 	FVector GetCircleAttackPosition();
 	void SetWeaponOn(bool bWeaponOn);
+	void ZeroStamina(bool InStamina);
 
 	virtual FSkillScoreData& GetSkillScoreData(int32 InIdx) override;
 	virtual int32 GetSkillScoreDataCount() override;
