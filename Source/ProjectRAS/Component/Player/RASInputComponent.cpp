@@ -10,6 +10,9 @@
 #include "Component/Player/RASCombatComponent.h"
 #include "UI/RASUISubsystem.h"
 #include "Component/Player/RASUIComponent.h"
+#include "Utils/RASCollisionChannels.h"
+#include "Engine/OverlapResult.h"
+#include "Character/NPC/RASNpc.h"
 
 // Sets default values for this component's properties
 URASInputComponent::URASInputComponent()
@@ -87,6 +90,11 @@ URASInputComponent::URASInputComponent()
 		{
 			MapAction = MapActionRef.Object;
 		}
+		static ConstructorHelpers::FObjectFinder<UInputAction> InteractionActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/1_ProjectRAS/Input/Action/IA_T.IA_T'"));
+		if (InteractionActionRef.Object)
+		{
+			InteractionAction = InteractionActionRef.Object;
+		}
 	}
 }
 
@@ -110,6 +118,7 @@ void URASInputComponent::InitPlayerInputComponent(class UInputComponent* PlayerI
 	EnhancedInput->BindAction(ParryingAction, ETriggerEvent::Completed, this, &URASInputComponent::HandlePressRightClickEnd);
 	EnhancedInput->BindAction(MenuAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressO);
 	EnhancedInput->BindAction(MapAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressM);
+	EnhancedInput->BindAction(InteractionAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressT);
 }
 
 void URASInputComponent::BeginPlay()
@@ -283,5 +292,45 @@ void URASInputComponent::HandlePressM()
 	if (Player) 
 	{
 		Player->GetUIComponent()->ShowMapUI();
+	}
+}
+
+void URASInputComponent::HandlePressT()
+{
+	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
+
+	FVector Origin = Player->GetActorLocation();
+	float Radius = 150.0f; 
+
+	TArray<FOverlapResult> Overlaps;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(Player);
+
+	ECollisionChannel TraceChannel = ECC_RASChannel;
+
+	bool bHit = GetWorld()->OverlapMultiByChannel(
+		Overlaps,
+		Origin,
+		FQuat::Identity,
+		TraceChannel,
+		FCollisionShape::MakeSphere(Radius),
+		QueryParams
+	);
+	DrawDebugSphere(GetWorld(), Origin, Radius, 32, FColor::Green, false, 2.0f, 0, 2.0f);
+	if (bHit)
+	{
+		for (const FOverlapResult& Result : Overlaps)
+		{
+			AActor* HitActor = Result.GetActor();
+			if (HitActor)
+			{
+				ARASNpc* Npc = Cast<ARASNpc>(HitActor);
+				if (Npc)
+				{
+					Npc->InteractionWithPlayer();
+					return; 
+				}
+			}
+		}
 	}
 }

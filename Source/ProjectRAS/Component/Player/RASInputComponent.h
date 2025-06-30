@@ -48,7 +48,8 @@ protected:
 	TObjectPtr<class UInputAction> MenuAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> MapAction;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> InteractionAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputMappingContext> MappingContext;
@@ -70,4 +71,5 @@ protected:
 	void HandlePress1();
 	void HandlePressO();
 	void HandlePressM();
+	void HandlePressT();
 };
