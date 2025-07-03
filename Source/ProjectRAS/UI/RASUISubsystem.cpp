@@ -5,6 +5,7 @@
 #include "UI/RASMenuWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Controller/Player/RASTitlePlayerController.h"
+#include "UI/RASFadeWidget.h"
 
 URASUISubsystem::URASUISubsystem()
 {
@@ -12,6 +13,11 @@ URASUISubsystem::URASUISubsystem()
 	if (MenuWidgetBPClass.Class)
 	{
 		MenuWidgetClass = MenuWidgetBPClass.Class;
+	}
+	static ConstructorHelpers::FClassFinder<URASFadeWidget> FadeWidgetBPClass(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/1_ProjectRAS/UI/WBP_RASFadeWidget.WBP_RASFadeWidget_C'"));
+	if (FadeWidgetBPClass.Class)
+	{
+		FadeWidgetClass = FadeWidgetBPClass.Class;
 	}
 }
 
@@ -77,6 +83,50 @@ void URASUISubsystem::HideMenu()
 			PC->bShowMouseCursor = false;
 		}
 
+	}
+}
+
+void URASUISubsystem::FadeIn()
+{
+	if (FadeWidget)
+	{
+		FadeWidget->RemoveFromParent();
+		FadeWidget = nullptr;
+	}
+
+	if (FadeWidgetClass)
+	{
+		UWorld* World = GetWorld();
+		if (!World) return;
+
+		FadeWidget = CreateWidget<URASFadeWidget>(GetGameInstance(), FadeWidgetClass);
+		if (FadeWidget)
+		{
+			FadeWidget->AddToViewport(500);
+			FadeWidget->FadeIn();
+		}
+	}
+}
+
+void URASUISubsystem::FadeOut()
+{
+	if (FadeWidget)
+	{
+		FadeWidget->RemoveFromParent();
+		FadeWidget = nullptr;
+	}
+
+	if (FadeWidgetClass)
+	{
+		UWorld* World = GetWorld();
+		if (!World) return;
+
+		FadeWidget = CreateWidget<URASFadeWidget>(GetGameInstance(), FadeWidgetClass);
+		if (FadeWidget)
+		{
+			FadeWidget->AddToViewport(500);
+			FadeWidget->FadeOut();
+		}
 	}
 }
 

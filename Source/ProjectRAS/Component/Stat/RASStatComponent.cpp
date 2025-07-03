@@ -30,6 +30,14 @@ float URASStatComponent::ApplyDamage(float InDamageAmount)
 float URASStatComponent::ApplyStaminaDamage(float InStaminaDamageAmount)
 {
 	const float PrevStamina = GetStamina();
+	if(PrevStamina <= KINDA_SMALL_NUMBER)
+	{
+		return 0.f; 
+	}
+	if(InStaminaDamageAmount <= KINDA_SMALL_NUMBER)
+	{
+		return 0.f;
+	}
 	const float ActualStaminaDamage = FMath::Clamp<float>(InStaminaDamageAmount, 0, InStaminaDamageAmount);
 
 	if (ActualStaminaDamage > 0)

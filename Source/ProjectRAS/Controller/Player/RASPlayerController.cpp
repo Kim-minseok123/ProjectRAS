@@ -15,6 +15,10 @@ void ARASPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	URASUISubsystem* UISubsystem = GetGameInstance()->GetSubsystem<URASUISubsystem>();
+	if (UISubsystem) 
+	{
+		UISubsystem->FadeOut();
+	}
 	if (UISubsystem)
 	{
 		UISubsystem->ShowMenu();

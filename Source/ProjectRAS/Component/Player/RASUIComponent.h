@@ -36,6 +36,9 @@ public:
 	bool HideMapUI();
 
 	void SetMapUI(TArray<TObjectPtr<class ARASChunk>>& SpawnChunks);
+
+	void ShowNpcUI(class ARASNpc* InNPC);
+	void HideNpcUI();
 protected:
 
 
@@ -48,4 +51,8 @@ protected:
 	TSubclassOf<class URASMapUI> MapUIClass;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class URASMapUI> MapUI;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class URASNpcUI> NpcUIClass;
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class URASNpcUI> NpcUI;
 };

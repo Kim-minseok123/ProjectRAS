@@ -11,6 +11,7 @@
 #include "Utils/RASUtils.h"
 #include "Component/Player/RASUIComponent.h"
 #include "Controller/Player/RASPlayerController.h"
+#include "Audio/RASAudioSubsystem.h"
 
 // Sets default values for this component's properties
 URASCombatComponent::URASCombatComponent()
@@ -615,6 +616,13 @@ void URASCombatComponent::Death()
 			// 플레이어 사망 UI 띄움, UI에서 다시하기 버튼 클릭시  게임모드에서 플레이어를 저장된 위치로 리스폰
 		},
 		4.f, false);
+}
+
+void URASCombatComponent::RecoverPotion()
+{
+	PotionCount = 5;
+	OwnerPlayer->GetGameInstance()->GetSubsystem<URASAudioSubsystem>()->PlaySFX(TEXT("Healing"), OwnerPlayer->GetActorLocation());
+	OwnerPlayer->GetUIComponent()->SetIconProgressBar(3, 0.f, PotionCount);
 }
 
 void URASCombatComponent::UsePotion()

@@ -5,6 +5,8 @@
 #include "Components/WidgetComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Character/Player/RASPlayer.h"
+#include "Component/Player/RASCombatComponent.h"
+#include "Component/Player/RASUIComponent.h"
 
 ARASNpc::ARASNpc()
 {
@@ -39,7 +41,7 @@ void ARASNpc::InteractionWithPlayer()
 	FVector NpcLocation = GetActorLocation();
 	float Distance = FVector::Dist(PlayerLocation, NpcLocation);
 
-	if (Distance < 150.0f)
+	if (Distance < 200.f)
 	{
 		bIsInteracting = true;
 		InteractionUIOff();
@@ -53,6 +55,7 @@ void ARASNpc::InteractionWithPlayer()
 				PlayerController->SetViewTargetWithBlend(this, 0.5f);
 			}
 		}
+		Player->GetUIComponent()->ShowNpcUI(this);
 	}
 }
 
@@ -87,7 +90,7 @@ void ARASNpc::Tick(float DeltaSeconds)
 		FVector NpcLocation = GetActorLocation();
 		float Distance = FVector::Dist(PlayerLocation, NpcLocation);
 
-		if (Distance < 150.0f)
+		if (Distance < 200.f)
 		{
 			InteractionUIOn();
 		}
@@ -96,4 +99,18 @@ void ARASNpc::Tick(float DeltaSeconds)
 			InteractionUIOff();
 		}
 	}
+}
+
+void ARASNpc::AcceptInteraction()
+{
+	Player->GetUIComponent()->HideNpcUI();
+	Player->GetCombatComponent()->RecoverPotion();
+	bIsHealPotion = true;
+	InteractionWithPlayerEnd();
+}
+
+void ARASNpc::CancelInteraction()
+{
+	Player->GetUIComponent()->HideNpcUI();
+	InteractionWithPlayerEnd();
 }

@@ -8,6 +8,8 @@
 #include "UI/RASBossHUDWidget.h"
 #include "UI/RASMapUI.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/RASNpcUI.h"
+#include "Character/NPC/RASNpc.h"
 
 // Sets default values for this component's properties
 URASUIComponent::URASUIComponent()
@@ -142,5 +144,44 @@ void URASUIComponent::SetMapUI(TArray<TObjectPtr<class ARASChunk>>& SpawnChunks)
 	}
 	if (MapUI == nullptr) return;
 	MapUI->BuildMapUI(SpawnChunks, SpawnChunks[0], Cast<ARASPlayer>(GetOwner()));
+}
+
+void URASUIComponent::ShowNpcUI(class ARASNpc* InNPC)
+{
+	if (!NpcUI && NpcUIClass)
+	{
+		NpcUI = CreateWidget<URASNpcUI>(GetWorld(), NpcUIClass);
+	}
+	if (NpcUI && !NpcUI->IsInViewport())
+	{
+		NpcUI->Setup(InNPC);
+		PlayerHUDWidget->HideMiniMap();
+		NpcUI->AddToViewport(10);
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		if (PC)
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(NpcUI->GetCachedWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+		NpcUI->StartTyping(InNPC->GetNpcText(), 0.04f);
+		return;
+	}
+	return;
+}
+
+void URASUIComponent::HideNpcUI()
+{
+	if (NpcUI && NpcUI->IsInViewport())
+	{
+		NpcUI->RemoveFromViewport();
+		PlayerHUDWidget->ShowMiniMap();
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+	}
 }
 

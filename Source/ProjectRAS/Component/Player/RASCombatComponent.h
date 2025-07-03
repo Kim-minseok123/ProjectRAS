@@ -60,7 +60,7 @@ public:
 	void Death();
 
 	// 포션 개수 회복
-	void RecoverPotion() { PotionCount = 5; }
+	void RecoverPotion();
 
 	// 포션 사용
 	void UsePotion();

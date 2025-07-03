@@ -24,6 +24,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void HideMenu();
 
+	UFUNCTION(BlueprintCallable)
+	void FadeIn();
+	UFUNCTION(BlueprintCallable)
+	void FadeOut();
+
 	void SetVolume();
 
 	bool IsMenuVisible() const;
@@ -36,5 +41,10 @@ protected:
 	UPROPERTY()
 	TObjectPtr<class URASMenuWidget> MenuWidget;
 
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class URASFadeWidget> FadeWidgetClass;
+	UPROPERTY()
+	TObjectPtr<class URASFadeWidget> FadeWidget;
 	
 };

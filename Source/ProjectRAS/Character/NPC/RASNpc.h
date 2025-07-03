@@ -25,13 +25,18 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	void AcceptInteraction();
+	void CancelInteraction();
+	FString& GetNpcText() { return NpcText; }
+
 protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UWidgetComponent> NPCInteractionWidget;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UCameraComponent> NPCInteractionCamera;
-
+	UPROPERTY(EditAnywhere)
+	FString NpcText;
 	TObjectPtr<class ARASPlayer> Player;
 
 	TWeakObjectPtr<AActor> OriginalViewTarget;

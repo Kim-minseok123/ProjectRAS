@@ -53,7 +53,6 @@ void URASBossHUDWidget::BindStamina(class URASStatComponent* InStatComponent)
     if (InStatComponent != nullptr)
     {
         InStatComponent->OnStaminaChanged.AddUObject(this, &URASBossHUDWidget::UpdateStamina);
-        InStatComponent->OnStaminaChanged.AddUObject(this, &URASBossHUDWidget::UpdateStaminaHandle);
     }
 }
 
@@ -83,6 +82,13 @@ void URASBossHUDWidget::UpdateStamina(float InStamina)
             Stamina_Bar->SetPercent(CurrentStaminaPercent);
         }
     }
+
+    GetWorld()->GetTimerManager().ClearTimer(StaminaTimerHandle);
+
+    FTimerDelegate HideStaminaDelegate;
+    HideStaminaDelegate.BindUObject(this, &URASBossHUDWidget::HideStaminaBar);
+
+    GetWorld()->GetTimerManager().SetTimer(StaminaTimerHandle, HideStaminaDelegate, 3.f, false);
 }
 
 void URASBossHUDWidget::HideStaminaBar()
@@ -90,11 +96,4 @@ void URASBossHUDWidget::HideStaminaBar()
     Stamina_Bar->SetVisibility(ESlateVisibility::Collapsed);
 }
 
-void URASBossHUDWidget::UpdateStaminaHandle(float InStamina)
-{
-    GetWorld()->GetTimerManager().ClearTimer(StaminaTimerHandle);
-    GetWorld()->GetTimerManager().SetTimer(StaminaTimerHandle, [this]()
-        {
-            HideStaminaBar();
-        }, 3.f, false);
-}
+

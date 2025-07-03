@@ -32,9 +32,6 @@ protected:
 	UFUNCTION()
 	void HideStaminaBar();
 
-	UFUNCTION()
-	void UpdateStaminaHandle(float InStamina);
-
 	TWeakObjectPtr<class URASStatComponent> StatComponent;
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<class UProgressBar> HP_Bar;

@@ -300,7 +300,7 @@ void URASInputComponent::HandlePressT()
 	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
 
 	FVector Origin = Player->GetActorLocation();
-	float Radius = 150.0f; 
+	float Radius = 200.f; 
 
 	TArray<FOverlapResult> Overlaps;
 	FCollisionQueryParams QueryParams;
@@ -316,7 +316,6 @@ void URASInputComponent::HandlePressT()
 		FCollisionShape::MakeSphere(Radius),
 		QueryParams
 	);
-	DrawDebugSphere(GetWorld(), Origin, Radius, 32, FColor::Green, false, 2.0f, 0, 2.0f);
 	if (bHit)
 	{
 		for (const FOverlapResult& Result : Overlaps)

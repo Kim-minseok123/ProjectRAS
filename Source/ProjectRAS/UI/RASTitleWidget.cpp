@@ -27,7 +27,7 @@ void URASTitleWidget::NativeConstruct()
 	if (StartButton)
 	{
 		StartButton->SetIsEnabled(false);
-		StartButton->OnClicked.AddDynamic(this, &URASTitleWidget::StartGame);
+		
 	}
 	if (MenuButton)
 	{
