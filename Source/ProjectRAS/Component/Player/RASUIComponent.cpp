@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/RASNpcUI.h"
 #include "Character/NPC/RASNpc.h"
+#include "UI/RASPlayerDeathWidget.h"
 
 // Sets default values for this component's properties
 URASUIComponent::URASUIComponent()
@@ -177,6 +178,40 @@ void URASUIComponent::HideNpcUI()
 	{
 		NpcUI->RemoveFromViewport();
 		PlayerHUDWidget->ShowMiniMap();
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+	}
+}
+
+void URASUIComponent::ShowDeathUI()
+{
+	if (!PlayerDeathWidget && PlayerDeathWidgetClass)
+	{
+		PlayerDeathWidget = CreateWidget<URASPlayerDeathWidget>(GetWorld(), PlayerDeathWidgetClass);
+	};
+	if (PlayerDeathWidget && !PlayerDeathWidget->IsInViewport())
+	{
+		PlayerDeathWidget->AddToViewport(100);
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		if (PC)
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(PlayerDeathWidget->GetCachedWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+		return;
+	}
+}
+
+void URASUIComponent::HideDeathUI()
+{
+	if (PlayerDeathWidget && PlayerDeathWidget->IsInViewport())
+	{
+		PlayerDeathWidget->RemoveFromViewport();
 		APlayerController* PC = GetWorld()->GetFirstPlayerController();
 
 		FInputModeGameOnly InputMode;

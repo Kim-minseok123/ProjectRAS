@@ -77,6 +77,22 @@ void ARASBossMonster::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	if (bIsDeath) return;
+	if (Target) 
+	{
+		if (ARASPlayer* Player = Cast<ARASPlayer>(Target)) 
+		{
+			if (Player->GetCombatComponent()->GetCombatState() == EPlayerCombatState::Deathing) 
+			{
+				ARASAIBossController* MyController = Cast<ARASAIBossController>(GetController());
+				if (MyController)
+				{
+					MyController->ClearTarget();
+				}
+				Target = nullptr;
+				return;
+			}
+		}
+	}
 	if (Target)
 	{
 		FVector MyLocation = GetActorLocation();

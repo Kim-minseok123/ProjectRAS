@@ -4,6 +4,7 @@
 #include "Controller/Monster/RASAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
+#include "Utils/RASBlackBoardKey.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 ARASAIController::ARASAIController()
@@ -30,6 +31,11 @@ void ARASAIController::StopAI()
 	{
 		BTComponent->StopTree();
 	}
+}
+
+void ARASAIController::ClearTarget()
+{
+	Blackboard->SetValueAsObject(BBTarget, nullptr);
 }
 
 void ARASAIController::OnPossess(APawn* InPawn)

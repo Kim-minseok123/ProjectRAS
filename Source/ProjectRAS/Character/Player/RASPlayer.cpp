@@ -118,6 +118,8 @@ void ARASPlayer::BeginPlay()
 
 	Stat->OnHpZero.AddUObject(this, &ARASPlayer::Death);
 	PlayerCameraComponent->InitCamera();
+
+	GetUIComponent()->HideDeathUI();
 }
 
 void ARASPlayer::Tick(float DeltaTime)
@@ -263,6 +265,6 @@ void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, f
 void ARASPlayer::Death()
 {
 	Super::Death();
-
+	if (GetCombatComponent()->GetCombatState() == EPlayerCombatState::Deathing) return;
 	PlayerCombatComponent->Death();
 }

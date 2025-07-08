@@ -442,112 +442,128 @@ void URASCombatComponent::CycleLockOnTarget()
 	SetLockedOnTarget(EnemyArray[NextIndex]);
 }
 
-void URASCombatComponent::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
+void URASCombatComponent::HitFromActor(ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
-	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing)
+	if (CombatState == EPlayerCombatState::Rolling ||
+		CombatState == EPlayerCombatState::Armoring ||
+		CombatState == EPlayerCombatState::Deathing ||
+		CombatState == EPlayerCombatState::Executing)
+	{
 		return;
+	}
 
 	if (LockOnTarget == nullptr)
+	{
 		SetLockedOnTarget(InFrom);
+	}
 
 	SetInBattleTimer();
 
 	URASStatComponent* Stat = OwnerPlayer->GetStat();
-	if (Stat == nullptr) return;
-
-	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
-	if (MyAnimInstance == nullptr) return;
+	URASPlayerAnimComponent* Anim = OwnerPlayer->GetAnimComponent();
+	if (!Stat || !Anim)
+		return;
 
 	if (InDamage == 999.f)
 	{
-		float ActualDamage = Stat->ApplyDamage(InDamage);
-		if (ActualDamage > 0)
+		if (CombatState == EPlayerCombatState::Parrying)
 		{
-			if (Stat->GetHp() > 0)
+			Stat->ApplyStaminaDamage(InDamage);
+
+			if (Stat->GetStamina() <= 0)
 			{
-				//if (CombatState == EPlayerCombatState::Breaking) return;
-				MyAnimInstance->StopMontage(nullptr, 0.1f);
-
-				URASComboComponent* ComboAttack = OwnerPlayer->GetComboComponent();
-				ComboAttack->EndCombo(true, 0.8f);
-
 				CombatState = EPlayerCombatState::Breaking;
+				OwnerPlayer->GetWorldSettings()->SetTimeDilation(0.7f);
 
-				MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Hit")), TEXT("Hit"), 1.0f,
-					[this](UAnimMontage* Montage, bool bInterrupted)
+				Anim->PlayMontageWithSection(
+					Anim->GetMontageByName(TEXT("Parrying")), TEXT("ParryingBreak"), 1.0f,
+					[this](UAnimMontage*, bool)
 					{
 						CombatState = EPlayerCombatState::Idle;
-					});
+						OwnerPlayer->GetWorldSettings()->SetTimeDilation(1.f);
+					}
+				);
 			}
+
+			Stat->ApplyDamage(Stat->GetMaxHp() / 2);
 		}
+		else
+		{
+			Stat->ApplyDamage(InDamage);
+		}
+
 		return;
 	}
-	
+
 	if (CombatState == EPlayerCombatState::Parrying)
 	{
 		Stat->ApplyStaminaDamage(InStaminaDamage);
+
 		float CurrentTime = RASUtils::GetCurrentPlatformTime();
 		UE_LOG(LogTemp, Log, TEXT("Parrying time diff: %f"), CurrentTime - ParryingTime);
 
 		if (CurrentTime - ParryingTime <= 0.1f)
 		{
 			CombatState = EPlayerCombatState::Armoring;
-
 			OwnerPlayer->GetWorldSettings()->SetTimeDilation(0.6f);
 			Stat->ApplyStaminaDamage(30.f);
+
 			FTimerHandle TimeDilationTimer;
 			OwnerPlayer->GetWorld()->GetTimerManager().SetTimer(TimeDilationTimer, [this]()
 				{
 					OwnerPlayer->GetWorldSettings()->SetTimeDilation(1.f);
 				}, 0.8f, false);
 
-			MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Parrying")), TEXT("ParryingExact"), 1.0f,
-				[this](UAnimMontage* Montage, bool bInterrupted)
+			Anim->PlayMontageWithSection(
+				Anim->GetMontageByName(TEXT("Parrying")), TEXT("ParryingExact"), 1.0f,
+				[this](UAnimMontage*, bool)
 				{
 					CombatState = EPlayerCombatState::Idle;
-				});
+				}
+			);
 
 			return;
 		}
+
 		if (Stat->GetStamina() <= 0)
 		{
 			CombatState = EPlayerCombatState::Breaking;
 			OwnerPlayer->GetWorldSettings()->SetTimeDilation(0.7f);
 
-			MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Parrying")), TEXT("ParryingBreak"), 1.0f,
-				[this](UAnimMontage* Montage, bool bInterrupted)
+			Anim->PlayMontageWithSection(
+				Anim->GetMontageByName(TEXT("Parrying")), TEXT("ParryingBreak"), 1.0f,
+				[this](UAnimMontage*, bool)
 				{
 					CombatState = EPlayerCombatState::Idle;
 					OwnerPlayer->GetWorldSettings()->SetTimeDilation(1.f);
-				});
+				}
+			);
 		}
 		else
 		{
-			MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Parrying")), TEXT("ParryingHit"), 1.0f);
+			Anim->PlayMontageWithSection(Anim->GetMontageByName(TEXT("Parrying")), TEXT("ParryingHit"), 1.0f);
 		}
+
+		return;
 	}
-	else
+
+	float ActualDamage = Stat->ApplyDamage(InDamage);
+	if (ActualDamage > 0 && Stat->GetHp() > 0)
 	{
-		float ActualDamage = Stat->ApplyDamage(InDamage);
-		if (ActualDamage > 0)
-		{
-			if (Stat->GetHp() > 0)
+		Anim->StopMontage(nullptr, 0.1f);
+
+		URASComboComponent* Combo = OwnerPlayer->GetComboComponent();
+		Combo->EndCombo(true, 0.8f);
+
+		CombatState = EPlayerCombatState::Breaking;
+
+		Anim->PlayMontageWithSection(
+			Anim->GetMontageByName(TEXT("Hit")), TEXT("Hit"), 1.0f,
+			[this](UAnimMontage*, bool)
 			{
-				//if (CombatState == EPlayerCombatState::Breaking) return;
-				MyAnimInstance->StopMontage(nullptr, 0.1f);
-
-				URASComboComponent* ComboAttack = OwnerPlayer->GetComboComponent();
-				ComboAttack->EndCombo(true, 0.8f);
-
-				CombatState = EPlayerCombatState::Breaking;
-
-				MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Hit")), TEXT("Hit"), 1.0f,
-					[this](UAnimMontage* Montage, bool bInterrupted)
-					{
-						CombatState = EPlayerCombatState::Idle;
-					});
+				CombatState = EPlayerCombatState::Idle;
 			}
-		}
+		);
 	}
 }
 
@@ -585,11 +601,7 @@ void URASCombatComponent::Death()
 	if (CombatState == EPlayerCombatState::Deathing) return;
 	SetCombatState(EPlayerCombatState::Deathing);
 
-	ARASPlayerController* PlayerController = Cast<ARASPlayerController>(OwnerPlayer->GetController());
-	if (PlayerController)
-	{
-		PlayerController->DisableInput(PlayerController);
-	}
+	OwnerPlayer->GetUIComponent()->ShowDeathUI();
 
 	URASPlayerAnimComponent* PlayerAnimComponent = OwnerPlayer->GetAnimComponent();
 
@@ -610,12 +622,7 @@ void URASCombatComponent::Death()
 
 	LockOnTarget = nullptr;
 
-	FTimerHandle DeathHandle;
-	OwnerPlayer->GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this]()
-		{
-			// 플레이어 사망 UI 띄움, UI에서 다시하기 버튼 클릭시  게임모드에서 플레이어를 저장된 위치로 리스폰
-		},
-		4.f, false);
+	
 }
 
 void URASCombatComponent::RecoverPotion()

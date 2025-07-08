@@ -39,6 +39,9 @@ public:
 
 	void ShowNpcUI(class ARASNpc* InNPC);
 	void HideNpcUI();
+
+	void ShowDeathUI();
+	void HideDeathUI();
 protected:
 
 
@@ -55,4 +58,8 @@ protected:
 	TSubclassOf<class URASNpcUI> NpcUIClass;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class URASNpcUI> NpcUI;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class URASPlayerDeathWidget> PlayerDeathWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<class URASPlayerDeathWidget> PlayerDeathWidget;
 };
