@@ -42,6 +42,9 @@ public:
 
 	void ShowDeathUI();
 	void HideDeathUI();
+
+	void ShowClearUI();
+	void HideClearUI();
 protected:
 
 
@@ -62,4 +65,8 @@ protected:
 	TSubclassOf<class URASPlayerDeathWidget> PlayerDeathWidgetClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<class URASPlayerDeathWidget> PlayerDeathWidget;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> ClearGameWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<class UUserWidget> ClearGameWidget;
 };

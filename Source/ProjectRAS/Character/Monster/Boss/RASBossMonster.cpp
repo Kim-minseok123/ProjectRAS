@@ -21,6 +21,7 @@
 #include "Utils/RASBlackBoardKey.h"
 #include "UI/RASBossHUDWidget.h"
 #include "Audio/RASAudioSubsystem.h"
+#include "Component/Player/RASUIComponent.h"
 
 ARASBossMonster::ARASBossMonster()
 {
@@ -61,6 +62,11 @@ void ARASBossMonster::BeginPlay()
 		if (MyController)
 		{
 			MyController->SetTargetBlackboard();
+		}
+		ARASPlayer* Player = Cast<ARASPlayer>(Target);
+		if (Player)
+		{
+			Player->EnterBattle();
 		}
 	}
 	SkillScoreDataMap = BossScoreData->SkillScoreDataMap;
@@ -117,7 +123,7 @@ void ARASBossMonster::PostInitializeComponents()
 
 	Stat->SetHp(100000);
 	Stat->SetStamina(100000);
-
+	Stat->OnStaminaZero.Clear();
 	Stat->OnHpZero.AddUObject(this, &ARASBossMonster::Death);
 	Stat->OnStaminaZero.AddUObject(this, &ARASBossMonster::ZeroStamina);
 }
@@ -187,13 +193,15 @@ void ARASBossMonster::HitFromActor(class ARASCharacterBase* InFrom, float InDama
 		FRotator LookAtFrom = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), InFrom->GetActorLocation());
 		SetActorRotation(LookAtFrom);
 		Stat->ApplyStaminaDamage(InStaminaDamage);
+		GetGameInstance()->GetSubsystem<URASAudioSubsystem>()->PlaySFX(TEXT("BossHit"), GetActorLocation());
 		if (Stat->GetHp() <= 0) return;
-		
+
 		if (bUnflinching == false)
 		{
 			if (GetMesh()->GetAnimInstance()->Montage_IsPlaying(MonsterAnimComponent->GetMontageByName(TEXT("Hit")))) return;
 			MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Hit")), TEXT("Hit"), 1.0f);
 		}
+		
 	}
 }
 
@@ -235,7 +243,41 @@ void ARASBossMonster::KnockbackToDirection(class AActor* InFrom, FVector Directi
 
 void ARASBossMonster::Death()
 {
+	ARASPlayer* Player = Cast<ARASPlayer>(Target);
+	Target = nullptr;
+
+	ARASAIBossController* MyController = Cast<ARASAIBossController>(GetController());
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("NoCollision"));
+	MyController->StopAI();
+	IndicatorWideget->SetVisibility(false);
+	HideBossHUD();
+
+	MonsterAnimComponent->StopMontage(nullptr, 0.1f);
+	MonsterAnimComponent->ClearAllDelegate();
+
+	MonsterAnimComponent->PlayMontageWithSection(MonsterAnimComponent->GetMontageByName(TEXT("Death")), TEXT("Death"), 1.f);
 	
+	if (Player != nullptr)
+	{
+		Player->GetCombatComponent()->PressTab();
+		Player->WarningEnd();
+	}
+	FTimerHandle DeathHandle;
+	GetWorld()->GetTimerManager().SetTimer(DeathHandle, [this, Player]()
+		{
+			Destroy();
+		},
+		11.4f, false);
+
+	FTimerHandle DeathHandle2;
+	GetWorld()->GetTimerManager().SetTimer(DeathHandle2, [this, Player]()
+		{
+			Player->GetUIComponent()->ShowClearUI();
+
+			GetGameInstance()->GetSubsystem<URASAudioSubsystem>()->PlayBGM(TEXT("Main"));
+		},
+		15.f, false);
 }
 
 void ARASBossMonster::ExecuteDeath(int32 InDeathNumber)

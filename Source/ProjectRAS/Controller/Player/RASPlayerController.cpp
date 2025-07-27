@@ -14,16 +14,15 @@ ARASPlayerController::ARASPlayerController()
 void ARASPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+	bShowMouseCursor = false;
 	URASUISubsystem* UISubsystem = GetGameInstance()->GetSubsystem<URASUISubsystem>();
 	if (UISubsystem) 
 	{
 		UISubsystem->FadeOut();
 	}
-	if (UISubsystem)
-	{
-		UISubsystem->ShowMenu();
-		UISubsystem->HideMenu();
-	}
+	
 	UISubsystem->SetVolume();
 	GetGameInstance()->GetSubsystem<URASAudioSubsystem>()->PlayBGM(TEXT("Main"), 0.5f, 0.5f);
 }

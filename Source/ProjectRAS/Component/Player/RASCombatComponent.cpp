@@ -370,7 +370,10 @@ void URASCombatComponent::PressRightClick()
 {
 	if (CombatState != EPlayerCombatState::Idle)
 		return;
-
+	if (OwnerPlayer->GetStat()->GetHp() <= 0)
+	{
+		return;
+	}
 	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
 	if (MyAnimInstance == nullptr) return;
 
@@ -389,7 +392,10 @@ void URASCombatComponent::PressRightClickHold()
 {
 	if (CombatState != EPlayerCombatState::Idle)
 		return;
-
+	if (OwnerPlayer->GetStat()->GetHp() <= 0)
+	{
+		return;
+	}
 	PressRightClick();
 }
 

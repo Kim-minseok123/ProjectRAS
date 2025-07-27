@@ -104,7 +104,6 @@ bool URASUIComponent::ShowMapUI()
 		MapUI->FoundMapShow();
 		PlayerHUDWidget->HideMiniMap();
 		MapUI->AddToViewport(10);
-		UGameplayStatics::SetGamePaused(GetWorld(), true);
 		APlayerController* PC = GetWorld()->GetFirstPlayerController();
 		if (PC)
 		{
@@ -191,7 +190,7 @@ void URASUIComponent::ShowDeathUI()
 	if (!PlayerDeathWidget && PlayerDeathWidgetClass)
 	{
 		PlayerDeathWidget = CreateWidget<URASPlayerDeathWidget>(GetWorld(), PlayerDeathWidgetClass);
-	};
+	}
 	if (PlayerDeathWidget && !PlayerDeathWidget->IsInViewport())
 	{
 		PlayerDeathWidget->AddToViewport(100);
@@ -212,6 +211,40 @@ void URASUIComponent::HideDeathUI()
 	if (PlayerDeathWidget && PlayerDeathWidget->IsInViewport())
 	{
 		PlayerDeathWidget->RemoveFromViewport();
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->bShowMouseCursor = false;
+	}
+}
+
+void URASUIComponent::ShowClearUI()
+{
+	if(ClearGameWidgetClass && !ClearGameWidget)
+	{
+		ClearGameWidget = CreateWidget<UUserWidget>(GetWorld(), ClearGameWidgetClass);
+	}
+	if (ClearGameWidget && !ClearGameWidget->IsInViewport())
+	{
+		ClearGameWidget->AddToViewport(100);
+		APlayerController* PC = GetWorld()->GetFirstPlayerController();
+		if (PC)
+		{
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(ClearGameWidget->GetCachedWidget());
+			PC->SetInputMode(InputMode);
+			PC->bShowMouseCursor = true;
+		}
+		return;
+	}
+}
+
+void URASUIComponent::HideClearUI()
+{
+	if (ClearGameWidget && ClearGameWidget->IsInViewport())
+	{
+		ClearGameWidget->RemoveFromViewport();
 		APlayerController* PC = GetWorld()->GetFirstPlayerController();
 
 		FInputModeGameOnly InputMode;
