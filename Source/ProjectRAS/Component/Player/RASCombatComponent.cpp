@@ -544,6 +544,7 @@ void URASCombatComponent::HitFromActor(ARASCharacterBase* InFrom, float InDamage
 					OwnerPlayer->GetWorldSettings()->SetTimeDilation(1.f);
 				}
 			);
+			float ActualDamage = Stat->ApplyDamage(InDamage/3);
 		}
 		else
 		{
