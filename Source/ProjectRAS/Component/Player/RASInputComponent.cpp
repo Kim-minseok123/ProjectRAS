@@ -102,7 +102,7 @@ void URASInputComponent::InitPlayerInputComponent(class UInputComponent* PlayerI
 {
 	UEnhancedInputComponent* EnhancedInput = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 	
-	EnhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandleRoll);
+	EnhancedInput->BindAction(RollAction, ETriggerEvent::Started, this, &URASInputComponent::HandleRoll);
 	EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandleMove);
 	EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandleLook);
 	EnhancedInput->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &URASInputComponent::HandlePressTab);

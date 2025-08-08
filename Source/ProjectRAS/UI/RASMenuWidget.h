@@ -30,6 +30,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void SetSFXVolume(float Value);
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ChangeMode();
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UButton> ExitButton;
@@ -39,6 +42,8 @@ protected:
 	TObjectPtr<class USlider> BGMSlider;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class USlider> SFXSlider;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UCheckBox> ModeCheckBox;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class USoundMix> SoundMix;

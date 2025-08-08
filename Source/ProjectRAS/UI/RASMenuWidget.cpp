@@ -7,6 +7,8 @@
 #include "Components/Button.h"
 #include "Components/Slider.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/CheckBox.h"
+#include "Data/RASGameSingleton.h"
 
 URASMenuWidget::URASMenuWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -90,4 +92,16 @@ void URASMenuWidget::SetSFXVolume(float Value)
 	UGameplayStatics::PushSoundMixModifier(GetWorld(), SoundMix);
 	URASUISubsystem* UISubsystem = GetGameInstance()->GetSubsystem<URASUISubsystem>();
 	UISubsystem->SFXVolume = Value;
+}
+
+void URASMenuWidget::ChangeMode()
+{
+	if (ModeCheckBox->GetCheckedState() == ECheckBoxState::Checked)
+	{
+		URASGameSingleton::Get().SetDeveloperMode(true);
+	}
+	else if(ModeCheckBox->GetCheckedState() == ECheckBoxState::Unchecked)
+	{
+		URASGameSingleton::Get().SetDeveloperMode(false);
+	}
 }

@@ -253,6 +253,11 @@ void ARASPlayer::WarningEnd()
 	}
 }
 
+bool ARASPlayer::GetDeveloperMode()
+{
+	return URASGameSingleton::Get().IsDeveloperMode();
+}
+
 void ARASPlayer::HitFromActor(class ARASCharacterBase* InFrom, float InDamage, float InStaminaDamage)
 {
 	if (PlayerCombatComponent->GetCombatState() == EPlayerCombatState::Rolling || PlayerCombatComponent->GetCombatState() == EPlayerCombatState::Armoring || PlayerCombatComponent->GetCombatState() == EPlayerCombatState::Deathing)

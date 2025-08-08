@@ -88,6 +88,9 @@ void URASCombatComponent::SetClosestLockedOnTarget()
 void URASCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	UE_LOG(LogTemp, Log, TEXT("State: %s"),
+		*UEnum::GetValueAsName(CombatState).ToString());
 }
 
 void URASCombatComponent::SetInBattleTimer()
@@ -111,9 +114,7 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 
 	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::UsingItem || CombatState == EPlayerCombatState::Executing) return;
 	if (OwnerPlayer->GetStat()->GetStamina() < 30) return;
-
-	CombatState = EPlayerCombatState::Rolling;
-
+	AnimComponent->ClearAllDelegate();
 	AnimComponent->StopMontage(nullptr, 0.1f);
 
 	FName RollSection = TEXT("Roll_F"); // 기본 섹션
@@ -215,10 +216,11 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 
 	OwnerPlayer->GetStat()->ApplyStaminaDamage(30.f);
 
+	CombatState = EPlayerCombatState::Rolling;
+
 	AnimComponent->PlayMontageWithSection(AnimComponent->GetMontageByName(TEXT("Roll")), RollSection, 1.2f,
 		[this](UAnimMontage* Montage, bool bInterrupted)
 		{
-			CombatState = EPlayerCombatState::Idle;
 			if (OwnerPlayer && OwnerPlayer->GetComboComponent())
 			{
 				OwnerPlayer->GetComboComponent()->EndCombo(true, 0.1f);
@@ -289,7 +291,6 @@ void URASCombatComponent::PressF()
 			if (LockOnTarget->GetCreatureName().IsEqual(TEXT("Ashur"))) return; 
 			if (CombatState != EPlayerCombatState::Executing)
 			{
-				CombatState = EPlayerCombatState::Executing;
 				KillTarget(LockOnTarget);
 			}
 		}
@@ -457,7 +458,6 @@ void URASCombatComponent::HitFromActor(ARASCharacterBase* InFrom, float InDamage
 	{
 		return;
 	}
-
 	if (LockOnTarget == nullptr)
 	{
 		SetLockedOnTarget(InFrom);
@@ -554,21 +554,21 @@ void URASCombatComponent::HitFromActor(ARASCharacterBase* InFrom, float InDamage
 		return;
 	}
 
+	
 	float ActualDamage = Stat->ApplyDamage(InDamage);
 	if (ActualDamage > 0 && Stat->GetHp() > 0)
 	{
 		Anim->StopMontage(nullptr, 0.1f);
 
 		URASComboComponent* Combo = OwnerPlayer->GetComboComponent();
-		Combo->EndCombo(true, 0.8f);
 
 		CombatState = EPlayerCombatState::Breaking;
 
 		Anim->PlayMontageWithSection(
 			Anim->GetMontageByName(TEXT("Hit")), TEXT("Hit"), 1.0f,
-			[this](UAnimMontage*, bool)
+			[this, Combo](UAnimMontage*, bool)
 			{
-				CombatState = EPlayerCombatState::Idle;
+				Combo->EndCombo(true, 0.8f);
 			}
 		);
 	}
@@ -581,18 +581,19 @@ void URASCombatComponent::KillTarget(ARASCharacterBase* Target)
 	URASStatComponent* Stat = OwnerPlayer->GetStat();
 	if (Stat == nullptr) return;
 
-	URASPlayerAnimComponent* MyAnimInstance = OwnerPlayer->GetAnimComponent();
-	if (MyAnimInstance == nullptr) return;
+	URASPlayerAnimComponent* AnimComponent = OwnerPlayer->GetAnimComponent();
+	if (AnimComponent == nullptr) return;
 
 	LockOnTarget = nullptr;
 	int32 DeathNumber = FMath::RandRange(1, 2);
 	FString MontageSectionName = FString::Printf(TEXT("Execute%d"), DeathNumber);
 
-	MyAnimInstance->StopMontage(nullptr, 0.1f);
-	MyAnimInstance->PlayMontageWithSection(MyAnimInstance->GetMontageByName(TEXT("Execute")), FName(*MontageSectionName), 1.f,
+	AnimComponent->ClearAllDelegate();
+	AnimComponent->StopMontage(nullptr, 0.1f);
+	CombatState = EPlayerCombatState::Executing;
+	AnimComponent->PlayMontageWithSection(AnimComponent->GetMontageByName(TEXT("Execute")), FName(*MontageSectionName), 1.f,
 		[this](UAnimMontage* Montage, bool bInterrupted)
 		{
-			CombatState = EPlayerCombatState::Idle;
 			if (OwnerPlayer->GetComboComponent())
 			{
 				PressTab();

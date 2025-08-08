@@ -20,6 +20,8 @@ public:
 
 	bool StopParryingAnimation();
 
+	virtual void ClearAllDelegate() override;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> SkillMontage;

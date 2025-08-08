@@ -31,6 +31,11 @@ URASGameSingleton& URASGameSingleton::Get()
 	return *NewObject<URASGameSingleton>();
 }
 
+void URASGameSingleton::SetDeveloperMode(bool bEnable)
+{
+	bIsDeveloperMode = bEnable;
+}
+
 FRASCharacterStats& URASGameSingleton::GetStatForName(const FName InName)
 {
 	return CharacterStat[InName];

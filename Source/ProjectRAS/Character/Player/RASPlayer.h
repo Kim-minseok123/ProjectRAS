@@ -61,6 +61,8 @@ public:
 	void WarningTheBoss();
 	UFUNCTION(BlueprintCallable, Category = "Warning")
 	void WarningEnd();
+	UFUNCTION(BlueprintCallable, Category = "Warning")
+	bool GetDeveloperMode();
 protected:
 	// 입력 벡터를 저장 (최근 이동 입력)
 	FVector2D LastMoveInput;

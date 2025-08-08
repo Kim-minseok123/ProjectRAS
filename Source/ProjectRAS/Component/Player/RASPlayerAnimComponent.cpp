@@ -53,3 +53,35 @@ bool URASPlayerAnimComponent::StopParryingAnimation()
 	}
 	return false;
 }
+
+void URASPlayerAnimComponent::ClearAllDelegate()
+{
+	if (MyAnimInstance)
+	{
+		FOnMontageEnded DummyDelegate;
+		if (HitMontage)
+		{
+			MyAnimInstance->Montage_SetEndDelegate(DummyDelegate, HitMontage);
+		}
+		if (SkillMontage)
+		{
+			MyAnimInstance->Montage_SetEndDelegate(DummyDelegate, SkillMontage);
+		}
+		if (ParryingMontage)
+		{
+			MyAnimInstance->Montage_SetEndDelegate(DummyDelegate, ParryingMontage);
+		}
+		if (ExecuteMontage)
+		{
+			MyAnimInstance->Montage_SetEndDelegate(DummyDelegate, ExecuteMontage);
+		}
+		if (RollMontage)
+		{
+			MyAnimInstance->Montage_SetEndDelegate(DummyDelegate, RollMontage);
+		}
+		if (PotionMontage)
+		{
+			MyAnimInstance->Montage_SetEndDelegate(DummyDelegate, PotionMontage);
+		}
+	}
+}

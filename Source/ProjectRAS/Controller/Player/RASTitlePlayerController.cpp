@@ -25,10 +25,10 @@ void ARASTitlePlayerController::SetTitleUI()
 void ARASTitlePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	UGameUserSettings* S = GEngine->GetGameUserSettings();
-	S->SetScreenResolution({ 1920,1080 });
-	S->SetFullscreenMode(EWindowMode::Fullscreen);  
-	S->ApplySettings(false);
+	//UGameUserSettings* S = GEngine->GetGameUserSettings();
+	//S->SetScreenResolution({ 1920,1080 });
+	//S->SetFullscreenMode(EWindowMode::Fullscreen);  
+	//S->ApplySettings(false);
 
 
 	if (TitleWidgetClass)

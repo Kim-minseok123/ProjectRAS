@@ -24,7 +24,7 @@ public:
 	
 	virtual TObjectPtr<class UAnimMontage> GetMontageByName(FName MontageName) const;
 
-	void ClearAllDelegate();
+	virtual void ClearAllDelegate();
 
 	void ChangeRootMotionMode(bool bEnable);
 

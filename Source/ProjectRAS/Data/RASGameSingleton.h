@@ -21,6 +21,10 @@ public:
 	URASGameSingleton();
 	static URASGameSingleton& Get();
 
+	void SetDeveloperMode(bool bEnable);
+
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	bool IsDeveloperMode() const { return bIsDeveloperMode; }
 public:
 
 	FRASCharacterStats& GetStatForName(const FName InName);
@@ -31,4 +35,6 @@ private:
 	TMap<FName, FRASCharacterStats> CharacterStat;
 
 	TMap<FName, FCreatureDamageInfo> DamageInfo;
+
+	bool bIsDeveloperMode = false;
 };

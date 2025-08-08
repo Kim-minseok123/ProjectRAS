@@ -18,6 +18,7 @@
 #include "Components/Image.h"
 #include "Data/RASMapType.h"
 #include "Map/RASCorridor.h"
+#include "Data/RASGameSingleton.h"
 
 URASMapUI::URASMapUI(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
@@ -159,20 +160,15 @@ void URASMapUI::BuildMapUI(const TArray<TObjectPtr<ARASChunk>>& Spawned, ARASChu
 
 void URASMapUI::FoundMapShow()
 {
+	const bool bIsDeveloperMode = URASGameSingleton::Get().IsDeveloperMode();
+
 	for (URASMapButton* Button : MapButtons)
 	{
-		if (Button)
-		{
-			if (Button->CheckVisitChunk())
-			{
-				Button->SetVisibility(ESlateVisibility::Visible);
-			}
-			else
-			{
-				//Button->SetVisibility(ESlateVisibility::Hidden);
-			}
-			Button->SetCurrentChunk();
-		}
+		if (!Button) continue;
+
+		const bool bShouldShow = bIsDeveloperMode || Button->CheckVisitChunk();
+		Button->SetVisibility(bShouldShow ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+		Button->SetCurrentChunk();
 	}
 }
 
