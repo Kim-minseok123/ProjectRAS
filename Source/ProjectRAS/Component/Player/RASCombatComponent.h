@@ -64,7 +64,9 @@ public:
 
 	// 포션 사용
 	void UsePotion();
-	
+
+	bool bIsExecuting = false;
+
 protected:
 	virtual void BeginPlay() override;
 

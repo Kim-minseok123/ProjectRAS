@@ -255,6 +255,10 @@ void ARASCommonMonster::ExecuteDeath(int32 InDeathNumber)
 
 	MonsterAnimComponent->PlayMontageWithSection(
 		MonsterAnimComponent->GetMontageByName(TEXT("Death")), FName(*MontageSectionName), 1.f);
+
+	ARASPlayer* Player = Cast<ARASPlayer>(Target);
+	if (Player != nullptr)
+		Player->GetCombatComponent()->PressTab();
 	OnRoomClear.ExecuteIfBound();
 
 	FTimerHandle DeathHandle;

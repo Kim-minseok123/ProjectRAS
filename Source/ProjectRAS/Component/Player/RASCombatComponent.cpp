@@ -113,6 +113,7 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 	if(AnimComponent == nullptr) return;
 
 	if (CombatState == EPlayerCombatState::Rolling || CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::UsingItem || CombatState == EPlayerCombatState::Executing) return;
+	if (bIsExecuting) return;
 	if (OwnerPlayer->GetStat()->GetStamina() < 30) return;
 	AnimComponent->ClearAllDelegate();
 	AnimComponent->StopMontage(nullptr, 0.1f);
@@ -231,7 +232,7 @@ void URASCombatComponent::Roll(const FInputActionValue& Value)
 void URASCombatComponent::PressTab()
 {
 	if (CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing) return;
-
+	if (bIsExecuting) return;
 	FindAllEnemyInRange();
 	if (TargetEnemys.IsEmpty())
 		LockOnTarget = nullptr;
@@ -250,7 +251,7 @@ void URASCombatComponent::PressComboAction()
 {
 	if (CombatState == EPlayerCombatState::Deathing) return;
 	if (CombatState == EPlayerCombatState::Executing) return;
-
+	if (bIsExecuting) return;
 	if (CombatState == EPlayerCombatState::Idle || CombatState == EPlayerCombatState::Attacking)
 	{
 		if (URASComboComponent* ComboAttack = OwnerPlayer->GetComboComponent())
@@ -407,7 +408,7 @@ void URASCombatComponent::PressRightClickEnd()
 
 	if (CombatState == EPlayerCombatState::Breaking || CombatState == EPlayerCombatState::Armoring || CombatState == EPlayerCombatState::Deathing || CombatState == EPlayerCombatState::Executing)
 		return;
-
+	if (bIsExecuting) return;
 	if(MyAnimInstance->StopParryingAnimation())
 		CombatState = EPlayerCombatState::Idle;
 }
@@ -454,7 +455,8 @@ void URASCombatComponent::HitFromActor(ARASCharacterBase* InFrom, float InDamage
 	if (CombatState == EPlayerCombatState::Rolling ||
 		CombatState == EPlayerCombatState::Armoring ||
 		CombatState == EPlayerCombatState::Deathing ||
-		CombatState == EPlayerCombatState::Executing)
+		CombatState == EPlayerCombatState::Executing ||
+		bIsExecuting)
 	{
 		return;
 	}
@@ -583,7 +585,7 @@ void URASCombatComponent::KillTarget(ARASCharacterBase* Target)
 
 	URASPlayerAnimComponent* AnimComponent = OwnerPlayer->GetAnimComponent();
 	if (AnimComponent == nullptr) return;
-
+	bIsExecuting = true;
 	LockOnTarget = nullptr;
 	int32 DeathNumber = FMath::RandRange(1, 2);
 	FString MontageSectionName = FString::Printf(TEXT("Execute%d"), DeathNumber);
@@ -596,8 +598,9 @@ void URASCombatComponent::KillTarget(ARASCharacterBase* Target)
 		{
 			if (OwnerPlayer->GetComboComponent())
 			{
+				CombatState = EPlayerCombatState::Idle;
+				bIsExecuting = false;
 				PressTab();
-				OwnerPlayer->GetComboComponent()->EndCombo(true, .8f);
 			}
 		});
 

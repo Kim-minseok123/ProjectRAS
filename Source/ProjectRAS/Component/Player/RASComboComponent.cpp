@@ -201,8 +201,10 @@ void URASComboComponent::EndCombo(bool InbSetTimer /*= true*/, float InSeconds /
 	ARASPlayer* Player = Cast<ARASPlayer>(GetOwner());
 	if (Player)
 	{
-		if(Player->GetCombatComponent()->GetCombatState() != EPlayerCombatState::Deathing)
+		if (Player->GetCombatComponent()->GetCombatState() != EPlayerCombatState::Deathing)
+		{
 			Player->GetCombatComponent()->SetCombatState(EPlayerCombatState::Idle);
+		}
 	}
 
 	bCanAcceptInput = false;
